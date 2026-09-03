@@ -1,3 +1,4 @@
+
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
@@ -19,7 +20,7 @@ export default async function CardPage({ params }) {
 
   const { data: serials, error: serialsError } = await supabase
     .from("serials")
-    .select("serial_number, region, status")
+    .select("id, serial_number, region, status")
     .eq("card_id", id)
     .order("serial_number");
 
@@ -42,8 +43,13 @@ export default async function CardPage({ params }) {
     );
   }
 
-  const standard = serials.filter((serial) => serial.region === "AMERICAS");
-  const eRegion = serials.filter((serial) => serial.region === "E");
+  const standard = serials.filter(
+    (serial) => serial.region === "AMERICAS"
+  );
+
+  const eRegion = serials.filter(
+    (serial) => serial.region === "E"
+  );
 
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
@@ -62,14 +68,33 @@ export default async function CardPage({ params }) {
 
   const SerialGrid = ({ serials }) => (
     <div className="serial-grid">
-      {serials.map((serial) => (
-        <div
-          key={`${serial.region}-${serial.serial_number}`}
-          className={`serial-box ${serial.status}`}
-        >
-          {formatNumber(serial.serial_number, serial.region)}
-        </div>
-      ))}
+      {serials.map((serial) => {
+        const serialLabel = formatNumber(
+          serial.serial_number,
+          serial.region
+        );
+
+        if (serial.status === "confirmed") {
+          return (
+            <Link
+              key={`${serial.region}-${serial.serial_number}`}
+              href={`/serial/${serial.id}`}
+              className={`serial-box ${serial.status}`}
+            >
+              {serialLabel}
+            </Link>
+          );
+        }
+
+        return (
+          <div
+            key={`${serial.region}-${serial.serial_number}`}
+            className={`serial-box ${serial.status}`}
+          >
+            {serialLabel}
+          </div>
+        );
+      })}
     </div>
   );
 
@@ -88,7 +113,7 @@ export default async function CardPage({ params }) {
       </section>
 
       <section>
-        <h2>E-Region</h2>
+        <h2>Europe-distributed</h2>
         <p>{eConfirmed} / 100 confirmed</p>
         <SerialGrid serials={eRegion} />
       </section>
