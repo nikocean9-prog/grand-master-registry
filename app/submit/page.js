@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,7 +16,9 @@ export default function SubmitPage() {
   const [serialNumber, setSerialNumber] = useState("1");
   const [country, setCountry] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [photo, setPhoto] = useState(null);
   const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadCards() {
@@ -36,6 +37,13 @@ export default function SubmitPage() {
     event.preventDefault();
     setMessage("");
 
+    if (!photo) {
+      setMessage("Please upload a photo of the card.");
+      return;
+    }
+
+    setSubmitting(true);
+
     const { data: serial, error: serialError } = await supabase
       .from("serials")
       .select("id")
@@ -46,13 +54,38 @@ export default function SubmitPage() {
 
     if (serialError || !serial) {
       setMessage("Could not find that serial number.");
+      setSubmitting(false);
       return;
     }
+
+    const fileExtension = photo.name.split(".").pop();
+    const fileName = `${Date.now()}-${Math.random()
+      .toString(36)
+      .substring(2)}.${fileExtension}`;
+
+    const filePath = `submissions/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("submission-evidence")
+      .upload(filePath, photo);
+
+    if (uploadError) {
+      setMessage("Photo could not be uploaded.");
+      setSubmitting(false);
+      return;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from("submission-evidence")
+      .getPublicUrl(filePath);
+
+    const photoUrl = publicUrlData.publicUrl;
 
     const { error } = await supabase
       .from("submissions")
       .insert({
         serial_id: serial.id,
+        photo_url: photoUrl,
         country: country || null,
         source_url: sourceUrl || null,
         status: "pending",
@@ -60,6 +93,7 @@ export default function SubmitPage() {
 
     if (error) {
       setMessage("Submission could not be sent.");
+      setSubmitting(false);
       return;
     }
 
@@ -69,6 +103,10 @@ export default function SubmitPage() {
     setSerialNumber("1");
     setCountry("");
     setSourceUrl("");
+    setPhoto(null);
+    setSubmitting(false);
+
+    event.target.reset();
   }
 
   return (
@@ -135,6 +173,19 @@ export default function SubmitPage() {
         <br />
 
         <div>
+          <label>Photo Evidence</label>
+          <br />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+            required
+          />
+        </div>
+
+        <br />
+
+        <div>
           <label>Country (optional)</label>
           <br />
           <input
@@ -160,7 +211,9 @@ export default function SubmitPage() {
 
         <br />
 
-        <button type="submit">Submit for Verification</button>
+        <button type="submit" disabled={submitting}>
+          {submitting ? "Submitting..." : "Submit for Verification"}
+        </button>
       </form>
 
       {message && <p>{message}</p>}
