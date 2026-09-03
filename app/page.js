@@ -44,7 +44,9 @@ export default async function Home() {
         </>
       )}
 
-      <button>Submit a Pull</button>
+      <Link href="/submit">
+  <button>Submit a Pull</button>
+</Link>
 
       <hr />
 
