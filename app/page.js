@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-
+import Link from "next/link";
 export default async function Home() {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -48,11 +48,15 @@ export default async function Home() {
         <p>Could not load cards.</p>
       ) : (
         <div>
-          {cards?.map((card) => (
-            <div key={card.id}>
-              <h3>{card.name}</h3>
-            </div>
-          ))}
+         {cards?.map((card) => (
+  <div key={card.id}>
+    <h3>
+      <Link href={`/card/${card.id}`}>
+        {card.name}
+      </Link>
+    </h3>
+  </div>
+))}
         </div>
       )}
     </main>
