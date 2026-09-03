@@ -1,9 +1,7 @@
-
 "use client";
 
 import { useState } from "react";
 import { createClient } from "@supabase/supabase-js";
-import Link from "next/link";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -38,7 +36,9 @@ export default function AdminPage() {
 
   return (
     <main>
-      <Link href="/">← Back to Registry</Link>
+      <p>
+        <a href="/">← Back to Registry</a>
+      </p>
 
       <h1>Admin Login</h1>
 
