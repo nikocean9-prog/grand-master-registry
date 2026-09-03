@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 
-export default async function CardPage({ params }) {
+export default async function SerialPage({ params }) {
   const { id } = await params;
 
   const supabase = createClient(
@@ -12,111 +12,113 @@ export default async function CardPage({ params }) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
-  const { data: card, error: cardError } = await supabase
-    .from("cards")
-    .select("id, name")
+  const { data: serial, error: serialError } = await supabase
+    .from("serials")
+    .select("id, card_id, serial_number, region, status, confirmed_at")
     .eq("id", id)
     .single();
 
-  const { data: serials, error: serialsError } = await supabase
-    .from("serials")
-    .select("id, serial_number, region, status")
-    .eq("card_id", id)
-    .order("serial_number");
-
-  if (cardError || !card) {
+  if (serialError || !serial || serial.status !== "confirmed") {
     return (
       <main>
         <Link href="/">← Back to Registry</Link>
-        <h1>Card not found</h1>
+        <h1>Serial not found</h1>
       </main>
     );
   }
 
-  if (serialsError) {
-    return (
-      <main>
-        <Link href="/">← Back to Registry</Link>
-        <h1>{card.name}</h1>
-        <p>Could not load serial numbers.</p>
-      </main>
-    );
-  }
+  const { data: card } = await supabase
+    .from("cards")
+    .select("id, name")
+    .eq("id", serial.card_id)
+    .single();
 
-  const standard = serials.filter(
-    (serial) => serial.region === "AMERICAS"
-  );
+  const { data: submission } = await supabase
+    .from("submissions")
+    .select("photo_url, country, source_url, created_at, status")
+    .eq("serial_id", serial.id)
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const eRegion = serials.filter(
-    (serial) => serial.region === "E"
-  );
+  const serialNumber = String(serial.serial_number).padStart(3, "0");
+  const serialLabel =
+    serial.region === "E" ? `${serialNumber}E` : serialNumber;
 
-  const standardConfirmed = standard.filter(
-    (serial) => serial.status === "confirmed"
-  ).length;
-
-  const eConfirmed = eRegion.filter(
-    (serial) => serial.status === "confirmed"
-  ).length;
-
-  const totalConfirmed = standardConfirmed + eConfirmed;
-
-  const formatNumber = (number, region) => {
-    const formatted = String(number).padStart(3, "0");
-    return region === "E" ? `${formatted}E` : formatted;
-  };
-
-  const SerialGrid = ({ serials }) => (
-    <div className="serial-grid">
-      {serials.map((serial) => {
-        const serialLabel = formatNumber(
-          serial.serial_number,
-          serial.region
-        );
-
-        if (serial.status === "confirmed") {
-          return (
-            <Link
-              key={`${serial.region}-${serial.serial_number}`}
-              href={`/serial/${serial.id}`}
-              className={`serial-box ${serial.status}`}
-            >
-              {serialLabel}
-            </Link>
-          );
-        }
-
-        return (
-          <div
-            key={`${serial.region}-${serial.serial_number}`}
-            className={`serial-box ${serial.status}`}
-          >
-            {serialLabel}
-          </div>
-        );
-      })}
-    </div>
-  );
+  const regionLabel =
+    serial.region === "E" ? "Europe-distributed" : "Americas";
 
   return (
     <main>
-      <Link href="/">← Back to Registry</Link>
+      <p>
+        <Link href={`/card/${serial.card_id}`}>
+          ← Back to {card?.name || "Card"}
+        </Link>
+      </p>
 
-      <h1>{card.name}</h1>
+      <h1>{card?.name || "Grand Master Rare"}</h1>
 
-      <h2>{totalConfirmed} / 200 Confirmed</h2>
+      <h2>Serial {serialLabel}</h2>
 
-      <section>
-        <h2>Americas</h2>
-        <p>{standardConfirmed} / 100 confirmed</p>
-        <SerialGrid serials={standard} />
-      </section>
+      <p>
+        <strong>Status:</strong> Confirmed
+      </p>
 
-      <section>
-        <h2>Europe-distributed</h2>
-        <p>{eConfirmed} / 100 confirmed</p>
-        <SerialGrid serials={eRegion} />
-      </section>
+      <p>
+        <strong>Region:</strong> {regionLabel}
+      </p>
+
+      {submission?.country && (
+        <p>
+          <strong>Country:</strong> {submission.country}
+        </p>
+      )}
+
+      {serial.confirmed_at && (
+        <p>
+          <strong>Confirmed:</strong>{" "}
+          {new Date(serial.confirmed_at).toLocaleDateString()}
+        </p>
+      )}
+
+      {submission?.source_url && (
+        <p>
+          <strong>Source:</strong>{" "}
+          <a
+            href={submission.source_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View source
+          </a>
+        </p>
+      )}
+
+      {submission?.photo_url ? (
+        <div>
+          <h2>Evidence Photo</h2>
+
+          <a
+            href={submission.photo_url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img
+              src={submission.photo_url}
+              alt={`${card?.name || "Grand Master Rare"} ${serialLabel}`}
+              style={{
+                display: "block",
+                maxWidth: "600px",
+                width: "100%",
+                height: "auto",
+              }}
+            />
+          </a>
+        </div>
+      ) : (
+        <p>No public evidence photo available.</p>
+      )}
     </main>
   );
 }
