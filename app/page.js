@@ -12,9 +12,15 @@ export default async function Home() {
     .eq("status", "confirmed");
 
   const { data: cards, error: cardsError } = await supabase
-    .from("cards")
-    .select("id, name")
-    .order("id");
+  .from("cards")
+  .select(`
+    id,
+    name,
+    serials (
+      status
+    )
+  `)
+  .order("id");
 
   const confirmed = count ?? 0;
   const total = 3600;
@@ -48,15 +54,26 @@ export default async function Home() {
         <p>Could not load cards.</p>
       ) : (
         <div>
-         {cards?.map((card) => (
-  <div key={card.id}>
-    <h3>
-      <Link href={`/card/${card.id}`}>
-        {card.name}
-      </Link>
-    </h3>
-  </div>
-))}
+         {cards?.map((card) => {
+  const cardConfirmed =
+    card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
+
+  const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
+
+  return (
+    <div key={card.id}>
+      <h3>
+        <Link href={`/card/${card.id}`}>
+          {card.name}
+        </Link>
+      </h3>
+
+      <p>
+        {cardConfirmed} / 200 confirmed · {cardPercentage}%
+      </p>
+    </div>
+  );
+})}
         </div>
       )}
     </main>
