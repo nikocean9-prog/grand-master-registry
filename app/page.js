@@ -24,7 +24,7 @@ export default async function Home() {
 
   const confirmed = count ?? 0;
   const total = 3600;
-  const percentage = ((confirmed / total) * 100).toFixed(1);
+  const percentage = ((confirmed / total) * 100).toFixed(2);
 
   return (
     <main>
