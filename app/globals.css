@@ -26,3 +26,39 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
+.serial-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+  margin: 20px 0 40px;
+}
+
+.serial-box {
+  border: 1px solid #ccc;
+  padding: 10px 4px;
+  text-align: center;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.serial-box.confirmed {
+  background: #d9f7df;
+  border-color: #5dbb73;
+  font-weight: bold;
+}
+
+.serial-box.reported {
+  background: #fff4cc;
+  border-color: #d6b348;
+}
+
+.serial-box.unreported {
+  color: #777;
+}
+
+@media (max-width: 700px) {
+  .serial-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
