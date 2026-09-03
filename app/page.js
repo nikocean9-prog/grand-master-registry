@@ -6,10 +6,15 @@ export default async function Home() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
-  const { count, error } = await supabase
+  const { count, error: countError } = await supabase
     .from("serials")
     .select("*", { count: "exact", head: true })
     .eq("status", "confirmed");
+
+  const { data: cards, error: cardsError } = await supabase
+    .from("cards")
+    .select("id, name")
+    .order("id");
 
   const confirmed = count ?? 0;
   const total = 3600;
@@ -24,7 +29,7 @@ export default async function Home() {
         that have been pulled around the world.
       </p>
 
-      {error ? (
+      {countError ? (
         <p>Database connection needs to be configured.</p>
       ) : (
         <>
@@ -39,7 +44,17 @@ export default async function Home() {
 
       <h2>Magnificent Monsters</h2>
 
-      <p>The 18 Grand Master Rares will appear here.</p>
+      {cardsError ? (
+        <p>Could not load cards.</p>
+      ) : (
+        <div>
+          {cards?.map((card) => (
+            <div key={card.id}>
+              <h3>{card.name}</h3>
+            </div>
+          ))}
+        </div>
+      )}
     </main>
   );
 }
