@@ -9,13 +9,19 @@ export default async function CardPage({ params }) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 
-  const { data: card, error } = await supabase
+  const { data: card, error: cardError } = await supabase
     .from("cards")
-    .select("*")
+    .select("id, name")
     .eq("id", id)
     .single();
 
-  if (error || !card) {
+  const { data: serials, error: serialsError } = await supabase
+    .from("serials")
+    .select("serial_number, region, status")
+    .eq("card_id", id)
+    .order("serial_number");
+
+  if (cardError || !card) {
     return (
       <main>
         <Link href="/">← Back to Registry</Link>
@@ -24,20 +30,66 @@ export default async function CardPage({ params }) {
     );
   }
 
+  if (serialsError) {
+    return (
+      <main>
+        <Link href="/">← Back to Registry</Link>
+        <h1>{card.name}</h1>
+        <p>Could not load serial numbers.</p>
+      </main>
+    );
+  }
+
+  const standard = serials.filter((serial) => serial.region === "AMERICAS");
+  const eRegion = serials.filter((serial) => serial.region === "E");
+
+  const standardConfirmed = standard.filter(
+    (serial) => serial.status === "confirmed"
+  ).length;
+
+  const eConfirmed = eRegion.filter(
+    (serial) => serial.status === "confirmed"
+  ).length;
+
+  const totalConfirmed = standardConfirmed + eConfirmed;
+
+  const formatNumber = (number, region) => {
+    const formatted = String(number).padStart(3, "0");
+    return region === "E" ? `${formatted}E` : formatted;
+  };
+
+  const SerialGrid = ({ serials }) => (
+    <div className="serial-grid">
+      {serials.map((serial) => (
+        <div
+          key={`${serial.region}-${serial.serial_number}`}
+          className={`serial-box ${serial.status}`}
+        >
+          {formatNumber(serial.serial_number, serial.region)}
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <main>
       <Link href="/">← Back to Registry</Link>
 
       <h1>{card.name}</h1>
 
-      <h2>Confirmed Pulls</h2>
+      <h2>{totalConfirmed} / 200 Confirmed</h2>
 
-      <p>
-        This page will track every confirmed Grand Master Rare pull for
-        {` ${card.name}`}.
-      </p>
+      <section>
+        <h2>Americas</h2>
+        <p>{standardConfirmed} / 100 confirmed</p>
+        <SerialGrid serials={standard} />
+      </section>
 
-      <p>Card ID: {card.id}</p>
+      <section>
+        <h2>E-Region</h2>
+        <p>{eConfirmed} / 100 confirmed</p>
+        <SerialGrid serials={eRegion} />
+      </section>
     </main>
   );
 }
