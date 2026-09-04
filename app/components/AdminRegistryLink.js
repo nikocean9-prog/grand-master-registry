@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export default function AdminRegistryLink() {
+export default function AdminRegistryLink({ className = "nav-link nav-link-secondary" }) {
   const [adminStatus, setAdminStatus] = useState("loading");
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function AdminRegistryLink() {
   return (
     <Link
       href={isAdmin ? "/admin/dashboard" : "/admin"}
-      className="nav-link nav-link-secondary"
+      className={className}
     >
       {isAdmin ? "Admin Home" : "Admin Login"}
     </Link>
