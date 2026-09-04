@@ -170,7 +170,7 @@ if (serial) {
 
   return (
     <main>
-      <Link href="/">← Back to Registry</Link>
+      <Link href="/sets/magnificent-monsters">← Back to Registry</Link>
 
       <h1>Submit a Pull</h1>
 
