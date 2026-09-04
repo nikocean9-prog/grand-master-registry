@@ -85,6 +85,8 @@ if (serial) {
 
   async function handleSubmit(event) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const honeypotValue = form.elements.website?.value || "";
     setMessage("");
 
     if (!photo) {
@@ -106,65 +108,64 @@ if (serial) {
 
     setSubmitting(true);
 
-    const { data: serial, error: serialError } = await supabase
-      .from("serials")
-      .select("id")
-      .eq("card_id", cardId)
-      .eq("region", region)
-      .eq("serial_number", Number(serialNumber))
-      .single();
+    try {
+      const { data: serial, error: serialError } = await supabase
+        .from("serials")
+        .select("id")
+        .eq("card_id", cardId)
+        .eq("region", region)
+        .eq("serial_number", Number(serialNumber))
+        .single();
 
-    if (serialError || !serial) {
-      setMessage("Could not find that serial number.");
-      setSubmitting(false);
-      return;
-    }
-
-    const submissionForm = new FormData();
-    submissionForm.append("serial_id", String(serial.id));
-    submissionForm.append("photo", photo);
-    submissionForm.append("country", country);
-    submissionForm.append("source_url", sourceUrl);
-    submissionForm.append("notes", notes);
-    submissionForm.append("submitter_email", submitterEmail.trim());
-    submissionForm.append(
-      "website",
-      event.currentTarget.elements.website?.value || ""
-    );
-
-    const { error } = await supabase.functions.invoke("submit-pull", {
-      body: submissionForm,
-    });
-
-    if (error) {
-      let serverMessage = "";
-
-      if (error.context instanceof Response) {
-        try {
-          const responseBody = await error.context.json();
-          serverMessage = responseBody?.error || "";
-        } catch {
-          // Keep the safe fallback message.
-        }
+      if (serialError || !serial) {
+        setMessage("Could not find that serial number.");
+        return;
       }
 
-      setMessage(safeSubmissionMessage(serverMessage, error));
+      const submissionForm = new FormData();
+      submissionForm.append("serial_id", String(serial.id));
+      submissionForm.append("photo", photo);
+      submissionForm.append("country", country);
+      submissionForm.append("source_url", sourceUrl);
+      submissionForm.append("notes", notes);
+      submissionForm.append("submitter_email", submitterEmail.trim());
+      submissionForm.append("website", honeypotValue);
+
+      const { error } = await supabase.functions.invoke("submit-pull", {
+        body: submissionForm,
+      });
+
+      if (error) {
+        let serverMessage = "";
+
+        if (error.context instanceof Response) {
+          try {
+            const responseBody = await error.context.json();
+            serverMessage = responseBody?.error || "";
+          } catch {
+            // Keep the safe fallback message.
+          }
+        }
+
+        setMessage(safeSubmissionMessage(serverMessage, error));
+        return;
+      }
+
+      setMessage("Pull submitted for verification.");
+      setCardId("");
+      setRegion("AMERICAS");
+      setSerialNumber("1");
+      setCountry("");
+      setSourceUrl("");
+      setNotes("");
+      setSubmitterEmail("");
+      setPhoto(null);
+      form.reset();
+    } catch (error) {
+      setMessage(safeSubmissionMessage("", error));
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    setMessage("Pull submitted for verification.");
-    setCardId("");
-    setRegion("AMERICAS");
-    setSerialNumber("1");
-    setCountry("");
-    setSourceUrl("");
-    setNotes("");
-    setSubmitterEmail("");
-    setPhoto(null);
-    setSubmitting(false);
-
-    event.target.reset();
   }
 
   return (
