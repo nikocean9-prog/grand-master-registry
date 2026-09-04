@@ -110,6 +110,8 @@ export default function SubmissionHistory() {
               borderLeft:
                 submission.status === "approved"
                   ? "5px solid #2e7d32"
+                  : submission.status === "removed"
+                  ? "5px solid #9a6700"
                   : "5px solid #b71c1c",
               padding: "12px 15px",
               marginBottom: "10px",
@@ -143,7 +145,11 @@ export default function SubmissionHistory() {
                 style={{
                   minWidth: "80px",
                   color:
-                    submission.status === "approved" ? "#2e7d32" : "#b71c1c",
+                    submission.status === "approved"
+                      ? "#2e7d32"
+                      : submission.status === "removed"
+                      ? "#9a6700"
+                      : "#b71c1c",
                   textTransform: "capitalize",
                 }}
               >
