@@ -84,9 +84,6 @@ export default async function Home() {
           </div>
         )}
 
-        <Link href="/submit" className="hero-submit-button">
-          Submit a Pull
-        </Link>
       </section>
 
       <section className="registry-section">
