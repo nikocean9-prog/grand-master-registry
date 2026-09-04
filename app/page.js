@@ -35,7 +35,7 @@ export default async function Home() {
     <main>
       <nav className="public-nav" aria-label="Main navigation">
         <Link href="/" className="site-name">
-          Grand Master Registry
+          TCG Serial Tracker
         </Link>
         <div className="nav-actions">
           <Link href="/submit" className="nav-link nav-link-primary">
@@ -47,7 +47,7 @@ export default async function Home() {
 
       <section className="registry-hero">
         <p className="eyebrow">Yu-Gi-Oh! Magnificent Monsters</p>
-        <h1>Track every Grand Master Rare</h1>
+        <h1>Tracking every serial. Preserving every pull.</h1>
         <p className="hero-copy">
           A community registry documenting serial-numbered Grand Master Rares
           pulled around the world.
