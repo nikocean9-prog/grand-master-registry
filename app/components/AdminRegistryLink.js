@@ -11,25 +11,27 @@ const supabase = createClient(
 );
 
 export default function AdminRegistryLink() {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminStatus, setAdminStatus] = useState("loading");
 
   useEffect(() => {
     async function checkAdmin() {
       const admin = await getCurrentAdmin(supabase);
-      setIsAdmin(Boolean(admin));
+      setAdminStatus(admin ? "admin" : "visitor");
     }
 
     checkAdmin();
   }, []);
 
-  if (!isAdmin) {
+  if (adminStatus === "loading") {
     return null;
   }
+
+  const isAdmin = adminStatus === "admin";
 
   return (
     <p>
       <Link
-        href="/admin/dashboard"
+        href={isAdmin ? "/admin/dashboard" : "/admin"}
         style={{
           display: "inline-block",
           border: "1px solid #333",
@@ -37,7 +39,7 @@ export default function AdminRegistryLink() {
           textDecoration: "none",
         }}
       >
-        ← Back to Admin Home
+        {isAdmin ? "← Back to Admin Home" : "Admin Login"}
       </Link>
     </p>
   );
