@@ -106,8 +106,6 @@ export default async function SerialPage({ params }) {
 
       {evidenceUrl ? (
         <div>
-          <h2>Evidence Photo</h2>
-
           <a
             href={evidenceUrl}
             target="_blank"
