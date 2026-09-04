@@ -1,4 +1,5 @@
 import "./globals.css";
+import AdminRegistryLink from "./components/AdminRegistryLink";
 
 export const metadata = {
   metadataBase: new URL("https://www.tcgserialtracker.com"),
@@ -49,6 +50,7 @@ export default function RootLayout({ children }) {
               their respective trademark and copyright owners. Card images are
               displayed for identification and registry purposes.
             </p>
+            <div className="footer-admin"><AdminRegistryLink className="footer-admin-link" /></div>
           </footer>
         </div>
       </body>
