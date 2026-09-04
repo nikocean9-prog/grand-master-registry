@@ -27,7 +27,7 @@ export default async function CardPage({ params }) {
   if (cardError && cardError.code !== "PGRST116") {
     return (
       <main>
-        <Link href="/" className="back-link">← Back to Registry</Link>
+        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
         <h1>Card unavailable</h1>
         <p>This card could not be loaded. Check your connection and try again.</p>
       </main>
@@ -37,7 +37,7 @@ export default async function CardPage({ params }) {
   if (!card) {
     return (
       <main>
-        <Link href="/" className="back-link">← Back to Registry</Link>
+        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
         <h1>Card not found</h1>
       </main>
     );
@@ -46,7 +46,7 @@ export default async function CardPage({ params }) {
   if (serialsError) {
     return (
       <main>
-        <Link href="/" className="back-link">← Back to Registry</Link>
+        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
         <h1>{card.name}</h1>
         <p>Could not load serial numbers.</p>
       </main>
@@ -66,7 +66,7 @@ export default async function CardPage({ params }) {
 
   return (
     <main>
-      <Link href="/" className="back-link">← Back to Registry</Link>
+      <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">
         {card.image_url && (
