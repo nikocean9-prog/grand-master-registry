@@ -555,6 +555,28 @@ button {
 .tcg-card p { min-height:52px; margin:0 0 18px; color:#667069; font-size:14px; line-height:1.45; }
 .tcg-card > strong { color:#2d6842; font-size:13px; }
 .tcg-card.planned { background:#fafbfa; }
+.tcg-card.live {
+  overflow: hidden;
+  border-color: #9b7a32;
+  background:
+    radial-gradient(circle at 88% 48%, transparent 0 23%, rgba(200,165,82,.13) 23.5% 24%, transparent 24.5% 33%, rgba(200,165,82,.08) 33.5% 34%, transparent 34.5%),
+    radial-gradient(circle at 75% 30%, rgba(58,112,78,.42), transparent 42%),
+    linear-gradient(135deg,#071b12,#123b27 58%,#091d14);
+  color: #fff9e7;
+  box-shadow: 0 8px 24px rgba(7,27,18,.2), inset 0 0 0 1px rgba(226,191,104,.25);
+}
+.tcg-card.live::after {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+  border: 1px solid rgba(220,181,88,.28);
+  border-radius: 9px;
+}
+.tcg-card.live h3 { margin-top: 56px; color: #fff5d6; font-family: Georgia, "Times New Roman", serif; font-size: 27px; }
+.tcg-card.live p { color: #d9e1dc; }
+.tcg-card.live > strong { color: #a9edbf; }
+.tcg-card.live .status-badge.live { z-index: 1; background: #d9f7df; color: #185a31; }
 .tcg-monogram { display:inline-grid; width:50px; height:50px; place-items:center; border-radius:12px; background:#183d29; color:#91e2ae; font-size:13px; font-weight:900; letter-spacing:.04em; }
 .tcg-monogram.large { width:82px; height:82px; flex:0 0 auto; border-radius:18px; font-size:20px; }
 .status-badge { position:absolute; top:22px; right:22px; border-radius:999px; padding:5px 9px; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
