@@ -1,5 +1,4 @@
 import Link from "next/link";
-import AdminRegistryLink from "./AdminRegistryLink";
 
 export default function PublicHeader() {
   return (
@@ -11,7 +10,6 @@ export default function PublicHeader() {
       <div className="nav-actions">
         <Link href="/#tcgs" className="nav-link nav-link-plain">Browse TCGs</Link>
         <Link href="/submit" className="nav-link nav-link-primary">Submit a Pull</Link>
-        <AdminRegistryLink />
       </div>
     </nav>
   );
