@@ -54,7 +54,7 @@ export default async function Home() {
         </p>
 
         {countError ? (
-          <p>Database connection needs to be configured.</p>
+          <p>Registry totals are temporarily unavailable. Please try again shortly.</p>
         ) : (
           <div className="overall-progress-card">
             <div className="overall-progress-heading">
@@ -89,7 +89,7 @@ export default async function Home() {
         </div>
 
         {cardsError ? (
-          <p>Could not load cards.</p>
+          <p>The card list is temporarily unavailable. Please refresh the page.</p>
         ) : (
           <div className="card-grid">
             {cards?.map((card) => {

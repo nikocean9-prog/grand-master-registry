@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
 import { getEvidenceUrl } from "../../lib/evidenceUrl";
+import {
+  isMfaRequiredError,
+  safeAdminActionMessage,
+} from "../../lib/userMessages";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -28,7 +32,7 @@ export default function AdminApprovals() {
 
     if (!admin) {
       await supabase.auth.signOut();
-      window.location.href = "/admin";
+      window.location.href = "/admin?reason=session";
       return;
     }
 
@@ -92,13 +96,18 @@ export default function AdminApprovals() {
     });
 
     if (error) {
-      setMessage(`Approval failed: ${error.message}`);
+      setMessage(safeAdminActionMessage(error, "approve this submission"));
       setBusyId(null);
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => {
+          window.location.href = "/admin/mfa";
+        }, 1500);
+      }
       return;
     }
 
-    setMessage("Submission approved.");
     await loadApprovals();
+    setMessage("Submission approved.");
     setBusyId(null);
   }
 
@@ -119,13 +128,18 @@ export default function AdminApprovals() {
     });
 
     if (error) {
-      setMessage(`Rejection failed: ${error.message}`);
+      setMessage(safeAdminActionMessage(error, "reject this submission"));
       setBusyId(null);
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => {
+          window.location.href = "/admin/mfa";
+        }, 1500);
+      }
       return;
     }
 
-    setMessage("Submission rejected.");
     await loadApprovals();
+    setMessage("Submission rejected.");
     setBusyId(null);
   }
 

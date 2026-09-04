@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { safeSubmissionMessage } from "../lib/userMessages";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -22,13 +23,19 @@ export default function SubmitPage() {
   const [serialStatus, setSerialStatus] = useState(null);
   const [notes, setNotes] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
+  const [cardsError, setCardsError] = useState(false);
 
   useEffect(() => {
     async function loadCards() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("cards")
         .select("id, name")
         .order("id");
+
+      if (error) {
+        setCardsError(true);
+        return;
+      }
 
       setCards(data || []);
     }
@@ -85,6 +92,11 @@ if (serial) {
       return;
     }
 
+    if (!photo.type.startsWith("image/") || photo.size > 10 * 1024 * 1024) {
+      setMessage("Photo must be an image no larger than 10 MB.");
+      return;
+    }
+
     if (serialStatus === "confirmed" && !submitterEmail.trim()) {
       setMessage(
         "Please enter your email address when challenging an already-confirmed serial."
@@ -125,18 +137,18 @@ if (serial) {
     });
 
     if (error) {
-      let errorMessage = "Submission could not be sent.";
+      let serverMessage = "";
 
       if (error.context instanceof Response) {
         try {
           const responseBody = await error.context.json();
-          errorMessage = responseBody?.error || errorMessage;
+          serverMessage = responseBody?.error || "";
         } catch {
           // Keep the safe fallback message.
         }
       }
 
-      setMessage(errorMessage);
+      setMessage(safeSubmissionMessage(serverMessage, error));
       setSubmitting(false);
       return;
     }
@@ -165,6 +177,12 @@ if (serial) {
         Report a Magnificent Monsters Grand Master Rare that has been pulled.
       </p>
 
+      {cardsError && (
+        <p role="alert">
+          The card list could not be loaded. Check your connection and refresh the page.
+        </p>
+      )}
+
       <form onSubmit={handleSubmit}>
         <div
           aria-hidden="true"
@@ -192,6 +210,7 @@ if (serial) {
             value={cardId}
             onChange={(e) => setCardId(e.target.value)}
             required
+            disabled={cardsError}
           >
             <option value="">Select a card</option>
 

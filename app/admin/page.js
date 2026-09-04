@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../lib/adminAuth";
 
@@ -14,6 +14,13 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const reason = new URLSearchParams(window.location.search).get("reason");
+    if (reason === "session") {
+      setMessage("Your admin session expired. Please sign in again.");
+    }
+  }, []);
 
   async function handleLogin(event) {
     event.preventDefault();

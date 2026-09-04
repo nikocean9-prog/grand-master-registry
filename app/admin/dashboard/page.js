@@ -30,7 +30,7 @@ export default function AdminHome() {
 
       if (!admin) {
         await supabase.auth.signOut();
-        window.location.href = "/admin";
+        window.location.href = "/admin?reason=session";
         return;
       }
 

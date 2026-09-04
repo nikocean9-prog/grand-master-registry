@@ -5,6 +5,11 @@ import { useParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../../lib/adminAuth";
 import { getEvidenceUrl } from "../../../lib/evidenceUrl";
+import {
+  isMfaRequiredError,
+  safeAdminActionMessage,
+  safePhotoUploadMessage,
+} from "../../../lib/userMessages";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -37,7 +42,7 @@ export default function SubmissionHistoryDetails() {
     const admin = await getCurrentAdmin(supabase);
     if (!admin) {
       await supabase.auth.signOut();
-      window.location.href = "/admin";
+      window.location.href = "/admin?reason=session";
       return;
     }
     setIsOwner(admin.isOwner);
@@ -123,13 +128,24 @@ export default function SubmissionHistoryDetails() {
   async function uploadReplacementPhoto() {
     if (!replacementPhoto) return editForm.photoUrl;
 
+    if (
+      !replacementPhoto.type.startsWith("image/") ||
+      replacementPhoto.size > 10 * 1024 * 1024
+    ) {
+      throw new Error("INVALID_REPLACEMENT_PHOTO");
+    }
+
     const safeName = replacementPhoto.name.replace(/[^a-zA-Z0-9._-]/g, "-");
     const filePath = `submissions/${Date.now()}-${safeName}`;
     const { error } = await supabase.storage
       .from("submission-evidence")
       .upload(filePath, replacementPhoto);
 
-    if (error) throw new Error(`Photo upload failed: ${error.message}`);
+    if (error) {
+      const safeError = new Error(safePhotoUploadMessage(error));
+      safeError.isSafeMessage = true;
+      throw safeError;
+    }
     return filePath;
   }
 
@@ -158,10 +174,21 @@ export default function SubmissionHistoryDetails() {
 
       setEditing(false);
       setReason("");
-      setMessage("Registry record updated.");
       await loadSubmission();
+      setMessage("Registry record updated.");
     } catch (error) {
-      setMessage(error.message || "The record could not be updated.");
+      if (error?.message === "INVALID_REPLACEMENT_PHOTO") {
+        setMessage("Replacement photo must be a JPG, PNG or WEBP image smaller than 10 MB.");
+      } else if (error?.isSafeMessage) {
+        setMessage(error.message);
+      } else {
+        setMessage(safeAdminActionMessage(error, "update this registry record"));
+      }
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => {
+          window.location.href = "/admin/mfa";
+        }, 1500);
+      }
     } finally {
       setBusy(false);
     }
@@ -182,11 +209,16 @@ export default function SubmissionHistoryDetails() {
       p_reason: reason,
     });
     if (error) {
-      setMessage(error.message);
+      setMessage(safeAdminActionMessage(error, "remove this registry record"));
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => {
+          window.location.href = "/admin/mfa";
+        }, 1500);
+      }
     } else {
       setReason("");
-      setMessage("Record removed from the public registry. It can be restored.");
       await loadSubmission();
+      setMessage("Record removed from the public registry. It can be restored.");
     }
     setBusy(false);
   }
@@ -204,11 +236,16 @@ export default function SubmissionHistoryDetails() {
       p_reason: reason,
     });
     if (error) {
-      setMessage(error.message);
+      setMessage(safeAdminActionMessage(error, "restore this registry record"));
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => {
+          window.location.href = "/admin/mfa";
+        }, 1500);
+      }
     } else {
       setReason("");
-      setMessage("Record restored to the public registry.");
       await loadSubmission();
+      setMessage("Record restored to the public registry.");
     }
     setBusy(false);
   }

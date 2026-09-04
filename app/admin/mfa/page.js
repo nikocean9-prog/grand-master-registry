@@ -23,7 +23,7 @@ export default function AdminMfaPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        window.location.href = "/admin";
+        window.location.href = "/admin?reason=session";
         return;
       }
 
@@ -68,7 +68,7 @@ export default function AdminMfaPage() {
     const challenge = await supabase.auth.mfa.challenge({ factorId });
 
     if (challenge.error) {
-      setMessage(`Could not start verification: ${challenge.error.message}`);
+      setMessage("Authenticator verification could not start. Check your connection and try again.");
       setBusy(false);
       return;
     }

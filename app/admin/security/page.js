@@ -64,7 +64,7 @@ export default function AdminSecurityPage() {
     });
 
     if (error) {
-      setMessage(`Setup failed: ${error.message}`);
+      setMessage("Authenticator setup could not start. Check your connection and try again.");
       setBusy(false);
       return;
     }
@@ -83,7 +83,7 @@ export default function AdminSecurityPage() {
     const challenge = await supabase.auth.mfa.challenge({ factorId });
 
     if (challenge.error) {
-      setMessage(`Verification failed: ${challenge.error.message}`);
+      setMessage("Authenticator verification could not start. Check your connection and try again.");
       setBusy(false);
       return;
     }

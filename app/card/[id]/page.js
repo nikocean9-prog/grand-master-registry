@@ -24,7 +24,17 @@ export default async function CardPage({ params }) {
     .eq("card_id", id)
     .order("serial_number");
 
-  if (cardError || !card) {
+  if (cardError && cardError.code !== "PGRST116") {
+    return (
+      <main>
+        <Link href="/" className="back-link">← Back to Registry</Link>
+        <h1>Card unavailable</h1>
+        <p>This card could not be loaded. Check your connection and try again.</p>
+      </main>
+    );
+  }
+
+  if (!card) {
     return (
       <main>
         <Link href="/" className="back-link">← Back to Registry</Link>

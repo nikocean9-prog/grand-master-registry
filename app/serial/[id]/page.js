@@ -18,7 +18,17 @@ export default async function SerialPage({ params }) {
     .eq("id", id)
     .single();
 
-  if (serialError || !serial || serial.status !== "confirmed") {
+  if (serialError && serialError.code !== "PGRST116") {
+    return (
+      <main>
+        <Link href="/" className="back-link">← Back to Registry</Link>
+        <h1>Serial unavailable</h1>
+        <p>This serial could not be loaded. Check your connection and try again.</p>
+      </main>
+    );
+  }
+
+  if (!serial || serial.status !== "confirmed") {
     return (
       <main>
         <Link href="/" className="back-link">← Back to Registry</Link>

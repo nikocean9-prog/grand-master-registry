@@ -36,7 +36,7 @@ export default function SubmissionHistory() {
 
     if (!admin) {
       await supabase.auth.signOut();
-      window.location.href = "/admin";
+      window.location.href = "/admin?reason=session";
       return;
     }
 
