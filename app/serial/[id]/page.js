@@ -109,12 +109,12 @@ export default async function SerialPage({ params }) {
           <h2>Evidence Photo</h2>
 
           <a
-            href={submission.photo_url}
+            href={evidenceUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
             <img
-              src={submission.photo_url}
+              src={evidenceUrl}
               alt={`${card?.name || "Grand Master Rare"} ${serialLabel}`}
               style={{
                 display: "block",
