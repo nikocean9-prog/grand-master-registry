@@ -1,140 +1,32 @@
-import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
-import AdminRegistryLink from "./components/AdminRegistryLink";
+import PublicHeader from "./components/PublicHeader";
+import { tcgs } from "./lib/catalog";
 
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
-
-  const { count, error: countError } = await supabase
-    .from("serials")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "confirmed");
-
-  const { data: cards, error: cardsError } = await supabase
-    .from("cards")
-    .select(`
-      id,
-      name,
-      image_url,
-      serials (
-        status
-      )
-    `)
-    .order("id");
-
-  const confirmed = count ?? 0;
-  const total = 3600;
-  const percentage = ((confirmed / total) * 100).toFixed(2);
+export default function Home() {
+  const liveSets = tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live");
 
   return (
     <main>
-      <nav className="public-nav" aria-label="Main navigation">
-        <Link href="/" className="site-name" aria-label="TCG Serial Tracker home">
-          <img
-            src="/tst-mark.svg"
-            alt=""
-            width="46"
-            height="46"
-            className="brand-mark"
-          />
-          <span className="brand-copy">
-            <strong>TCG Serial Tracker</strong>
-            <small>Tracking every serial</small>
-          </span>
-        </Link>
-        <div className="nav-actions">
-          <Link href="/submit" className="nav-link nav-link-primary">
-            Submit a Pull
-          </Link>
-          <AdminRegistryLink />
-        </div>
-      </nav>
-
-      <section className="registry-hero">
-        <p className="eyebrow">Yu-Gi-Oh! Magnificent Monsters</p>
+      <PublicHeader />
+      <section className="home-hero">
+        <div>
+        <p className="eyebrow">The global serialised card registry</p>
         <h1>Tracking every serial. Preserving every pull.</h1>
         <p className="hero-copy">
-          A community registry documenting serial-numbered Grand Master Rares
-          pulled around the world.
+          Explore community-built registries for serial-numbered trading cards,
+          organised by trading card game and set.
         </p>
-
-        {countError ? (
-          <p>Registry totals are temporarily unavailable. Please try again shortly.</p>
-        ) : (
-          <div className="overall-progress-card">
-            <div className="overall-progress-heading">
-              <strong>{confirmed.toLocaleString()} / 3,600 confirmed</strong>
-              <span>{percentage}% documented</span>
-            </div>
-            <div
-              className="overall-progress"
-              role="progressbar"
-              aria-label="Worldwide Grand Master Rare registry progress"
-              aria-valuemin="0"
-              aria-valuemax="3600"
-              aria-valuenow={confirmed}
-            >
-              <span style={{ width: `${percentage}%` }} />
-            </div>
-          </div>
-        )}
-
-      </section>
-
-      <section className="registry-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">The complete set</p>
-            <h2>Magnificent Monsters</h2>
-          </div>
-          <p>Choose a card to view all 200 serial numbers.</p>
+        <div className="hero-actions"><Link href="#tcgs" className="hero-button hero-button-primary">Browse TCGs</Link><Link href="/submit" className="hero-button hero-button-secondary">Submit a Pull</Link></div>
         </div>
-
-        {cardsError ? (
-          <p>The card list is temporarily unavailable. Please refresh the page.</p>
-        ) : (
-          <div className="card-grid">
-            {cards?.map((card) => {
-              const cardConfirmed =
-                card.serials?.filter((serial) => serial.status === "confirmed")
-                  .length ?? 0;
-              const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
-
-              return (
-                <Link
-                  key={card.id}
-                  href={`/card/${card.id}`}
-                  className="registry-card"
-                >
-                  {card.image_url && (
-                    <img
-                      src={card.image_url}
-                      alt={card.name}
-                      className="registry-card-image"
-                      loading="lazy"
-                    />
-                  )}
-
-                  <div className="registry-card-content">
-                    <h3>{card.name}</h3>
-                    <p>
-                      {cardConfirmed} / 200 confirmed · {cardPercentage}%
-                    </p>
-                    <div className="card-progress" aria-hidden="true">
-                      <span style={{ width: `${cardPercentage}%` }} />
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        <div className="home-stats" aria-label="Registry overview"><div><strong>{tcgs.length}</strong><span>TCGs listed</span></div><div><strong>{liveSets.length}</strong><span>Live set</span></div><div><strong>3,600</strong><span>Serials tracked</span></div></div>
       </section>
+      <section className="registry-section" id="tcgs">
+        <div className="section-heading">
+          <div><p className="eyebrow">Explore the registry</p><h2>Choose a TCG</h2></div><p>Select a game, then choose the set you want to explore.</p>
+        </div>
+        <div className="tcg-grid">{tcgs.map((tcg) => <Link href={`/tcg/${tcg.slug}`} className={`tcg-card ${tcg.status}`} key={tcg.slug}><span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span><span className={`status-badge ${tcg.status}`}>{tcg.status === "live" ? "Live" : "Coming soon"}</span><h3>{tcg.name}</h3><p>{tcg.description}</p><strong>{tcg.sets.length || "No"} {tcg.sets.length === 1 ? "set" : "sets"} listed →</strong></Link>)}</div>
+      </section>
+      <section className="home-links"><Link href="/help" className="feature-link"><span>?</span><div><h2>Help &amp; Contact</h2><p>Get help, report a problem, or suggest a TCG or set.</p></div></Link><Link href="/store" className="feature-link"><span>◇</span><div><h2>Store</h2><p>A future home for TCG Serial Tracker products.</p></div><small>Coming soon</small></Link></section>
     </main>
   );
 }
