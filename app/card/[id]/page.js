@@ -1,4 +1,3 @@
-
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
@@ -14,7 +13,7 @@ export default async function CardPage({ params }) {
 
   const { data: card, error: cardError } = await supabase
     .from("cards")
-    .select("id, name")
+    .select("id, name, image_url")
     .eq("id", id)
     .single();
 
@@ -46,19 +45,13 @@ export default async function CardPage({ params }) {
   const standard = serials.filter(
     (serial) => serial.region === "AMERICAS"
   );
-
-  const eRegion = serials.filter(
-    (serial) => serial.region === "E"
-  );
-
+  const eRegion = serials.filter((serial) => serial.region === "E");
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
   ).length;
-
   const eConfirmed = eRegion.filter(
     (serial) => serial.status === "confirmed"
   ).length;
-
   const totalConfirmed = standardConfirmed + eConfirmed;
 
   const formatNumber = (number, region) => {
@@ -102,9 +95,20 @@ export default async function CardPage({ params }) {
     <main>
       <Link href="/">← Back to Registry</Link>
 
-      <h1>{card.name}</h1>
+      <div className="card-detail-header">
+        {card.image_url && (
+          <img
+            src={card.image_url}
+            alt={card.name}
+            className="card-detail-image"
+          />
+        )}
 
-      <h2>{totalConfirmed} / 200 Confirmed</h2>
+        <div>
+          <h1>{card.name}</h1>
+          <h2>{totalConfirmed} / 200 Confirmed</h2>
+        </div>
+      </div>
 
       <section>
         <h2>Americas</h2>
