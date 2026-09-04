@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 
 const supabase = createClient(
@@ -48,7 +49,7 @@ export default function SubmissionHistory() {
     for (const submission of submissionData || []) {
       const { data: serial } = await supabase
         .from("serials")
-        .select("id, card_id, serial_number, region, status")
+        .select("id, card_id, serial_number, region")
         .eq("id", submission.serial_id)
         .single();
 
@@ -64,11 +65,7 @@ export default function SubmissionHistory() {
         card = cardData;
       }
 
-      completedSubmissions.push({
-        ...submission,
-        serial,
-        card,
-      });
+      completedSubmissions.push({ ...submission, serial, card });
     }
 
     setSubmissions(completedSubmissions);
@@ -77,14 +74,8 @@ export default function SubmissionHistory() {
 
   function formatSerial(serial) {
     if (!serial) return "Unknown";
-
     const number = String(serial.serial_number).padStart(3, "0");
     return serial.region === "E" ? `${number}E` : number;
-  }
-
-  function formatRegion(serial) {
-    if (!serial) return "Unknown";
-    return serial.region === "E" ? "Europe-distributed" : "Americas";
   }
 
   if (loading) {
@@ -103,7 +94,7 @@ export default function SubmissionHistory() {
       </p>
 
       <h1>Submission History</h1>
-      <p>All approved and rejected submissions are retained here.</p>
+      <p>Select a submission to view its complete details and evidence.</p>
 
       {message && <p>{message}</p>}
 
@@ -111,119 +102,56 @@ export default function SubmissionHistory() {
         <p>No completed submissions yet.</p>
       ) : (
         submissions.map((submission) => (
-          <div
+          <Link
             key={submission.id}
+            href={`/admin/history/${submission.id}`}
             style={{
-              border:
+              display: "block",
+              border: "1px solid #ccc",
+              borderLeft:
                 submission.status === "approved"
-                  ? "2px solid #2e7d32"
-                  : "2px solid #777",
-              padding: "20px",
-              marginBottom: "25px",
+                  ? "5px solid #2e7d32"
+                  : "5px solid #b71c1c",
+              padding: "12px 15px",
+              marginBottom: "10px",
+              color: "inherit",
+              textDecoration: "none",
             }}
           >
-            <h2>{submission.card?.name || "Unknown Card"}</h2>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "center",
+                gap: "10px 25px",
+              }}
+            >
+              <strong style={{ minWidth: "180px", flex: "1 1 220px" }}>
+                {submission.card?.name || "Unknown Card"}
+              </strong>
 
-            <p>
-              <strong>Status:</strong>{" "}
-              <span
+              <span style={{ minWidth: "70px" }}>
+                {formatSerial(submission.serial)}
+              </span>
+
+              <span style={{ minWidth: "170px" }}>
+                {submission.created_at
+                  ? new Date(submission.created_at).toLocaleString()
+                  : "Unknown date"}
+              </span>
+
+              <strong
                 style={{
+                  minWidth: "80px",
                   color:
                     submission.status === "approved" ? "#2e7d32" : "#b71c1c",
                   textTransform: "capitalize",
-                  fontWeight: "bold",
                 }}
               >
                 {submission.status}
-              </span>
-            </p>
-
-            <p>
-              <strong>Serial:</strong> {formatSerial(submission.serial)}
-            </p>
-
-            <p>
-              <strong>Region:</strong> {formatRegion(submission.serial)}
-            </p>
-
-            <p>
-              <strong>Country:</strong>{" "}
-              {submission.country || "Not provided"}
-            </p>
-
-            <p>
-              <strong>Submitted:</strong>{" "}
-              {submission.created_at
-                ? new Date(submission.created_at).toLocaleString()
-                : "Unknown"}
-            </p>
-
-            {submission.notes && (
-              <div>
-                <p><strong>Notes:</strong></p>
-                <p style={{ whiteSpace: "pre-wrap" }}>{submission.notes}</p>
-              </div>
-            )}
-
-            {submission.submitter_email && (
-              <div style={{ marginBottom: "16px" }}>
-                <p>
-                  <strong>Contact email:</strong>{" "}
-                  {submission.submitter_email}
-                </p>
-                <a
-                  href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
-                    `Grand Master Registry submission: ${
-                      submission.card?.name || "Unknown Card"
-                    } ${formatSerial(submission.serial)}`
-                  )}`}
-                  style={{
-                    display: "inline-block",
-                    border: "1px solid #333",
-                    padding: "8px 14px",
-                    textDecoration: "none",
-                  }}
-                >
-                  Contact submitter
-                </a>
-              </div>
-            )}
-
-            {submission.source_url && (
-              <p>
-                <strong>Source:</strong>{" "}
-                <a
-                  href={submission.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View source
-                </a>
-              </p>
-            )}
-
-            {submission.photo_url && (
-              <div>
-                <p><strong>Photo Evidence:</strong></p>
-                <a
-                  href={submission.photo_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={submission.photo_url}
-                    alt="Submission evidence"
-                    style={{
-                      display: "block",
-                      maxWidth: "400px",
-                      width: "100%",
-                      height: "auto",
-                    }}
-                  />
-                </a>
-              </div>
-            )}
-          </div>
+              </strong>
+            </div>
+          </Link>
         ))
       )}
     </main>
