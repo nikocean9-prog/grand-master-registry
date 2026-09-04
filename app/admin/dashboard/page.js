@@ -178,7 +178,10 @@ export default function AdminDashboard() {
           <div
             key={submission.id}
             style={{
-              border: "1px solid #ccc",
+              border:
+                submission.serial?.status === "confirmed"
+                  ? "3px solid #c62828"
+                  : "1px solid #ccc",
               padding: "20px",
               marginBottom: "25px",
             }}
