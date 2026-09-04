@@ -10,8 +10,6 @@ export default function PublicHeader() {
       </Link>
       <div className="nav-actions">
         <Link href="/#tcgs" className="nav-link nav-link-plain">Browse TCGs</Link>
-        <Link href="/help" className="nav-link nav-link-plain">Help &amp; Contact</Link>
-        <Link href="/store" className="nav-link nav-link-plain">Store</Link>
         <Link href="/submit" className="nav-link nav-link-primary">Submit a Pull</Link>
         <AdminRegistryLink />
       </div>
