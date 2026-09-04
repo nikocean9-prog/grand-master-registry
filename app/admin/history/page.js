@@ -10,14 +10,21 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+const PAGE_SIZE = 25;
+
 export default function SubmissionHistory() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [draftSearch, setDraftSearch] = useState("");
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("all");
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     loadHistory();
-  }, []);
+  }, [page, search, status]);
 
   async function loadHistory() {
     setLoading(true);
@@ -31,60 +38,48 @@ export default function SubmissionHistory() {
       return;
     }
 
-    const { data: submissionData, error: submissionError } = await supabase
-      .from("submissions")
-      .select("*")
-      .neq("status", "pending")
-      .order("created_at", { ascending: false });
+    const { data, error } = await supabase.rpc("search_submission_history", {
+      p_search: search,
+      p_status: status,
+      p_limit: PAGE_SIZE,
+      p_offset: (page - 1) * PAGE_SIZE,
+    });
 
-    if (submissionError) {
+    if (error) {
       setMessage("Could not load submission history.");
+      setSubmissions([]);
+      setTotal(0);
       setLoading(false);
       return;
     }
 
-    const completedSubmissions = [];
-
-    for (const submission of submissionData || []) {
-      const { data: serial } = await supabase
-        .from("serials")
-        .select("id, card_id, serial_number, region")
-        .eq("id", submission.serial_id)
-        .single();
-
-      let card = null;
-
-      if (serial) {
-        const { data: cardData } = await supabase
-          .from("cards")
-          .select("id, name")
-          .eq("id", serial.card_id)
-          .single();
-
-        card = cardData;
-      }
-
-      completedSubmissions.push({ ...submission, serial, card });
-    }
-
-    setSubmissions(completedSubmissions);
+    setSubmissions(data || []);
+    setTotal(data?.[0]?.total_count ? Number(data[0].total_count) : 0);
     setLoading(false);
   }
 
-  function formatSerial(serial) {
-    if (!serial) return "Unknown";
-    const number = String(serial.serial_number).padStart(3, "0");
-    return serial.region === "E" ? `${number}E` : number;
+  function handleSearch(event) {
+    event.preventDefault();
+    setPage(1);
+    setSearch(draftSearch.trim());
   }
 
-  if (loading) {
-    return (
-      <main>
-        <h1>Submission History</h1>
-        <p>Loading history...</p>
-      </main>
-    );
+  function clearSearch() {
+    setDraftSearch("");
+    setSearch("");
+    setStatus("all");
+    setPage(1);
   }
+
+  function statusColor(value) {
+    if (value === "approved") return "#2e7d32";
+    if (value === "removed") return "#9a6700";
+    return "#b71c1c";
+  }
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const firstResult = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const lastResult = Math.min(page * PAGE_SIZE, total);
 
   return (
     <main>
@@ -95,10 +90,75 @@ export default function SubmissionHistory() {
       <h1>Submission History</h1>
       <p>Select a submission to view its complete details and evidence.</p>
 
+      <form
+        onSubmit={handleSearch}
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          alignItems: "end",
+          margin: "20px 0",
+        }}
+      >
+        <label style={{ flex: "1 1 300px" }}>
+          Search
+          <br />
+          <input
+            type="search"
+            value={draftSearch}
+            onChange={(event) => setDraftSearch(event.target.value)}
+            placeholder="Card name, serial or submitter email"
+            style={{ width: "100%", padding: "9px", boxSizing: "border-box" }}
+          />
+        </label>
+
+        <label>
+          Status
+          <br />
+          <select
+            value={status}
+            onChange={(event) => {
+              setStatus(event.target.value);
+              setPage(1);
+            }}
+            style={{ padding: "9px" }}
+          >
+            <option value="all">All statuses</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="removed">Removed</option>
+          </select>
+        </label>
+
+        <button type="submit" style={{ padding: "9px 16px" }}>
+          Search
+        </button>
+
+        {(search || status !== "all") && (
+          <button type="button" onClick={clearSearch} style={{ padding: "9px 16px" }}>
+            Clear
+          </button>
+        )}
+      </form>
+
       {message && <p>{message}</p>}
 
-      {submissions.length === 0 ? (
-        <p>No completed submissions yet.</p>
+      {!loading && (
+        <p>
+          {total === 0
+            ? "No matching submissions."
+            : `Showing ${firstResult}–${lastResult} of ${total} submissions`}
+        </p>
+      )}
+
+      {loading ? (
+        <p>Loading history...</p>
+      ) : submissions.length === 0 ? (
+        <p>
+          {search || status !== "all"
+            ? "Try changing or clearing the search."
+            : "No completed submissions yet."}
+        </p>
       ) : (
         submissions.map((submission) => (
           <Link
@@ -107,12 +167,7 @@ export default function SubmissionHistory() {
             style={{
               display: "block",
               border: "1px solid #ccc",
-              borderLeft:
-                submission.status === "approved"
-                  ? "5px solid #2e7d32"
-                  : submission.status === "removed"
-                  ? "5px solid #9a6700"
-                  : "5px solid #b71c1c",
+              borderLeft: `5px solid ${statusColor(submission.status)}`,
               padding: "12px 15px",
               marginBottom: "10px",
               color: "inherit",
@@ -128,11 +183,11 @@ export default function SubmissionHistory() {
               }}
             >
               <strong style={{ minWidth: "180px", flex: "1 1 220px" }}>
-                {submission.card?.name || "Unknown Card"}
+                {submission.card_name || "Unknown Card"}
               </strong>
 
               <span style={{ minWidth: "70px" }}>
-                {formatSerial(submission.serial)}
+                {submission.serial_label || "Unknown"}
               </span>
 
               <span style={{ minWidth: "170px" }}>
@@ -144,12 +199,7 @@ export default function SubmissionHistory() {
               <strong
                 style={{
                   minWidth: "80px",
-                  color:
-                    submission.status === "approved"
-                      ? "#2e7d32"
-                      : submission.status === "removed"
-                      ? "#9a6700"
-                      : "#b71c1c",
+                  color: statusColor(submission.status),
                   textTransform: "capitalize",
                 }}
               >
@@ -158,6 +208,39 @@ export default function SubmissionHistory() {
             </div>
           </Link>
         ))
+      )}
+
+      {totalPages > 1 && (
+        <nav
+          aria-label="Submission history pages"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "15px",
+            marginTop: "24px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            disabled={page === 1 || loading}
+          >
+            Previous
+          </button>
+
+          <span>
+            Page {page} of {totalPages}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+            disabled={page === totalPages || loading}
+          >
+            Next
+          </button>
+        </nav>
       )}
     </main>
   );
