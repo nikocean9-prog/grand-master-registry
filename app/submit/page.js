@@ -54,16 +54,23 @@ const [message, setMessage] = useState("");
       }
 
       const { data: serial, error } = await supabase
-        .from("serials")
-        .select("status")
-        .eq("card_id", cardId)
-        .eq("region", region)
-        .eq("serial_number", serialValue)
-        .single();
+  .from("serials")
+  .select("id, status, region, serial_number")
+  .eq("card_id", Number(cardId))
+  .eq("region", region)
+  .eq("serial_number", serialValue)
+  .maybeSingle();
 
-      if (!error && serial) {
-        setSerialStatus(serial.status);
-      }
+if (error) {
+  console.error("Serial status check failed:", error);
+  return;
+}
+
+if (serial) {
+  setSerialStatus(serial.status);
+} else {
+  setSerialStatus(null);
+}
     }
 
     checkSerialStatus();
