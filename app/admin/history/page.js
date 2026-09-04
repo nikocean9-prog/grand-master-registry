@@ -14,17 +14,19 @@ const PAGE_SIZE = 25;
 
 export default function SubmissionHistory() {
   const [submissions, setSubmissions] = useState([]);
+  const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [draftSearch, setDraftSearch] = useState("");
   const [search, setSearch] = useState("");
+  const [cardId, setCardId] = useState("");
   const [status, setStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
   useEffect(() => {
     loadHistory();
-  }, [page, search, status]);
+  }, [page, search, cardId, status]);
 
   async function loadHistory() {
     setLoading(true);
@@ -38,8 +40,17 @@ export default function SubmissionHistory() {
       return;
     }
 
+    if (cards.length === 0) {
+      const { data: cardData } = await supabase
+        .from("cards")
+        .select("id, name")
+        .order("id");
+      setCards(cardData || []);
+    }
+
     const { data, error } = await supabase.rpc("search_submission_history", {
       p_search: search,
+      p_card_id: cardId ? Number(cardId) : null,
       p_status: status,
       p_limit: PAGE_SIZE,
       p_offset: (page - 1) * PAGE_SIZE,
@@ -67,6 +78,7 @@ export default function SubmissionHistory() {
   function clearSearch() {
     setDraftSearch("");
     setSearch("");
+    setCardId("");
     setStatus("all");
     setPage(1);
   }
@@ -100,14 +112,34 @@ export default function SubmissionHistory() {
           margin: "20px 0",
         }}
       >
-        <label style={{ flex: "1 1 300px" }}>
-          Search
+        <label style={{ minWidth: "220px" }}>
+          Card
+          <br />
+          <select
+            value={cardId}
+            onChange={(event) => {
+              setCardId(event.target.value);
+              setPage(1);
+            }}
+            style={{ width: "100%", padding: "9px" }}
+          >
+            <option value="">All cards</option>
+            {cards.map((card) => (
+              <option key={card.id} value={card.id}>
+                {card.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label style={{ flex: "1 1 280px" }}>
+          Serial or submitter email
           <br />
           <input
             type="search"
             value={draftSearch}
             onChange={(event) => setDraftSearch(event.target.value)}
-            placeholder="Card name, serial or submitter email"
+            placeholder="For example: 001E or email@example.com"
             style={{ width: "100%", padding: "9px", boxSizing: "border-box" }}
           />
         </label>
@@ -134,7 +166,7 @@ export default function SubmissionHistory() {
           Search
         </button>
 
-        {(search || status !== "all") && (
+        {(search || cardId || status !== "all") && (
           <button type="button" onClick={clearSearch} style={{ padding: "9px 16px" }}>
             Clear
           </button>
@@ -155,7 +187,7 @@ export default function SubmissionHistory() {
         <p>Loading history...</p>
       ) : submissions.length === 0 ? (
         <p>
-          {search || status !== "all"
+          {search || cardId || status !== "all"
             ? "Try changing or clearing the search."
             : "No completed submissions yet."}
         </p>
