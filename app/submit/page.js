@@ -21,6 +21,7 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [serialStatus, setSerialStatus] = useState(null);
   const [notes, setNotes] = useState("");
+  const [submitterEmail, setSubmitterEmail] = useState("");
 
   useEffect(() => {
     async function loadCards() {
@@ -84,6 +85,13 @@ if (serial) {
       return;
     }
 
+    if (serialStatus === "confirmed" && !submitterEmail.trim()) {
+      setMessage(
+        "Please enter your email address when challenging an already-confirmed serial."
+      );
+      return;
+    }
+
     setSubmitting(true);
 
     const { data: serial, error: serialError } = await supabase
@@ -131,6 +139,7 @@ if (serial) {
         country: country || null,
         source_url: sourceUrl || null,
         notes: notes || null,
+        submitter_email: submitterEmail.trim() || null,
         status: "pending",
       });
 
@@ -147,6 +156,7 @@ if (serial) {
     setCountry("");
     setSourceUrl("");
     setNotes("");
+    setSubmitterEmail("");
     setPhoto(null);
     setSubmitting(false);
 
@@ -285,6 +295,29 @@ if (serial) {
 </div>
 
 <br />
+
+        <div>
+          <label>
+            Email{serialStatus === "confirmed" ? " (required)" : " (optional)"}
+          </label>
+          <br />
+          <input
+            type="email"
+            value={submitterEmail}
+            onChange={(e) => setSubmitterEmail(e.target.value)}
+            placeholder="your@email.com"
+            required={serialStatus === "confirmed"}
+          />
+          {serialStatus === "confirmed" && (
+            <p>
+              Your email is required so the registry administrator can contact
+              you about this challenge. It will not be displayed publicly.
+            </p>
+          )}
+        </div>
+
+        <br />
+
         <button type="submit" disabled={submitting}>
           {submitting ? "Submitting..." : "Submit for Verification"}
         </button>
