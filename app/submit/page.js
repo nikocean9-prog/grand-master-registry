@@ -125,17 +125,11 @@ if (serial) {
       return;
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from("submission-evidence")
-      .getPublicUrl(filePath);
-
-    const photoUrl = publicUrlData.publicUrl;
-
     const { error } = await supabase
       .from("submissions")
       .insert({
         serial_id: serial.id,
-        photo_url: photoUrl,
+        photo_url: filePath,
         country: country || null,
         source_url: sourceUrl || null,
         notes: notes || null,
