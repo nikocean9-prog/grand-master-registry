@@ -200,6 +200,17 @@ export default function AdminDashboard() {
               {submission.country || "Not provided"}
             </p>
 
+            {submission.notes && (
+              <div>
+                <p>
+                  <strong>Notes:</strong>
+                </p>
+                <p style={{ whiteSpace: "pre-wrap" }}>
+                  {submission.notes}
+                </p>
+              </div>
+            )}
+
             <p>
               <strong>Submitted:</strong>{" "}
               {submission.created_at
