@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import { getEvidenceUrl } from "../../lib/evidenceUrl";
 
 export default async function SerialPage({ params }) {
   const { id } = await params;
@@ -41,6 +42,11 @@ export default async function SerialPage({ params }) {
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
+
+  const evidenceUrl = await getEvidenceUrl(
+    supabase,
+    evidenceUrl
+  );
 
   const serialNumber = String(serial.serial_number).padStart(3, "0");
 
@@ -98,7 +104,7 @@ export default async function SerialPage({ params }) {
         </p>
       )}
 
-      {submission?.photo_url ? (
+      {evidenceUrl ? (
         <div>
           <h2>Evidence Photo</h2>
 
