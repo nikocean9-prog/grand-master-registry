@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import AdminRegistryLink from "./components/AdminRegistryLink";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,8 @@ export default async function Home() {
 
   return (
     <main>
+      <AdminRegistryLink />
+
       <h1>Grand Master Registry</h1>
 
       <p>
