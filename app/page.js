@@ -27,7 +27,7 @@ export default function Home() {
         </div>
         <TcgCatalog tcgs={tcgs} />
       </section>
-      <section className="home-links"><Link href="/help" className="feature-link"><span>?</span><div><h2>Help &amp; Contact</h2><p>Get help, report a problem, or suggest a TCG or set.</p></div></Link><Link href="/store" className="feature-link"><span>◇</span><div><h2>Store</h2><p>A future home for TCG Serial Tracker products.</p></div><small>Coming soon</small></Link></section>
+      <section className="home-links single"><Link href="/help" className="feature-link"><span>?</span><div><h2>Help &amp; Contact</h2><p>Get help, report a problem, or suggest a TCG or set.</p></div></Link></section>
     </main>
   );
 }
