@@ -72,7 +72,7 @@ export default function AdminPage() {
     <main>
       <p><a href="/">← Back to Registry</a></p>
       <h1>Admin Login</h1>
-      <p>Sign in to review Grand Master Registry submissions.</p>
+      <p>Sign in to review TCG Serial Tracker submissions.</p>
 
       <form onSubmit={handleLogin}>
         <div>
