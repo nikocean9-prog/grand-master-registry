@@ -10,7 +10,7 @@ export async function getCurrentAdmin(supabase) {
 
   const { data: admin, error: adminError } = await supabase
     .from("admins")
-    .select("user_id")
+    .select("user_id, is_owner")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -18,5 +18,8 @@ export async function getCurrentAdmin(supabase) {
     return null;
   }
 
-  return user;
+  return {
+    ...user,
+    isOwner: admin.is_owner === true,
+  };
 }
