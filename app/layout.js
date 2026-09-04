@@ -15,6 +15,20 @@ export const metadata = {
     url: "/",
     siteName: "TCG Serial Tracker",
     type: "website",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "TCG Serial Tracker — Tracking every serial. Preserving every pull.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TCG Serial Tracker",
+    description: "Tracking every serial. Preserving every pull.",
+    images: ["/opengraph-image"],
   },
 };
 
