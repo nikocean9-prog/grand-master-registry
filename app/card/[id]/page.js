@@ -26,7 +26,7 @@ export default async function CardPage({ params }) {
   if (cardError || !card) {
     return (
       <main>
-        <Link href="/">← Back to Registry</Link>
+        <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Card not found</h1>
       </main>
     );
@@ -35,16 +35,14 @@ export default async function CardPage({ params }) {
   if (serialsError) {
     return (
       <main>
-        <Link href="/">← Back to Registry</Link>
+        <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>{card.name}</h1>
         <p>Could not load serial numbers.</p>
       </main>
     );
   }
 
-  const standard = serials.filter(
-    (serial) => serial.region === "AMERICAS"
-  );
+  const standard = serials.filter((serial) => serial.region === "AMERICAS");
   const eRegion = serials.filter((serial) => serial.region === "E");
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
@@ -53,6 +51,7 @@ export default async function CardPage({ params }) {
     (serial) => serial.status === "confirmed"
   ).length;
   const totalConfirmed = standardConfirmed + eConfirmed;
+  const percentage = ((totalConfirmed / 200) * 100).toFixed(1);
 
   const formatNumber = (number, region) => {
     const formatted = String(number).padStart(3, "0");
@@ -62,10 +61,7 @@ export default async function CardPage({ params }) {
   const SerialGrid = ({ serials }) => (
     <div className="serial-grid">
       {serials.map((serial) => {
-        const serialLabel = formatNumber(
-          serial.serial_number,
-          serial.region
-        );
+        const serialLabel = formatNumber(serial.serial_number, serial.region);
 
         if (serial.status === "confirmed") {
           return (
@@ -73,6 +69,7 @@ export default async function CardPage({ params }) {
               key={`${serial.region}-${serial.serial_number}`}
               href={`/serial/${serial.id}`}
               className={`serial-box ${serial.status}`}
+              title="Confirmed — view details"
             >
               {serialLabel}
             </Link>
@@ -83,6 +80,7 @@ export default async function CardPage({ params }) {
           <div
             key={`${serial.region}-${serial.serial_number}`}
             className={`serial-box ${serial.status}`}
+            title={serial.status === "reported" ? "Reported — awaiting verification" : "Not yet reported"}
           >
             {serialLabel}
           </div>
@@ -93,32 +91,43 @@ export default async function CardPage({ params }) {
 
   return (
     <main>
-      <Link href="/">← Back to Registry</Link>
+      <Link href="/" className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">
         {card.image_url && (
-          <img
-            src={card.image_url}
-            alt={card.name}
-            className="card-detail-image"
-          />
+          <img src={card.image_url} alt={card.name} className="card-detail-image" />
         )}
 
-        <div>
+        <div className="card-detail-copy">
+          <p className="eyebrow">Magnificent Monsters</p>
           <h1>{card.name}</h1>
-          <h2>{totalConfirmed} / 200 Confirmed</h2>
+          <h2>{totalConfirmed} / 200 confirmed</h2>
+          <p>{percentage}% of this card documented</p>
+          <div className="overall-progress" aria-hidden="true">
+            <span style={{ width: `${percentage}%` }} />
+          </div>
         </div>
       </div>
 
-      <section>
-        <h2>Americas</h2>
-        <p>{standardConfirmed} / 100 confirmed</p>
+      <div className="serial-legend" aria-label="Serial status legend">
+        <span><i className="legend-dot confirmed" /> Confirmed</span>
+        <span><i className="legend-dot reported" /> Awaiting verification</span>
+        <span><i className="legend-dot unreported" /> Not reported</span>
+      </div>
+
+      <section className="serial-section">
+        <div className="serial-section-heading">
+          <h2>Americas</h2>
+          <strong>{standardConfirmed} / 100 confirmed</strong>
+        </div>
         <SerialGrid serials={standard} />
       </section>
 
-      <section>
-        <h2>Europe-distributed</h2>
-        <p>{eConfirmed} / 100 confirmed</p>
+      <section className="serial-section">
+        <div className="serial-section-heading">
+          <h2>Europe-distributed</h2>
+          <strong>{eConfirmed} / 100 confirmed</strong>
+        </div>
         <SerialGrid serials={eRegion} />
       </section>
     </main>
