@@ -45,7 +45,7 @@ export default async function SerialPage({ params }) {
 
   const evidenceUrl = await getEvidenceUrl(
     supabase,
-    evidenceUrl
+    submission?.photo_url
   );
 
   const serialNumber = String(serial.serial_number).padStart(3, "0");
