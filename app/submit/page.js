@@ -108,34 +108,35 @@ if (serial) {
       return;
     }
 
-    const fileExtension = photo.name.split(".").pop();
-    const fileName = `${Date.now()}-${Math.random()
-      .toString(36)
-      .substring(2)}.${fileExtension}`;
+    const submissionForm = new FormData();
+    submissionForm.append("serial_id", String(serial.id));
+    submissionForm.append("photo", photo);
+    submissionForm.append("country", country);
+    submissionForm.append("source_url", sourceUrl);
+    submissionForm.append("notes", notes);
+    submissionForm.append("submitter_email", submitterEmail.trim());
+    submissionForm.append(
+      "website",
+      event.currentTarget.elements.website?.value || ""
+    );
 
-    const filePath = `submissions/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from("submission-evidence")
-      .upload(filePath, photo);
-
-    if (uploadError) {
-      setMessage("Photo could not be uploaded.");
-      setSubmitting(false);
-      return;
-    }
-
-    const { error } = await supabase.rpc("submit_pull", {
-      p_serial_id: serial.id,
-      p_photo_url: filePath,
-      p_country: country || null,
-      p_source_url: sourceUrl || null,
-      p_notes: notes || null,
-      p_submitter_email: submitterEmail.trim() || null,
+    const { error } = await supabase.functions.invoke("submit-pull", {
+      body: submissionForm,
     });
 
     if (error) {
-      setMessage("Submission could not be sent.");
+      let errorMessage = "Submission could not be sent.";
+
+      if (error.context instanceof Response) {
+        try {
+          const responseBody = await error.context.json();
+          errorMessage = responseBody?.error || errorMessage;
+        } catch {
+          // Keep the safe fallback message.
+        }
+      }
+
+      setMessage(errorMessage);
       setSubmitting(false);
       return;
     }
@@ -165,6 +166,25 @@ if (serial) {
       </p>
 
       <form onSubmit={handleSubmit}>
+        <div
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            left: "-10000px",
+            width: "1px",
+            height: "1px",
+            overflow: "hidden",
+          }}
+        >
+          <label htmlFor="website">Website</label>
+          <input
+            id="website"
+            name="website"
+            type="text"
+            tabIndex="-1"
+            autoComplete="off"
+          />
+        </div>
         <div>
           <label>Card</label>
           <br />
