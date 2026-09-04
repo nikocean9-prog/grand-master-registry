@@ -32,41 +32,42 @@ const [message, setMessage] = useState("");
 
       setCards(data || []);
     }
-useEffect(() => {
-  async function checkSerialStatus() {
-    setSerialStatus(null);
-
-    if (!cardId || !serialNumber || !region) {
-      return;
-    }
-
-    const serialValue = Number(serialNumber);
-
-    if (
-      !Number.isInteger(serialValue) ||
-      serialValue < 1 ||
-      serialValue > 100
-    ) {
-      return;
-    }
-
-    const { data: serial, error } = await supabase
-      .from("serials")
-      .select("status")
-      .eq("card_id", cardId)
-      .eq("region", region)
-      .eq("serial_number", serialValue)
-      .single();
-
-    if (!error && serial) {
-      setSerialStatus(serial.status);
-    }
-  }
-
-  checkSerialStatus();
-}, [cardId, region, serialNumber]);
     loadCards();
   }, []);
+
+  useEffect(() => {
+    async function checkSerialStatus() {
+      setSerialStatus(null);
+
+      if (!cardId || !serialNumber || !region) {
+        return;
+      }
+
+      const serialValue = Number(serialNumber);
+
+      if (
+        !Number.isInteger(serialValue) ||
+        serialValue < 1 ||
+        serialValue > 100
+      ) {
+        return;
+      }
+
+      const { data: serial, error } = await supabase
+        .from("serials")
+        .select("status")
+        .eq("card_id", cardId)
+        .eq("region", region)
+        .eq("serial_number", serialValue)
+        .single();
+
+      if (!error && serial) {
+        setSerialStatus(serial.status);
+      }
+    }
+
+    checkSerialStatus();
+  }, [cardId, region, serialNumber]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -123,6 +124,7 @@ useEffect(() => {
         photo_url: photoUrl,
         country: country || null,
         source_url: sourceUrl || null,
+        notes: notes || null,
         status: "pending",
       });
 
@@ -138,6 +140,7 @@ useEffect(() => {
     setSerialNumber("1");
     setCountry("");
     setSourceUrl("");
+    setNotes("");
     setPhoto(null);
     setSubmitting(false);
 
@@ -203,12 +206,30 @@ useEffect(() => {
               </option>
             ))}
           </select>
+             </div>
+
+      {serialStatus === "confirmed" && (
+        <div
+          style={{
+            border: "1px solid #d6a700",
+            padding: "15px",
+            marginBottom: "20px",
+          }}
+        >
+          <strong>This serial is already listed as confirmed.</strong>
+
+          <p style={{ marginBottom: 0 }}>
+            If you believe the existing record is incorrect or invalid,
+            please provide details in the notes section and upload any
+            relevant photos or evidence.
+          </p>
         </div>
+      )}
 
-        <br />
+      <br />
 
-        <div>
-          <label>Photo Evidence</label>
+      <div>
+        <label>Photo Evidence</label>
           <br />
           <input
             type="file"
@@ -245,7 +266,19 @@ useEffect(() => {
         </div>
 
         <br />
+<div>
+  <label>Notes (optional)</label>
+  <br />
+  <textarea
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    placeholder="Add any additional information about this pull or existing record..."
+    rows="5"
+    style={{ width: "100%", maxWidth: "500px" }}
+  />
+</div>
 
+<br />
         <button type="submit" disabled={submitting}>
           {submitting ? "Submitting..." : "Submit for Verification"}
         </button>
