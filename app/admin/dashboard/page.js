@@ -195,6 +195,24 @@ export default function AdminDashboard() {
               {formatRegion(submission.serial)}
             </p>
 
+            {submission.serial?.status === "confirmed" && (
+              <div
+                style={{
+                  border: "1px solid #d6a700",
+                  backgroundColor: "#fff8d6",
+                  color: "#5f4900",
+                  padding: "15px",
+                  marginBottom: "20px",
+                }}
+              >
+                <strong>Warning: This serial has already been confirmed.</strong>
+                <p style={{ marginBottom: 0 }}>
+                  Approving this submission may replace the existing public
+                  record. Check the current evidence before continuing.
+                </p>
+              </div>
+            )}
+
             <p>
               <strong>Country:</strong>{" "}
               {submission.country || "Not provided"}
