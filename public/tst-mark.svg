@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">TCG Serial Tracker mark</title>
+  <defs>
+    <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#1f2937"/>
+    </linearGradient>
+    <linearGradient id="line" x1="17" y1="14" x2="48" y2="51" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#86efac"/>
+      <stop offset="1" stop-color="#35a65f"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <path d="M21 13h22a5 5 0 0 1 5 5v28a5 5 0 0 1-5 5H21a5 5 0 0 1-5-5V18a5 5 0 0 1 5-5Z" fill="none" stroke="url(#line)" stroke-width="3"/>
+  <path d="M22 22h20M22 29h12M22 42h20" fill="none" stroke="#f8fafc" stroke-linecap="round" stroke-width="3"/>
+  <circle cx="41" cy="31" r="7" fill="#f5c451"/>
+  <path d="m38.2 31 1.8 1.8 3.8-4" fill="none" stroke="#171717" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"/>
+</svg>
