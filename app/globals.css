@@ -51,6 +51,90 @@ button {
   font-size: 16px;
   cursor: pointer;
 }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.registry-card {
+  overflow: hidden;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  background: white;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.registry-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(0, 0, 0, 0.14);
+}
+
+.registry-card-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: #ddd;
+}
+
+.registry-card-content {
+  padding: 15px;
+}
+
+.registry-card-content h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+
+.registry-card-content p {
+  margin: 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.card-progress {
+  height: 6px;
+  margin-top: 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e5e5e5;
+}
+
+.card-progress span {
+  display: block;
+  min-width: 2px;
+  height: 100%;
+  border-radius: inherit;
+  background: #2e7d32;
+}
+
+.card-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  margin: 30px 0 40px;
+}
+
+.card-detail-header h1 {
+  margin-top: 0;
+}
+
+.card-detail-image {
+  width: 260px;
+  max-width: 38%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.16);
+}
+
 .serial-grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -82,12 +166,52 @@ button {
   color: #777;
 }
 
+@media (max-width: 800px) {
+  .card-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 700px) {
+  main {
+    padding: 35px 16px;
+  }
+
+  h1 {
+    font-size: 36px;
+  }
+
   .serial-grid {
     grid-template-columns: repeat(5, 1fr);
   }
 
+  .card-detail-header {
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .card-detail-image {
+    width: 150px;
+    max-width: 42%;
+  }
+
   .site-footer {
     text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-detail-header {
+    display: block;
+  }
+
+  .card-detail-image {
+    width: 100%;
+    max-width: 280px;
+    margin-bottom: 18px;
   }
 }
