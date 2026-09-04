@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
+import { getEvidenceUrl } from "../../lib/evidenceUrl";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -65,10 +66,16 @@ export default function AdminApprovals() {
         card = cardData;
       }
 
+      const evidenceUrl = await getEvidenceUrl(
+        supabase,
+        submission.evidence_url
+      );
+
       completedSubmissions.push({
         ...submission,
         serial,
         card,
+        evidence_url: evidenceUrl,
       });
     }
 
@@ -275,19 +282,19 @@ export default function AdminApprovals() {
               </p>
             )}
 
-            {submission.photo_url && (
+            {submission.evidence_url && (
               <div>
                 <p>
                   <strong>Photo Evidence:</strong>
                 </p>
 
                 <a
-                  href={submission.photo_url}
+                  href={submission.evidence_url}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   <img
-                    src={submission.photo_url}
+                    src={submission.evidence_url}
                     alt="Submission evidence"
                     style={{
                       display: "block",
