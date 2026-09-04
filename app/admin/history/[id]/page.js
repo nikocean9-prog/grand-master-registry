@@ -143,6 +143,20 @@ export default function SubmissionHistoryDetails() {
             : "Unknown"}
         </p>
 
+        <p>
+          <strong>
+            {submission.status === "approved" ? "Approved by:" : "Rejected by:"}
+          </strong>{" "}
+          {submission.reviewed_by_email || "Not recorded"}
+        </p>
+
+        <p>
+          <strong>Reviewed:</strong>{" "}
+          {submission.reviewed_at
+            ? new Date(submission.reviewed_at).toLocaleString()
+            : "Not recorded"}
+        </p>
+
         {submission.notes && (
           <div>
             <p><strong>Notes:</strong></p>
