@@ -32,7 +32,39 @@ const [message, setMessage] = useState("");
 
       setCards(data || []);
     }
+useEffect(() => {
+  async function checkSerialStatus() {
+    setSerialStatus(null);
 
+    if (!cardId || !serialNumber || !region) {
+      return;
+    }
+
+    const serialValue = Number(serialNumber);
+
+    if (
+      !Number.isInteger(serialValue) ||
+      serialValue < 1 ||
+      serialValue > 100
+    ) {
+      return;
+    }
+
+    const { data: serial, error } = await supabase
+      .from("serials")
+      .select("status")
+      .eq("card_id", cardId)
+      .eq("region", region)
+      .eq("serial_number", serialValue)
+      .single();
+
+    if (!error && serial) {
+      setSerialStatus(serial.status);
+    }
+  }
+
+  checkSerialStatus();
+}, [cardId, region, serialNumber]);
     loadCards();
   }, []);
 
