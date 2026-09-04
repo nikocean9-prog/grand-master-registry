@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PublicHeader from "../../components/PublicHeader";
+import AdminOnlyTcgPage from "../../components/AdminOnlyTcgPage";
 import { getTcg, tcgs } from "../../lib/catalog";
 
 export function generateStaticParams() { return tcgs.map((tcg) => ({ slug: tcg.slug })); }
@@ -15,6 +16,8 @@ export default async function TcgPage({ params }) {
   const { slug } = await params;
   const tcg = getTcg(slug);
   if (!tcg) notFound();
+  const hasLiveSet = tcg.sets.some((set) => set.status === "live");
+  if (!hasLiveSet) return <AdminOnlyTcgPage tcg={tcg} />;
   return (
     <main><PublicHeader /><Link href="/#tcgs" className="back-link">← All TCGs</Link>
       <section className="catalog-heading"><span className="tcg-monogram large" aria-hidden="true">{tcg.initials}</span><div><p className="eyebrow">Trading card game</p><h1>{tcg.name}</h1><p>{tcg.description}</p></div></section>
