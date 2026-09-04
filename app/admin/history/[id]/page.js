@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { getCurrentAdmin } from "../../../lib/adminAuth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -26,12 +27,10 @@ export default function SubmissionHistoryDetails() {
     setLoading(true);
     setMessage("");
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
+    const admin = await getCurrentAdmin(supabase);
 
-    if (userError || !user) {
+    if (!admin) {
+      await supabase.auth.signOut();
       window.location.href = "/admin";
       return;
     }
