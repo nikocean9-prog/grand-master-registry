@@ -20,6 +20,7 @@ export default function SubmitPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [serialStatus, setSerialStatus] = useState(null);
+  const [notes, setNotes] = useState("");
 
   useEffect(() => {
     async function loadCards() {
