@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
+import { getCurrentAdmin } from "../../lib/adminAuth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -14,12 +15,10 @@ export default function AdminHome() {
 
   useEffect(() => {
     async function checkAdmin() {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
+      const admin = await getCurrentAdmin(supabase);
 
-      if (error || !user) {
+      if (!admin) {
+        await supabase.auth.signOut();
         window.location.href = "/admin";
         return;
       }
