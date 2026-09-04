@@ -557,23 +557,15 @@ button {
 .tcg-card.planned { background:#fafbfa; }
 .tcg-card.live {
   overflow: hidden;
-  border-color: #9b7a32;
-  background:
-    radial-gradient(circle at 88% 48%, transparent 0 23%, rgba(200,165,82,.13) 23.5% 24%, transparent 24.5% 33%, rgba(200,165,82,.08) 33.5% 34%, transparent 34.5%),
-    radial-gradient(circle at 75% 30%, rgba(58,112,78,.42), transparent 42%),
-    linear-gradient(135deg,#071b12,#123b27 58%,#091d14);
+  border-color: #b48a38;
+  background-color: #061a11;
+  background-image: url("/graphics/yugioh-tile-bg.webp");
+  background-position: center;
+  background-size: cover;
   color: #fff9e7;
-  box-shadow: 0 8px 24px rgba(7,27,18,.2), inset 0 0 0 1px rgba(226,191,104,.25);
+  box-shadow: 0 9px 28px rgba(7,27,18,.27);
 }
-.tcg-card.live::after {
-  content: "";
-  position: absolute;
-  inset: 10px;
-  pointer-events: none;
-  border: 1px solid rgba(220,181,88,.28);
-  border-radius: 9px;
-}
-.tcg-card.live h3 { margin-top: 56px; color: #fff5d6; font-family: Georgia, "Times New Roman", serif; font-size: 27px; }
+.tcg-card.live h3 { margin-top: 56px; color: #fff2c8; font-family: Georgia, "Times New Roman", serif; font-size: 29px; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
 .tcg-card.live p { color: #d9e1dc; }
 .tcg-card.live > strong { color: #a9edbf; }
 .tcg-card.live .status-badge.live { z-index: 1; background: #d9f7df; color: #185a31; }
