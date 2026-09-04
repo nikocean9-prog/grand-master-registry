@@ -16,15 +16,16 @@ export default async function Home() {
     .eq("status", "confirmed");
 
   const { data: cards, error: cardsError } = await supabase
-  .from("cards")
-  .select(`
-    id,
-    name,
-    serials (
-      status
-    )
-  `)
-  .order("id");
+    .from("cards")
+    .select(`
+      id,
+      name,
+      image_url,
+      serials (
+        status
+      )
+    `)
+    .order("id");
 
   const confirmed = count ?? 0;
   const total = 3600;
@@ -51,8 +52,8 @@ export default async function Home() {
       )}
 
       <Link href="/submit">
-  <button>Submit a Pull</button>
-</Link>
+        <button>Submit a Pull</button>
+      </Link>
 
       <hr />
 
@@ -61,27 +62,40 @@ export default async function Home() {
       {cardsError ? (
         <p>Could not load cards.</p>
       ) : (
-        <div>
-         {cards?.map((card) => {
-  const cardConfirmed =
-    card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
+        <div className="card-grid">
+          {cards?.map((card) => {
+            const cardConfirmed =
+              card.serials?.filter((serial) => serial.status === "confirmed")
+                .length ?? 0;
+            const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
 
-  const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
+            return (
+              <Link
+                key={card.id}
+                href={`/card/${card.id}`}
+                className="registry-card"
+              >
+                {card.image_url && (
+                  <img
+                    src={card.image_url}
+                    alt={card.name}
+                    className="registry-card-image"
+                    loading="lazy"
+                  />
+                )}
 
-  return (
-    <div key={card.id}>
-      <h3>
-        <Link href={`/card/${card.id}`}>
-          {card.name}
-        </Link>
-      </h3>
-
-      <p>
-        {cardConfirmed} / 200 confirmed · {cardPercentage}%
-      </p>
-    </div>
-  );
-})}
+                <div className="registry-card-content">
+                  <h3>{card.name}</h3>
+                  <p>
+                    {cardConfirmed} / 200 confirmed · {cardPercentage}%
+                  </p>
+                  <div className="card-progress" aria-hidden="true">
+                    <span style={{ width: `${cardPercentage}%` }} />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </main>
