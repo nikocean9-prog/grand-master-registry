@@ -1,8 +1,21 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Grand Master Registry",
-  description: "Track Magnificent Monsters Grand Master Rare pulls",
+  metadataBase: new URL("https://www.tcgserialtracker.com"),
+  title: "TCG Serial Tracker",
+  description:
+    "A global community registry for tracking and preserving serial-numbered trading cards.",
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "TCG Serial Tracker",
+    description:
+      "Tracking every serial. Preserving every pull.",
+    url: "/",
+    siteName: "TCG Serial Tracker",
+    type: "website",
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -13,7 +26,7 @@ export default function RootLayout({ children }) {
           <div className="site-content">{children}</div>
           <footer className="site-footer">
             <p>
-              Grand Master Registry is an independent, unofficial fan project
+              TCG Serial Tracker is an independent, unofficial fan project
               and is not affiliated with, endorsed by, or sponsored by Konami
               Digital Entertainment.
             </p>
