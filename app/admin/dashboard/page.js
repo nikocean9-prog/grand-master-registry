@@ -84,7 +84,7 @@ export default function AdminHome() {
           <div>Set up or check Google Authenticator protection.</div>
         </Link>
 
-        <Link href="/" style={linkStyle}>
+        <Link href="/sets/magnificent-monsters" style={linkStyle}>
           <strong>View Public Registry</strong>
           <div>Open the public-facing registry.</div>
         </Link>
