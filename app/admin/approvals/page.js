@@ -68,7 +68,7 @@ export default function AdminApprovals() {
 
       const evidenceUrl = await getEvidenceUrl(
         supabase,
-        submission.evidence_url
+        submission.photo_url
       );
 
       completedSubmissions.push({
