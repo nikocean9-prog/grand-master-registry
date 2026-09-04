@@ -27,7 +27,7 @@ export default function TcgCatalog({ tcgs }) {
       <div className="tcg-grid">
         {visibleTcgs.map((tcg) => (
           <Link href={`/tcg/${tcg.slug}`} className={`tcg-card ${tcg.status}`} key={tcg.slug}>
-            <span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span>
+            {tcg.status !== "live" && <span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span>}
             <span className={`status-badge ${tcg.status}`}>{tcg.status === "live" ? "Live" : "Coming soon"}</span>
             <h3>{tcg.name}</h3>
             <p>{tcg.description}</p>
