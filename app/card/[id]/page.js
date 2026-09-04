@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import SerialGrid from "../../components/SerialGrid";
 
 export default async function CardPage({ params }) {
   const { id } = await params;
@@ -52,42 +53,6 @@ export default async function CardPage({ params }) {
   ).length;
   const totalConfirmed = standardConfirmed + eConfirmed;
   const percentage = ((totalConfirmed / 200) * 100).toFixed(1);
-
-  const formatNumber = (number, region) => {
-    const formatted = String(number).padStart(3, "0");
-    return region === "E" ? `${formatted}E` : formatted;
-  };
-
-  const SerialGrid = ({ serials }) => (
-    <div className="serial-grid">
-      {serials.map((serial) => {
-        const serialLabel = formatNumber(serial.serial_number, serial.region);
-
-        if (serial.status === "confirmed") {
-          return (
-            <Link
-              key={`${serial.region}-${serial.serial_number}`}
-              href={`/serial/${serial.id}`}
-              className={`serial-box ${serial.status}`}
-              title="Confirmed — view details"
-            >
-              {serialLabel}
-            </Link>
-          );
-        }
-
-        return (
-          <div
-            key={`${serial.region}-${serial.serial_number}`}
-            className={`serial-box ${serial.status}`}
-            title={serial.status === "reported" ? "Reported — awaiting verification" : "Not yet reported"}
-          >
-            {serialLabel}
-          </div>
-        );
-      })}
-    </div>
-  );
 
   return (
     <main>
