@@ -5,6 +5,31 @@ body {
   color: #111;
 }
 
+.site-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.site-content {
+  flex: 1;
+}
+
+.site-footer {
+  border-top: 1px solid #d8d8d8;
+  background: #ececec;
+  color: #555;
+  font-size: 12px;
+  line-height: 1.5;
+  padding: 20px 24px;
+  text-align: center;
+}
+
+.site-footer p {
+  max-width: 900px;
+  margin: 4px auto;
+}
+
 main {
   max-width: 1000px;
   margin: 0 auto;
@@ -60,5 +85,9 @@ button {
 @media (max-width: 700px) {
   .serial-grid {
     grid-template-columns: repeat(5, 1fr);
+  }
+
+  .site-footer {
+    text-align: left;
   }
 }
