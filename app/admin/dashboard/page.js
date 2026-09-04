@@ -232,6 +232,30 @@ export default function AdminDashboard() {
               </div>
             )}
 
+            {submission.submitter_email && (
+              <div style={{ marginBottom: "16px" }}>
+                <p>
+                  <strong>Contact email:</strong>{" "}
+                  {submission.submitter_email}
+                </p>
+                <a
+                  href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
+                    `Grand Master Registry submission: ${
+                      submission.card?.name || "Unknown Card"
+                    } ${formatSerial(submission.serial)}`
+                  )}`}
+                  style={{
+                    display: "inline-block",
+                    border: "1px solid #333",
+                    padding: "8px 14px",
+                    textDecoration: "none",
+                  }}
+                >
+                  Contact submitter
+                </a>
+              </div>
+            )}
+
             <p>
               <strong>Submitted:</strong>{" "}
               {submission.created_at
