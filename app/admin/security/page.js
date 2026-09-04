@@ -60,7 +60,7 @@ export default function AdminSecurityPage() {
 
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
-      friendlyName: "Grand Master Registry",
+      friendlyName: "TCG Serial Tracker",
     });
 
     if (error) {
