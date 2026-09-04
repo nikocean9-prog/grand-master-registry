@@ -15,6 +15,17 @@ export default function AdminHome() {
 
   useEffect(() => {
     async function checkAdmin() {
+      const { data: assurance } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (
+        assurance?.nextLevel === "aal2" &&
+        assurance.currentLevel !== "aal2"
+      ) {
+        window.location.href = "/admin/mfa";
+        return;
+      }
+
       const admin = await getCurrentAdmin(supabase);
 
       if (!admin) {
@@ -68,15 +79,18 @@ export default function AdminHome() {
           <div>View all approved and rejected submissions.</div>
         </Link>
 
+        <Link href="/admin/security" style={linkStyle}>
+          <strong>Admin Security</strong>
+          <div>Set up or check Google Authenticator protection.</div>
+        </Link>
+
         <Link href="/" style={linkStyle}>
           <strong>View Public Registry</strong>
           <div>Open the public-facing registry.</div>
         </Link>
       </div>
 
-      <button type="button" onClick={handleSignOut}>
-        Sign Out
-      </button>
+      <button type="button" onClick={handleSignOut}>Sign Out</button>
     </main>
   );
 }
