@@ -260,7 +260,7 @@ export default function AdminApprovals() {
                 </p>
                 <a
                   href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
-                    `Grand Master Registry submission: ${
+                    `TCG Serial Tracker submission: ${
                       submission.card?.name || "Unknown Card"
                     } ${formatSerial(submission.serial)}`
                   )}`}
