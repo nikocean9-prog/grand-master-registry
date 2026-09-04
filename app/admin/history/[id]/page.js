@@ -315,7 +315,7 @@ export default function SubmissionHistoryDetails() {
             <p><strong>Contact email:</strong> {submission.submitter_email}</p>
             <a
               href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
-                `Grand Master Registry submission: ${submission.card?.name || "Unknown Card"} ${formatSerial(submission.serial)}`
+                `TCG Serial Tracker submission: ${submission.card?.name || "Unknown Card"} ${formatSerial(submission.serial)}`
               )}`}
               style={{ display: "inline-block", border: "1px solid #333", padding: "8px 14px", textDecoration: "none" }}
             >
