@@ -125,17 +125,14 @@ if (serial) {
       return;
     }
 
-    const { error } = await supabase
-      .from("submissions")
-      .insert({
-        serial_id: serial.id,
-        photo_url: filePath,
-        country: country || null,
-        source_url: sourceUrl || null,
-        notes: notes || null,
-        submitter_email: submitterEmail.trim() || null,
-        status: "pending",
-      });
+    const { error } = await supabase.rpc("submit_pull", {
+      p_serial_id: serial.id,
+      p_photo_url: filePath,
+      p_country: country || null,
+      p_source_url: sourceUrl || null,
+      p_notes: notes || null,
+      p_submitter_email: submitterEmail.trim() || null,
+    });
 
     if (error) {
       setMessage("Submission could not be sent.");
