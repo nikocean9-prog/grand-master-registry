@@ -17,6 +17,9 @@ export default function SubmitPage() {
   const [country, setCountry] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [photo, setPhoto] = useState(null);
+  const [country, setCountry] = useState("");
+const [sourceUrl, setSourceUrl] = useState("");
+const [message, setMessage] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
