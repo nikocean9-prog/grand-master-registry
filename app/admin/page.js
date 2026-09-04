@@ -17,7 +17,6 @@ export default function AdminPage() {
 
   async function handleLogin(event) {
     event.preventDefault();
-
     setLoading(true);
     setMessage("");
 
@@ -32,6 +31,24 @@ export default function AdminPage() {
       return;
     }
 
+    const { data: assurance, error: assuranceError } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+    if (assuranceError) {
+      await supabase.auth.signOut();
+      setMessage("Could not verify the account security level.");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      assurance?.nextLevel === "aal2" &&
+      assurance.currentLevel !== "aal2"
+    ) {
+      window.location.href = "/admin/mfa";
+      return;
+    }
+
     const admin = await getCurrentAdmin(supabase);
 
     if (!admin) {
@@ -41,17 +58,13 @@ export default function AdminPage() {
       return;
     }
 
-    window.location.href = "/admin/dashboard";
+    window.location.href = "/admin/security";
   }
 
   return (
     <main>
-      <p>
-        <a href="/">← Back to Registry</a>
-      </p>
-
+      <p><a href="/">← Back to Registry</a></p>
       <h1>Admin Login</h1>
-
       <p>Sign in to review Grand Master Registry submissions.</p>
 
       <form onSubmit={handleLogin}>
@@ -61,7 +74,7 @@ export default function AdminPage() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(event) => setEmail(event.target.value)}
             required
           />
         </div>
@@ -74,7 +87,7 @@ export default function AdminPage() {
           <input
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(event) => setPassword(event.target.value)}
             required
           />
         </div>
