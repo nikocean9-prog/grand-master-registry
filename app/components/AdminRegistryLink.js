@@ -29,18 +29,11 @@ export default function AdminRegistryLink() {
   const isAdmin = adminStatus === "admin";
 
   return (
-    <p>
-      <Link
-        href={isAdmin ? "/admin/dashboard" : "/admin"}
-        style={{
-          display: "inline-block",
-          border: "1px solid #333",
-          padding: "8px 14px",
-          textDecoration: "none",
-        }}
-      >
-        {isAdmin ? "← Back to Admin Home" : "Admin Login"}
-      </Link>
-    </p>
+    <Link
+      href={isAdmin ? "/admin/dashboard" : "/admin"}
+      className="nav-link nav-link-secondary"
+    >
+      {isAdmin ? "Admin Home" : "Admin Login"}
+    </Link>
   );
 }
