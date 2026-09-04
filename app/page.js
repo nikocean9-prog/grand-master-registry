@@ -33,71 +33,101 @@ export default async function Home() {
 
   return (
     <main>
-      <AdminRegistryLink />
-
-      <h1>Grand Master Registry</h1>
-
-      <p>
-        Track the Yu-Gi-Oh! Magnificent Monsters Grand Master Rares
-        that have been pulled around the world.
-      </p>
-
-      {countError ? (
-        <p>Database connection needs to be configured.</p>
-      ) : (
-        <>
-          <h2>{confirmed.toLocaleString()} / 3,600 Confirmed</h2>
-          <p>{percentage}% of the worldwide Grand Master print run documented</p>
-        </>
-      )}
-
-      <Link href="/submit">
-        <button>Submit a Pull</button>
-      </Link>
-
-      <hr />
-
-      <h2>Magnificent Monsters</h2>
-
-      {cardsError ? (
-        <p>Could not load cards.</p>
-      ) : (
-        <div className="card-grid">
-          {cards?.map((card) => {
-            const cardConfirmed =
-              card.serials?.filter((serial) => serial.status === "confirmed")
-                .length ?? 0;
-            const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
-
-            return (
-              <Link
-                key={card.id}
-                href={`/card/${card.id}`}
-                className="registry-card"
-              >
-                {card.image_url && (
-                  <img
-                    src={card.image_url}
-                    alt={card.name}
-                    className="registry-card-image"
-                    loading="lazy"
-                  />
-                )}
-
-                <div className="registry-card-content">
-                  <h3>{card.name}</h3>
-                  <p>
-                    {cardConfirmed} / 200 confirmed · {cardPercentage}%
-                  </p>
-                  <div className="card-progress" aria-hidden="true">
-                    <span style={{ width: `${cardPercentage}%` }} />
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+      <nav className="public-nav" aria-label="Main navigation">
+        <Link href="/" className="site-name">
+          Grand Master Registry
+        </Link>
+        <div className="nav-actions">
+          <Link href="/submit" className="nav-link nav-link-primary">
+            Submit a Pull
+          </Link>
+          <AdminRegistryLink />
         </div>
-      )}
+      </nav>
+
+      <section className="registry-hero">
+        <p className="eyebrow">Yu-Gi-Oh! Magnificent Monsters</p>
+        <h1>Track every Grand Master Rare</h1>
+        <p className="hero-copy">
+          A community registry documenting serial-numbered Grand Master Rares
+          pulled around the world.
+        </p>
+
+        {countError ? (
+          <p>Database connection needs to be configured.</p>
+        ) : (
+          <div className="overall-progress-card">
+            <div className="overall-progress-heading">
+              <strong>{confirmed.toLocaleString()} / 3,600 confirmed</strong>
+              <span>{percentage}% documented</span>
+            </div>
+            <div
+              className="overall-progress"
+              role="progressbar"
+              aria-label="Worldwide Grand Master Rare registry progress"
+              aria-valuemin="0"
+              aria-valuemax="3600"
+              aria-valuenow={confirmed}
+            >
+              <span style={{ width: `${percentage}%` }} />
+            </div>
+          </div>
+        )}
+
+        <Link href="/submit" className="hero-submit-button">
+          Submit a Pull
+        </Link>
+      </section>
+
+      <section className="registry-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">The complete set</p>
+            <h2>Magnificent Monsters</h2>
+          </div>
+          <p>Choose a card to view all 200 serial numbers.</p>
+        </div>
+
+        {cardsError ? (
+          <p>Could not load cards.</p>
+        ) : (
+          <div className="card-grid">
+            {cards?.map((card) => {
+              const cardConfirmed =
+                card.serials?.filter((serial) => serial.status === "confirmed")
+                  .length ?? 0;
+              const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1);
+
+              return (
+                <Link
+                  key={card.id}
+                  href={`/card/${card.id}`}
+                  className="registry-card"
+                >
+                  {card.image_url && (
+                    <img
+                      src={card.image_url}
+                      alt={card.name}
+                      className="registry-card-image"
+                      loading="lazy"
+                    />
+                  )}
+
+                  <div className="registry-card-content">
+                    <h3>{card.name}</h3>
+                    <p>
+                      {cardConfirmed} / 200 confirmed · {cardPercentage}%
+                    </p>
+                    <div className="card-progress" aria-hidden="true">
+                      <span style={{ width: `${cardPercentage}%` }} />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
     </main>
   );
 }
