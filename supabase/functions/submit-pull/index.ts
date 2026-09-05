@@ -211,23 +211,22 @@ async function checkPhoto({
       'Return ONLY valid JSON with exactly these fields: {"risk_level":"low|review|high","subject_type":"trading_card|not_card|unclear","summary":"string","reasons":["string"],"serial_read":"string or null","card_match":"boolean or null","serial_match":"boolean or null","possible_edit":"boolean or null","confidence":0}. ' +
       "Confidence must be an integer from 0 to 100.";
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 14_000);
+    const timeout = setTimeout(() => controller.abort(), 10_000);
     let response: Response;
     const cloudflareEndpoint =
-      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
+      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/moondream/moondream3.1-9B-A2B`;
     const cloudflareHeaders = {
       Authorization: `Bearer ${cloudflareToken}`,
       "Content-Type": "application/json",
     };
     const visionBody = JSON.stringify({
-      prompt: screeningPrompt,
+      task: "query",
       image: encodedPhoto,
+      question: screeningPrompt,
+      reasoning: false,
       temperature: 0,
       max_tokens: 240,
-      response_format: {
-        type: "json_schema",
-        json_schema: photoCheckSchema,
-      },
+      stream: false,
     });
     const runVisionCheck = () =>
       fetch(cloudflareEndpoint, {
@@ -239,36 +238,6 @@ async function checkPhoto({
 
     try {
       response = await runVisionCheck();
-
-      if (response.status === 400 || response.status === 403) {
-        const agreement = await fetch(cloudflareEndpoint, {
-          method: "POST",
-          headers: cloudflareHeaders,
-          signal: controller.signal,
-          body: JSON.stringify({ prompt: "agree" }),
-        });
-        let agreementAccepted = agreement.ok;
-
-        if (!agreementAccepted) {
-          try {
-            const agreementBody = await agreement.clone().json();
-            const agreementError = agreementBody?.errors?.[0];
-            agreementAccepted =
-              Number(agreementError?.code) === 5016 ||
-              String(agreementError?.message || "")
-                .toLowerCase()
-                .includes("may now use the model");
-          } catch {
-            // Treat an unreadable non-success response as a failed agreement.
-          }
-        }
-
-        if (agreementAccepted) {
-          response = await runVisionCheck();
-        } else {
-          response = agreement;
-        }
-      }
     } finally {
       clearTimeout(timeout);
     }
@@ -299,7 +268,10 @@ async function checkPhoto({
     }
 
     const completion = await response.json();
-    const content = completion?.result?.response ?? completion?.result;
+    const content =
+      completion?.result?.answer ??
+      completion?.result?.response ??
+      completion?.result;
 
     try {
       return { status: "complete", result: parsePhotoCheck(content) };
