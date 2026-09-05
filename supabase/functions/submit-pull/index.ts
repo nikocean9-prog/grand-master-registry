@@ -275,19 +275,44 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
   const ipHash = await hashIp(ip, serviceRoleKey);
-  const { data: allowed, error: rateError } = await supabase.rpc(
-    "reserve_submission_slot",
-    { p_ip_hash: ipHash }
-  );
+  const authorization = req.headers.get("authorization") || "";
+  const accessToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || null;
+  let ownerBypass = false;
 
-  if (rateError) {
-    return json({ error: "Could not verify the submission limit. Please try again." }, 500);
+  if (accessToken) {
+    const { data: userData } = await supabase.auth.getUser(accessToken);
+
+    if (userData?.user) {
+      const { data: owner } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", userData.user.id)
+        .eq("is_owner", true)
+        .maybeSingle();
+
+      ownerBypass = Boolean(owner);
+    }
   }
-  if (!allowed) {
-    return json(
-      { error: "Too many submissions from this connection. Please try again in one hour." },
-      429
+
+  let slotReserved = false;
+
+  if (!ownerBypass) {
+    const { data: allowed, error: rateError } = await supabase.rpc(
+      "reserve_submission_slot",
+      { p_ip_hash: ipHash }
     );
+
+    if (rateError) {
+      return json({ error: "Could not verify the submission limit. Please try again." }, 500);
+    }
+    if (!allowed) {
+      return json(
+        { error: "Too many submissions from this connection. Please try again in one hour." },
+        429
+      );
+    }
+
+    slotReserved = true;
   }
 
   const rawExtension = photo.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -332,7 +357,9 @@ Deno.serve(async (req: Request) => {
     if (confidentNonCard || confidentWrongCard) {
       await supabase.storage.from("submission-evidence").remove([filePath]);
       uploaded = false;
-      await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
+      if (slotReserved) {
+        await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
+      }
 
       return json(
         {
@@ -406,7 +433,9 @@ Deno.serve(async (req: Request) => {
     if (uploaded) {
       await supabase.storage.from("submission-evidence").remove([filePath]);
     }
-    await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
+    if (slotReserved) {
+      await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
+    }
     console.error("submit-pull failed", error);
     return json(
       { error: "Submission could not be sent. Please check the details and try again." },
