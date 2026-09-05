@@ -641,7 +641,8 @@ button {
 .live-registry-card p { margin:0; color:#667069; font-size:14px; }
 .live-registry-card > strong { color:#1f6b3b; white-space:nowrap; }
 .live-registry-card i { margin-left:6px; font-style:normal; }
-.live-registry-art { width:92px; height:92px; flex:0 0 auto; border-radius:12px; background-color:#071b12; background-image:url("/graphics/yugioh-tile-bg.webp"); background-position:72% center; background-size:cover; box-shadow:0 4px 13px rgba(7,27,18,.2); }
+.live-registry-art { width:92px; height:92px; flex:0 0 auto; border-radius:12px; display:flex; align-items:center; justify-content:center; background-color:#071b12; background-image:url("/graphics/yugioh-tile-bg.webp"); background-position:72% center; background-size:cover; color:#f4d47d!important; font-weight:800; letter-spacing:.08em; box-shadow:0 4px 13px rgba(7,27,18,.2); }
+.tcg-magic-the-gathering .live-registry-art { background-image:linear-gradient(145deg,#172032,#654b22); }
 .live-registry-copy { flex:1; min-width:0; }
 .admin-future-section { margin-top:40px; }
 .admin-future-section > h2 { margin:16px 0; }
