@@ -261,23 +261,6 @@ async function checkTradingCardGate({
 
       console.warn("unrecognised trading card gate response", rawAnswer.slice(0, 160));
       return { status: "complete", decision: "unclear" };
-      }
-
-      const clearlyCard =
-        firstLabel === "CARD" ||
-        /\b(?:IS|SHOWS|CONTAINS|FEATURES|DEPICTS)\s+(?:A\s+)?(?:PHYSICAL\s+)?TRADING\s+CARD\b/.test(
-          answer
-        ) ||
-        /\bTRADING\s+CARD\s+(?:IS\s+)?(?:VISIBLE|SHOWN|PRESENT)\b/.test(
-          answer
-        );
-
-      if (clearlyCard) {
-        return { status: "complete", decision: "card" };
-      }
-
-      console.warn("unrecognised trading card gate response", rawAnswer.slice(0, 160));
-      return { status: "complete", decision: "unclear" };
     } finally {
       clearTimeout(timeout);
     }
