@@ -61,6 +61,8 @@ const SAFE_SUBMISSION_ERRORS = new Set([
   "Could not verify the submission limit. Please try again.",
   "Too many submissions from this connection. Please try again in one hour.",
   "Submission service is not configured.",
+  "This image does not appear to show a trading card. Please upload a clear photo of the card.",
+  "This photo appears to show a different card from the one selected. Please check the card selection and upload the correct photo.",
 ]);
 
 export function safeSubmissionMessage(serverMessage, error) {
