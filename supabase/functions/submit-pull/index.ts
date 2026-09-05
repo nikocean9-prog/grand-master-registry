@@ -154,25 +154,41 @@ async function checkPhoto({
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 20_000);
     let response: Response;
+    const cloudflareEndpoint =
+      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
+    const cloudflareHeaders = {
+      Authorization: `Bearer ${cloudflareToken}`,
+      "Content-Type": "application/json",
+    };
+    const visionBody = JSON.stringify({
+      prompt: screeningPrompt,
+      image: signed.signedUrl,
+      temperature: 0,
+      max_tokens: 700,
+    });
+    const runVisionCheck = () =>
+      fetch(cloudflareEndpoint, {
+        method: "POST",
+        headers: cloudflareHeaders,
+        signal: controller.signal,
+        body: visionBody,
+      });
 
     try {
-      response = await fetch(
-        `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`,
-        {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${cloudflareToken}`,
-        "Content-Type": "application/json",
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        prompt: screeningPrompt,
-        image: signed.signedUrl,
-        temperature: 0,
-        max_tokens: 700,
-      }),
+      response = await runVisionCheck();
+
+      if (response.status === 400) {
+        const agreement = await fetch(cloudflareEndpoint, {
+          method: "POST",
+          headers: cloudflareHeaders,
+          signal: controller.signal,
+          body: JSON.stringify({ prompt: "agree" }),
+        });
+
+        if (agreement.ok) {
+          response = await runVisionCheck();
         }
-      );
+      }
     } finally {
       clearTimeout(timeout);
     }
