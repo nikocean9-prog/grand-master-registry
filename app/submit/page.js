@@ -11,6 +11,8 @@ const supabase = createClient(
 );
 
 export default function SubmitPage() {
+  const [sets, setSets] = useState([]);
+  const [setId, setSetId] = useState("");
   const [cards, setCards] = useState([]);
   const [cardId, setCardId] = useState("");
   const [region, setRegion] = useState("AMERICAS");
@@ -26,10 +28,22 @@ export default function SubmitPage() {
   const [cardsError, setCardsError] = useState(false);
 
   useEffect(() => {
-    async function loadCards() {
+    async function loadCatalog() {
+      const { data: liveSets, error: setsError } = await supabase
+        .from("card_sets")
+        .select("id, name")
+        .eq("status", "live")
+        .order("release_date");
+
+      if (setsError || !liveSets?.length) {
+        setCardsError(true);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("cards")
-        .select("id, name")
+        .select("id, name, set_id")
+        .in("set_id", liveSets.map((cardSet) => cardSet.id))
         .order("id");
 
       if (error) {
@@ -37,9 +51,11 @@ export default function SubmitPage() {
         return;
       }
 
+      setSets(liveSets);
+      setSetId(String(liveSets[0].id));
       setCards(data || []);
     }
-    loadCards();
+    loadCatalog();
   }, []);
 
   useEffect(() => {
@@ -174,9 +190,7 @@ if (serial) {
 
       <h1>Submit a Pull</h1>
 
-      <p>
-        Report a Magnificent Monsters Grand Master Rare that has been pulled.
-      </p>
+      <p>Report a serial-numbered card that has been pulled.</p>
 
       {cardsError && (
         <p role="alert">
@@ -204,6 +218,13 @@ if (serial) {
             autoComplete="off"
           />
         </div>
+        {sets.length > 1 && <><div>
+          <label>Set</label>
+          <br />
+          <select value={setId} onChange={(event) => { setSetId(event.target.value); setCardId(""); }} required>
+            {sets.map((cardSet) => <option key={cardSet.id} value={cardSet.id}>{cardSet.name}</option>)}
+          </select>
+        </div><br /></>}
         <div>
           <label>Card</label>
           <br />
@@ -215,7 +236,7 @@ if (serial) {
           >
             <option value="">Select a card</option>
 
-            {cards.map((card) => (
+            {cards.filter((card) => String(card.set_id) === setId).map((card) => (
               <option key={card.id} value={card.id}>
                 {card.name}
               </option>

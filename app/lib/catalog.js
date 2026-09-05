@@ -1,5 +1,8 @@
 export const tcgs = [
-  { slug: "yugioh", name: "Yu-Gi-Oh!", initials: "YGO", status: "live", description: "Track serial-numbered Yu-Gi-Oh! cards by release and region.", sets: [{ slug: "magnificent-monsters", name: "Magnificent Monsters", status: "live", summary: "18 Grand Master Rares · 3,600 serial numbers", href: "/sets/magnificent-monsters" }] },
+  { slug: "yugioh", name: "Yu-Gi-Oh!", initials: "YGO", status: "live", description: "Track serial-numbered Yu-Gi-Oh! cards by release and region.", sets: [
+    { slug: "magnificent-monsters", name: "Magnificent Monsters", status: "live", summary: "18 Grand Master Rares · 3,600 serial numbers", href: "/sets/magnificent-monsters" },
+    { slug: "magnificent-maestros", name: "Magnificent Maestros", status: "draft", summary: "18 Grand Master Rares · 3,600 serial numbers · Releases 12 November 2026", href: "/sets/magnificent-maestros" },
+  ] },
   { slug: "pokemon", name: "Pokémon", initials: "PKM", status: "planned", description: "A future home for numbered Pokémon releases and Japanese promos.", sets: [{ name: "Japanese serialised releases", status: "planned" }] },
   { slug: "magic-the-gathering", name: "Magic: The Gathering", initials: "MTG", status: "planned", description: "Track serialized cards across major Magic releases.", sets: [{ name: "The Lord of the Rings: Tales of Middle-earth", status: "planned" }, { name: "Magic: The Gathering—FINAL FANTASY", status: "planned" }] },
   { slug: "one-piece", name: "One Piece Card Game", initials: "OP", status: "planned", description: "A planned registry for numbered One Piece cards.", sets: [] },
