@@ -552,6 +552,8 @@ button {
 .live-registry-card p { margin:0; color:#667069; font-size:14px; }
 .live-registry-card > strong { color:#1f6b3b; white-space:nowrap; }
 .live-registry-card i { margin-left:6px; font-style:normal; }
+.live-registry-art { width:92px; height:92px; flex:0 0 auto; border-radius:12px; background-color:#071b12; background-image:url("/graphics/yugioh-tile-bg.webp"); background-position:72% center; background-size:cover; box-shadow:0 4px 13px rgba(7,27,18,.2); }
+.live-registry-copy { flex:1; min-width:0; }
 .admin-future-section { margin-top:40px; }
 .admin-future-section > h2 { margin:16px 0; }
 .home-hero { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(220px,.65fr); gap:44px; align-items:center; overflow:hidden; border-radius:20px; background:radial-gradient(circle at 88% 10%,rgba(83,189,125,.3),transparent 34%),linear-gradient(135deg,#111827,#1f2937); color:white; padding:64px 54px; box-shadow:0 12px 35px rgba(17,24,39,.2); }
@@ -663,8 +665,10 @@ button {
   .compact-stats div { align-items:center; flex-direction:column; gap:2px; }
   .compact-stats strong { font-size:22px; }
   .compact-stats span { font-size:12px; }
-  .live-registry-card { align-items:flex-start; flex-direction:column; gap:18px; padding:22px; }
-  .live-registry-card > strong { width:100%; border-top:1px solid #e1e5e2; padding-top:15px; }
+  .live-registry-card { display:grid; grid-template-columns:72px minmax(0,1fr); align-items:center; gap:16px; padding:20px; }
+  .live-registry-art { width:72px; height:72px; }
+  .live-registry-card h3 { font-size:21px; }
+  .live-registry-card > strong { grid-column:1 / -1; width:100%; border-top:1px solid #e1e5e2; padding-top:15px; }
   .home-hero { padding:42px 24px; }
   .home-stats { grid-template-columns:1fr; }
   .section-heading { align-items:flex-start; flex-direction:column; }
