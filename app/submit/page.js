@@ -339,10 +339,17 @@ if (serial) {
             placeholder="your@email.com"
             required={serialStatus === "confirmed"}
           />
-          {serialStatus === "confirmed" && (
-            <p>
-              Your email is required so the registry administrator can contact
-              you about this challenge. It will not be displayed publicly.
+          {serialStatus === "confirmed" ? (
+            <p className="email-guidance important">
+              Email is required for this challenge so the registry administrator
+              can contact you for additional evidence. It will never be displayed publicly.
+            </p>
+          ) : (
+            <p className="email-guidance">
+              <strong>Email is recommended.</strong> Without it, we cannot contact
+              you if the photo needs clarification, and your submission may be
+              rejected if the evidence is insufficient. Your email will never be
+              displayed publicly.
             </p>
           )}
         </div>
