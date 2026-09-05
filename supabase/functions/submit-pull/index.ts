@@ -155,6 +155,87 @@ function parsePhotoCheck(content: unknown) {
   };
 }
 
+async function checkTradingCardGate({
+  supabase,
+  filePath,
+}: {
+  supabase: ReturnType<typeof createClient>;
+  filePath: string;
+}) {
+  try {
+    const cloudflareAccountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+    const cloudflareToken = Deno.env.get("CLOUDFLARE_AI_TOKEN");
+
+    if (!cloudflareAccountId || !cloudflareToken) {
+      return { status: "unavailable", decision: "unclear" };
+    }
+
+    const { data: evidencePhoto, error: downloadError } = await supabase.storage
+      .from("submission-evidence")
+      .download(filePath);
+
+    if (downloadError || !evidencePhoto) {
+      throw downloadError || new Error("Could not load evidence photo");
+    }
+
+    const encodedPhoto = await blobToDataUrl(evidencePhoto);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 7_000);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/moondream/moondream3.1-9B-A2B`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${cloudflareToken}`,
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            task: "query",
+            image: encodedPhoto,
+            question:
+              "Is the main subject of this image a physical trading card? Reply with exactly one label only: CARD, NOT_CARD, or UNCLEAR. Use NOT_CARD only when clearly no physical trading card is visible.",
+            reasoning: false,
+            temperature: 0,
+            max_tokens: 8,
+            stream: false,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        return { status: "unavailable", decision: "unclear" };
+      }
+
+      const completion = await response.json();
+      const answer = String(
+        completion?.result?.answer ??
+          completion?.result?.response ??
+          completion?.result ??
+          ""
+      )
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z_]/g, "");
+
+      if (answer === "NOT_CARD" || answer === "NOTCARD") {
+        return { status: "complete", decision: "not_card" };
+      }
+      if (answer === "CARD") {
+        return { status: "complete", decision: "card" };
+      }
+      return { status: "complete", decision: "unclear" };
+    } finally {
+      clearTimeout(timeout);
+    }
+  } catch (error) {
+    console.error("trading card gate failed", error);
+    return { status: "unavailable", decision: "unclear" };
+  }
+}
+
 async function checkPhoto({
   supabase,
   filePath,
@@ -211,22 +292,23 @@ async function checkPhoto({
       'Return ONLY valid JSON with exactly these fields: {"risk_level":"low|review|high","subject_type":"trading_card|not_card|unclear","summary":"string","reasons":["string"],"serial_read":"string or null","card_match":"boolean or null","serial_match":"boolean or null","possible_edit":"boolean or null","confidence":0}. ' +
       "Confidence must be an integer from 0 to 100.";
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10_000);
+    const timeout = setTimeout(() => controller.abort(), 14_000);
     let response: Response;
     const cloudflareEndpoint =
-      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/moondream/moondream3.1-9B-A2B`;
+      `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
     const cloudflareHeaders = {
       Authorization: `Bearer ${cloudflareToken}`,
       "Content-Type": "application/json",
     };
     const visionBody = JSON.stringify({
-      task: "query",
+      prompt: screeningPrompt,
       image: encodedPhoto,
-      question: screeningPrompt,
-      reasoning: false,
       temperature: 0,
       max_tokens: 240,
-      stream: false,
+      response_format: {
+        type: "json_schema",
+        json_schema: photoCheckSchema,
+      },
     });
     const runVisionCheck = () =>
       fetch(cloudflareEndpoint, {
@@ -238,6 +320,32 @@ async function checkPhoto({
 
     try {
       response = await runVisionCheck();
+
+      if (response.status === 400 || response.status === 403) {
+        const agreement = await fetch(cloudflareEndpoint, {
+          method: "POST",
+          headers: cloudflareHeaders,
+          signal: controller.signal,
+          body: JSON.stringify({ prompt: "agree" }),
+        });
+        let agreementAccepted = agreement.ok;
+
+        if (!agreementAccepted) {
+          try {
+            const agreementBody = await agreement.clone().json();
+            const agreementError = agreementBody?.errors?.[0];
+            agreementAccepted =
+              Number(agreementError?.code) === 5016 ||
+              String(agreementError?.message || "")
+                .toLowerCase()
+                .includes("may now use the model");
+          } catch {
+            // Treat an unreadable non-success response as a failed agreement.
+          }
+        }
+
+        response = agreementAccepted ? await runVisionCheck() : agreement;
+      }
     } finally {
       clearTimeout(timeout);
     }
@@ -268,10 +376,7 @@ async function checkPhoto({
     }
 
     const completion = await response.json();
-    const content =
-      completion?.result?.answer ??
-      completion?.result?.response ??
-      completion?.result;
+    const content = completion?.result?.response ?? completion?.result;
 
     try {
       return { status: "complete", result: parsePhotoCheck(content) };
@@ -358,6 +463,88 @@ async function finishPhotoReview({
   exactDuplicateOf: number | null;
 }) {
   try {
+    const rejectAndClean = async () => {
+      await supabase.storage.from("submission-evidence").remove([filePath]);
+      await supabase
+        .from("submissions")
+        .update({ photo_url: null })
+        .eq("id", submissionId);
+
+      const { count } = await supabase
+        .from("submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("serial_id", serialId)
+        .eq("status", "pending");
+
+      if ((count || 0) === 0) {
+        await supabase
+          .from("serials")
+          .update({ status: "unreported" })
+          .eq("id", serialId)
+          .eq("status", "reported");
+      }
+    };
+
+    const gate = await checkTradingCardGate({ supabase, filePath });
+
+    if (gate.decision === "not_card") {
+      const { error: rejectionError } = await supabase
+        .from("submissions")
+        .update({
+          status: "rejected",
+          reviewed_at: new Date().toISOString(),
+          reviewed_by_email: "Automated photo check",
+          photo_sha256: photoSha256,
+          exact_duplicate_of: exactDuplicateOf,
+          ai_check_status: "complete",
+          ai_risk_level: "high",
+          ai_reasons: ["The image does not show a physical trading card."],
+          ai_summary: "The initial photo check identified a non-card image.",
+          ai_confidence: 100,
+          ai_checked_at: new Date().toISOString(),
+        })
+        .eq("id", submissionId)
+        .eq("status", "pending");
+
+      if (rejectionError) throw rejectionError;
+      await rejectAndClean();
+      return;
+    }
+
+    if (gate.decision !== "card") {
+      await supabase
+        .from("submissions")
+        .update({
+          photo_sha256: photoSha256,
+          exact_duplicate_of: exactDuplicateOf,
+          ai_check_status: gate.status === "unavailable" ? "unavailable" : "manual",
+          ai_risk_level: "review",
+          ai_reasons: [
+            "The initial check could not confidently determine whether a trading card is visible.",
+          ],
+          ai_summary: "The photo requires manual review.",
+          ai_confidence: null,
+          ai_checked_at: new Date().toISOString(),
+        })
+        .eq("id", submissionId)
+        .eq("status", "pending");
+      return;
+    }
+
+    await supabase
+      .from("submissions")
+      .update({
+        photo_sha256: photoSha256,
+        exact_duplicate_of: exactDuplicateOf,
+        ai_check_status: "screened",
+        ai_risk_level: "review",
+        ai_reasons: ["A physical trading card is visible. Detailed checks are continuing."],
+        ai_summary: "Initial photo check passed.",
+        ai_checked_at: new Date().toISOString(),
+      })
+      .eq("id", submissionId)
+      .eq("status", "pending");
+
     const photoCheck = await checkPhoto({ supabase, filePath, serialId });
     const checkResult = photoCheck.result;
     const confidentNonCard =
@@ -415,27 +602,7 @@ async function finishPhotoReview({
 
     if (updateError) throw updateError;
 
-    if (automaticallyRejected) {
-      await supabase.storage.from("submission-evidence").remove([filePath]);
-      await supabase
-        .from("submissions")
-        .update({ photo_url: null })
-        .eq("id", submissionId);
-
-      const { count } = await supabase
-        .from("submissions")
-        .select("id", { count: "exact", head: true })
-        .eq("serial_id", serialId)
-        .eq("status", "pending");
-
-      if ((count || 0) === 0) {
-        await supabase
-          .from("serials")
-          .update({ status: "unreported" })
-          .eq("id", serialId)
-          .eq("status", "reported");
-      }
-    }
+    if (automaticallyRejected) await rejectAndClean();
   } catch (error) {
     console.error("background photo review failed", error);
     await supabase
@@ -450,7 +617,7 @@ async function finishPhotoReview({
         ai_checked_at: new Date().toISOString(),
       })
       .eq("id", submissionId)
-      .eq("ai_check_status", "pending");
+      .eq("status", "pending");
   }
 }
 
@@ -514,7 +681,8 @@ Deno.serve(async (req: Request) => {
 
       if (
         submission.ai_check_status === "error" ||
-        submission.ai_check_status === "unavailable"
+        submission.ai_check_status === "unavailable" ||
+        submission.ai_check_status === "manual"
       ) {
         return json({ review_status: "manual" });
       }
