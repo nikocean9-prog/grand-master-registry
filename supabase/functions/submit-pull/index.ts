@@ -7,6 +7,36 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const photoCheckSchema = {
+  type: "object",
+  additionalProperties: false,
+  properties: {
+    risk_level: { type: "string", enum: ["low", "review", "high"] },
+    subject_type: {
+      type: "string",
+      enum: ["trading_card", "not_card", "unclear"],
+    },
+    summary: { type: "string" },
+    reasons: { type: "array", items: { type: "string" }, maxItems: 6 },
+    serial_read: { type: ["string", "null"] },
+    card_match: { type: ["boolean", "null"] },
+    serial_match: { type: ["boolean", "null"] },
+    possible_edit: { type: ["boolean", "null"] },
+    confidence: { type: "integer", minimum: 0, maximum: 100 },
+  },
+  required: [
+    "risk_level",
+    "subject_type",
+    "summary",
+    "reasons",
+    "serial_read",
+    "card_match",
+    "serial_match",
+    "possible_edit",
+    "confidence",
+  ],
+};
+
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -186,39 +216,7 @@ async function checkPhoto({
       max_tokens: 700,
       response_format: {
         type: "json_schema",
-        json_schema: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            risk_level: { type: "string", enum: ["low", "review", "high"] },
-            subject_type: {
-              type: "string",
-              enum: ["trading_card", "not_card", "unclear"],
-            },
-            summary: { type: "string" },
-            reasons: {
-              type: "array",
-              items: { type: "string" },
-              maxItems: 6,
-            },
-            serial_read: { type: ["string", "null"] },
-            card_match: { type: ["boolean", "null"] },
-            serial_match: { type: ["boolean", "null"] },
-            possible_edit: { type: ["boolean", "null"] },
-            confidence: { type: "integer", minimum: 0, maximum: 100 },
-          },
-          required: [
-            "risk_level",
-            "subject_type",
-            "summary",
-            "reasons",
-            "serial_read",
-            "card_match",
-            "serial_match",
-            "possible_edit",
-            "confidence",
-          ],
-        },
+        json_schema: photoCheckSchema,
       },
     });
     const runVisionCheck = () =>
@@ -292,7 +290,51 @@ async function checkPhoto({
 
     const completion = await response.json();
     const content = completion?.result?.response ?? completion?.result;
-    return { status: "complete", result: parsePhotoCheck(content) };
+
+    try {
+      return { status: "complete", result: parsePhotoCheck(content) };
+    } catch (parseError) {
+      if (typeof content !== "string" || !content.trim()) throw parseError;
+
+      const formatterController = new AbortController();
+      const formatterTimeout = setTimeout(
+        () => formatterController.abort(),
+        15_000
+      );
+
+      try {
+        const formatterResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.1-8b-instruct-fast`,
+          {
+            method: "POST",
+            headers: cloudflareHeaders,
+            signal: formatterController.signal,
+            body: JSON.stringify({
+              prompt:
+                "Convert the following vision assessment into the required JSON schema. Preserve its conclusions and do not invent visible details. If the assessment is insufficient or ambiguous, use subject_type unclear, risk_level review, null comparison fields, and confidence no higher than 50.\n\nVISION ASSESSMENT:\n" +
+                content.slice(0, 4000),
+              temperature: 0,
+              max_tokens: 500,
+              response_format: {
+                type: "json_schema",
+                json_schema: photoCheckSchema,
+              },
+            }),
+          }
+        );
+
+        if (!formatterResponse.ok) {
+          throw new Error(`Cloudflare formatter returned ${formatterResponse.status}`);
+        }
+
+        const formatterCompletion = await formatterResponse.json();
+        const formatted =
+          formatterCompletion?.result?.response ?? formatterCompletion?.result;
+        return { status: "complete", result: parsePhotoCheck(formatted) };
+      } finally {
+        clearTimeout(formatterTimeout);
+      }
+    }
   } catch (error) {
     console.error("photo screening failed", error);
     const safeError = String(
