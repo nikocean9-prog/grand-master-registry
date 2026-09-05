@@ -184,6 +184,42 @@ async function checkPhoto({
       image: encodedPhoto,
       temperature: 0,
       max_tokens: 700,
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            risk_level: { type: "string", enum: ["low", "review", "high"] },
+            subject_type: {
+              type: "string",
+              enum: ["trading_card", "not_card", "unclear"],
+            },
+            summary: { type: "string" },
+            reasons: {
+              type: "array",
+              items: { type: "string" },
+              maxItems: 6,
+            },
+            serial_read: { type: ["string", "null"] },
+            card_match: { type: ["boolean", "null"] },
+            serial_match: { type: ["boolean", "null"] },
+            possible_edit: { type: ["boolean", "null"] },
+            confidence: { type: "integer", minimum: 0, maximum: 100 },
+          },
+          required: [
+            "risk_level",
+            "subject_type",
+            "summary",
+            "reasons",
+            "serial_read",
+            "card_match",
+            "serial_match",
+            "possible_edit",
+            "confidence",
+          ],
+        },
+      },
     });
     const runVisionCheck = () =>
       fetch(cloudflareEndpoint, {
