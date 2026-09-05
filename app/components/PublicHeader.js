@@ -8,7 +8,6 @@ export default function PublicHeader() {
         <span className="brand-copy"><strong>TCG Serial Tracker</strong><small>Tracking every serial</small></span>
       </Link>
       <div className="nav-actions">
-        <Link href="/#tcgs" className="nav-link nav-link-plain">Browse TCGs</Link>
         <Link href="/submit" className="nav-link nav-link-primary">Submit a Pull</Link>
       </div>
     </nav>
