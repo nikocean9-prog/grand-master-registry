@@ -73,6 +73,7 @@ export default function AdminApprovals() {
         .from("submissions")
         .select("*")
         .eq("status", "pending")
+        .neq("ai_check_status", "pending")
         .order("created_at", { ascending: true });
 
     if (submissionError) {
