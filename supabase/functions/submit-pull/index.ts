@@ -177,7 +177,7 @@ async function checkPhoto({
     try {
       response = await runVisionCheck();
 
-      if (response.status === 400) {
+      if (response.status === 400 || response.status === 403) {
         const agreement = await fetch(cloudflareEndpoint, {
           method: "POST",
           headers: cloudflareHeaders,
@@ -187,6 +187,8 @@ async function checkPhoto({
 
         if (agreement.ok) {
           response = await runVisionCheck();
+        } else {
+          response = agreement;
         }
       }
     } finally {
@@ -194,9 +196,26 @@ async function checkPhoto({
     }
 
     if (!response.ok) {
+      let providerDetail = "request_rejected";
+
+      try {
+        const errorBody = await response.json();
+        const providerError = errorBody?.errors?.[0];
+        const code = String(providerError?.code || "unknown").replace(
+          /[^a-zA-Z0-9_-]/g,
+          ""
+        );
+        const message = String(providerError?.message || "request rejected")
+          .replace(/[^a-zA-Z0-9 .,()_:-]/g, "")
+          .slice(0, 180);
+        providerDetail = `${code}: ${message}`;
+      } catch {
+        // Keep the generic diagnostic if Cloudflare did not return JSON.
+      }
+
       return {
         status: "error",
-        diagnostic: `cloudflare_http_${response.status}`,
+        diagnostic: `cloudflare_http_${response.status} (${providerDetail})`,
         result: null,
       };
     }
