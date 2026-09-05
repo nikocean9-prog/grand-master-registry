@@ -18,6 +18,12 @@ function riskDisplay(submission) {
   if (submission.ai_check_status === "pending") {
     return { label: "Checking photo…", tone: "pending" };
   }
+  if (submission.ai_check_status === "screened") {
+    return { label: "Detailed check running…", tone: "pending" };
+  }
+  if (submission.ai_check_status === "manual") {
+    return { label: "Review required", tone: "review" };
+  }
   if (submission.ai_check_status === "not_analyzed") {
     return { label: "Not analysed", tone: "unavailable" };
   }
