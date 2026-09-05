@@ -156,11 +156,9 @@ function parsePhotoCheck(content: unknown) {
 }
 
 async function checkTradingCardGate({
-  supabase,
-  filePath,
+  photo,
 }: {
-  supabase: ReturnType<typeof createClient>;
-  filePath: string;
+  photo: Blob;
 }) {
   try {
     const cloudflareAccountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
@@ -170,15 +168,7 @@ async function checkTradingCardGate({
       return { status: "unavailable", decision: "unclear" };
     }
 
-    const { data: evidencePhoto, error: downloadError } = await supabase.storage
-      .from("submission-evidence")
-      .download(filePath);
-
-    if (downloadError || !evidencePhoto) {
-      throw downloadError || new Error("Could not load evidence photo");
-    }
-
-    const encodedPhoto = await blobToDataUrl(evidencePhoto);
+    const encodedPhoto = await blobToDataUrl(photo);
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 7_000);
 
@@ -485,66 +475,6 @@ async function finishPhotoReview({
       }
     };
 
-    const gate = await checkTradingCardGate({ supabase, filePath });
-
-    if (gate.decision === "not_card") {
-      const { error: rejectionError } = await supabase
-        .from("submissions")
-        .update({
-          status: "rejected",
-          reviewed_at: new Date().toISOString(),
-          reviewed_by_email: "Automated photo check",
-          photo_sha256: photoSha256,
-          exact_duplicate_of: exactDuplicateOf,
-          ai_check_status: "complete",
-          ai_risk_level: "high",
-          ai_reasons: ["The image does not show a physical trading card."],
-          ai_summary: "The initial photo check identified a non-card image.",
-          ai_confidence: 100,
-          ai_checked_at: new Date().toISOString(),
-        })
-        .eq("id", submissionId)
-        .eq("status", "pending");
-
-      if (rejectionError) throw rejectionError;
-      await rejectAndClean();
-      return;
-    }
-
-    if (gate.decision !== "card") {
-      await supabase
-        .from("submissions")
-        .update({
-          photo_sha256: photoSha256,
-          exact_duplicate_of: exactDuplicateOf,
-          ai_check_status: gate.status === "unavailable" ? "unavailable" : "manual",
-          ai_risk_level: "review",
-          ai_reasons: [
-            "The initial check could not confidently determine whether a trading card is visible.",
-          ],
-          ai_summary: "The photo requires manual review.",
-          ai_confidence: null,
-          ai_checked_at: new Date().toISOString(),
-        })
-        .eq("id", submissionId)
-        .eq("status", "pending");
-      return;
-    }
-
-    await supabase
-      .from("submissions")
-      .update({
-        photo_sha256: photoSha256,
-        exact_duplicate_of: exactDuplicateOf,
-        ai_check_status: "screened",
-        ai_risk_level: "review",
-        ai_reasons: ["A physical trading card is visible. Detailed checks are continuing."],
-        ai_summary: "Initial photo check passed.",
-        ai_checked_at: new Date().toISOString(),
-      })
-      .eq("id", submissionId)
-      .eq("status", "pending");
-
     const photoCheck = await checkPhoto({ supabase, filePath, serialId });
     const checkResult = photoCheck.result;
     const confidentNonCard =
@@ -778,7 +708,25 @@ Deno.serve(async (req: Request) => {
   let uploaded = false;
 
   try {
-    const photoSha256 = await hashPhoto(photo);
+    const [photoSha256, gate, uploadResult] = await Promise.all([
+      hashPhoto(photo),
+      checkTradingCardGate({ photo }),
+      supabase.storage.from("submission-evidence").upload(filePath, photo, {
+        contentType: photo.type,
+        cacheControl: "3600",
+        upsert: false,
+      }),
+    ]);
+
+    if (uploadResult.error) throw uploadResult.error;
+    uploaded = true;
+
+    if (gate.decision === "not_card") {
+      await supabase.storage.from("submission-evidence").remove([filePath]);
+      uploaded = false;
+      return json({ success: true, review_status: "rejected" });
+    }
+
     const { data: duplicate } = await supabase
       .from("submissions")
       .select("id")
@@ -786,16 +734,6 @@ Deno.serve(async (req: Request) => {
       .order("created_at", { ascending: true })
       .limit(1)
       .maybeSingle();
-
-    const { error: uploadError } = await supabase.storage
-      .from("submission-evidence")
-      .upload(filePath, photo, {
-        contentType: photo.type,
-        cacheControl: "3600",
-        upsert: false,
-      });
-    if (uploadError) throw uploadError;
-    uploaded = true;
 
     const { data: submissionId, error: submitError } = await supabase.rpc(
       "submit_pull",
@@ -821,28 +759,44 @@ Deno.serve(async (req: Request) => {
         public_status_token_hash: receiptHash,
         photo_sha256: photoSha256,
         exact_duplicate_of: exactDuplicateOf,
-        ai_check_status: "pending",
-        ai_risk_level: null,
-        ai_reasons: [],
-        ai_summary: "Submission received and is being reviewed.",
+        ai_check_status:
+          gate.decision === "card"
+            ? "screened"
+            : gate.status === "unavailable"
+              ? "unavailable"
+              : "manual",
+        ai_risk_level: "review",
+        ai_reasons:
+          gate.decision === "card"
+            ? ["A physical trading card is visible. Detailed checks are continuing."]
+            : [
+                "The initial check could not confidently determine whether a trading card is visible.",
+              ],
+        ai_summary:
+          gate.decision === "card"
+            ? "Initial photo check passed."
+            : "The photo requires manual review.",
+        ai_checked_at: new Date().toISOString(),
       })
       .eq("id", submissionId);
     if (analysisSetupError) throw analysisSetupError;
 
-    EdgeRuntime.waitUntil(
-      finishPhotoReview({
-        supabase,
-        filePath,
-        serialId,
-        submissionId: Number(submissionId),
-        photoSha256,
-        exactDuplicateOf,
-      })
-    );
+    if (gate.decision === "card") {
+      EdgeRuntime.waitUntil(
+        finishPhotoReview({
+          supabase,
+          filePath,
+          serialId,
+          submissionId: Number(submissionId),
+          photoSha256,
+          exactDuplicateOf,
+        })
+      );
+    }
 
     return json({
       success: true,
-      review_status: "reviewing",
+      review_status: gate.decision === "card" ? "accepted" : "manual",
       submission_id: submissionId,
       receipt,
     });
