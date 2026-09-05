@@ -307,12 +307,12 @@ if (serial) {
             required
           />
           <p className="photo-processing-notice">
-            Submitted photos are checked automatically using OpenAI to help
+            Submitted photos are checked automatically to help
             identify unreadable details, mismatches, possible editing, and
             duplicate evidence. Images that clearly do not show the selected
             database card may be rejected before submission. Unclear results
             are sent to an administrator for review. Contact details are not
-            sent to OpenAI.
+            included in the automated check.
           </p>
         </div>
 
