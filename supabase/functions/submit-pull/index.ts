@@ -80,6 +80,16 @@ function expectedSerial(serialNumber: number, region: string) {
   return region === "E" ? `${number}E` : number;
 }
 
+async function hashReceipt(receipt: string) {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(receipt)
+  );
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 function blobToDataUrl(blob: Blob) {
   return blob.arrayBuffer().then((buffer) => {
     const bytes = new Uint8Array(buffer);
@@ -201,7 +211,7 @@ async function checkPhoto({
       'Return ONLY valid JSON with exactly these fields: {"risk_level":"low|review|high","subject_type":"trading_card|not_card|unclear","summary":"string","reasons":["string"],"serial_read":"string or null","card_match":"boolean or null","serial_match":"boolean or null","possible_edit":"boolean or null","confidence":0}. ' +
       "Confidence must be an integer from 0 to 100.";
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 20_000);
+    const timeout = setTimeout(() => controller.abort(), 14_000);
     let response: Response;
     const cloudflareEndpoint =
       `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
@@ -213,7 +223,7 @@ async function checkPhoto({
       prompt: screeningPrompt,
       image: encodedPhoto,
       temperature: 0,
-      max_tokens: 700,
+      max_tokens: 240,
       response_format: {
         type: "json_schema",
         json_schema: photoCheckSchema,
@@ -299,7 +309,7 @@ async function checkPhoto({
       const formatterController = new AbortController();
       const formatterTimeout = setTimeout(
         () => formatterController.abort(),
-        15_000
+        8_000
       );
 
       try {
@@ -321,7 +331,7 @@ async function checkPhoto({
                 "Preserve visible facts, do not invent details, and return JSON only.\n\nVISION ASSESSMENT:\n" +
                 content.slice(0, 4000),
               temperature: 0,
-              max_tokens: 500,
+              max_tokens: 260,
               response_format: {
                 type: "json_schema",
                 json_schema: photoCheckSchema,
@@ -360,6 +370,118 @@ async function checkPhoto({
   }
 }
 
+async function finishPhotoReview({
+  supabase,
+  filePath,
+  serialId,
+  submissionId,
+  photoSha256,
+  exactDuplicateOf,
+}: {
+  supabase: ReturnType<typeof createClient>;
+  filePath: string;
+  serialId: number;
+  submissionId: number;
+  photoSha256: string;
+  exactDuplicateOf: number | null;
+}) {
+  try {
+    const photoCheck = await checkPhoto({ supabase, filePath, serialId });
+    const checkResult = photoCheck.result;
+    const confidentNonCard =
+      checkResult?.subject_type === "not_card" &&
+      checkResult?.confidence >= 95;
+    const confidentWrongCard =
+      checkResult?.subject_type === "trading_card" &&
+      checkResult?.card_match === false &&
+      checkResult?.confidence >= 95;
+    const automaticallyRejected = confidentNonCard || confidentWrongCard;
+    const checkUnavailable = photoCheck.status !== "complete" || !checkResult;
+    const duplicateReason = exactDuplicateOf
+      ? [`Exact duplicate of submission #${exactDuplicateOf}.`]
+      : [];
+
+    const { error: updateError } = await supabase
+      .from("submissions")
+      .update({
+        status: automaticallyRejected ? "rejected" : "pending",
+        reviewed_at: automaticallyRejected ? new Date().toISOString() : null,
+        reviewed_by_email: automaticallyRejected
+          ? "Automated photo check"
+          : null,
+        photo_sha256: photoSha256,
+        exact_duplicate_of: exactDuplicateOf,
+        ai_check_status: checkUnavailable ? photoCheck.status : "complete",
+        ai_risk_level: exactDuplicateOf
+          ? "high"
+          : checkUnavailable
+            ? "unavailable"
+            : checkResult.risk_level,
+        ai_reasons: checkUnavailable
+          ? [
+              ...duplicateReason,
+              "Automated photo check could not be completed. Review manually.",
+              ...(photoCheck.diagnostic
+                ? [`Photo service result: ${photoCheck.diagnostic}.`]
+                : []),
+            ]
+          : [...duplicateReason, ...(checkResult.reasons || [])],
+        ai_summary: exactDuplicateOf
+          ? `This exact image has been submitted before. ${
+              checkResult?.summary || ""
+            }`.trim()
+          : checkResult?.summary || "Automated photo check was unavailable.",
+        ai_serial_read: checkResult?.serial_read || null,
+        ai_card_match: checkResult?.card_match ?? null,
+        ai_serial_match: checkResult?.serial_match ?? null,
+        ai_possible_edit: checkResult?.possible_edit ?? null,
+        ai_confidence: checkResult?.confidence ?? null,
+        ai_checked_at: new Date().toISOString(),
+      })
+      .eq("id", submissionId)
+      .eq("status", "pending");
+
+    if (updateError) throw updateError;
+
+    if (automaticallyRejected) {
+      await supabase.storage.from("submission-evidence").remove([filePath]);
+      await supabase
+        .from("submissions")
+        .update({ photo_url: null })
+        .eq("id", submissionId);
+
+      const { count } = await supabase
+        .from("submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("serial_id", serialId)
+        .eq("status", "pending");
+
+      if ((count || 0) === 0) {
+        await supabase
+          .from("serials")
+          .update({ status: "unreported" })
+          .eq("id", serialId)
+          .eq("status", "reported");
+      }
+    }
+  } catch (error) {
+    console.error("background photo review failed", error);
+    await supabase
+      .from("submissions")
+      .update({
+        ai_check_status: "error",
+        ai_risk_level: "unavailable",
+        ai_summary: "Automated photo check was unavailable.",
+        ai_reasons: [
+          "Automated photo check could not be completed. Review manually.",
+        ],
+        ai_checked_at: new Date().toISOString(),
+      })
+      .eq("id", submissionId)
+      .eq("ai_check_status", "pending");
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -374,6 +496,61 @@ Deno.serve(async (req: Request) => {
 
   if (!supabaseUrl || !serviceRoleKey) {
     return json({ error: "Submission service is not configured." }, 500);
+  }
+
+  const supabase = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  if ((req.headers.get("content-type") || "").includes("application/json")) {
+    try {
+      const body = await req.json();
+      const submissionId = Number(body?.submission_id);
+      const receipt = typeof body?.receipt === "string" ? body.receipt : "";
+
+      if (
+        body?.action !== "review-status" ||
+        !Number.isInteger(submissionId) ||
+        submissionId < 1 ||
+        receipt.length < 20
+      ) {
+        return json({ error: "Invalid review status request." }, 400);
+      }
+
+      const receiptHash = await hashReceipt(receipt);
+      const { data: submission } = await supabase
+        .from("submissions")
+        .select("status, ai_check_status, reviewed_by_email")
+        .eq("id", submissionId)
+        .eq("public_status_token_hash", receiptHash)
+        .maybeSingle();
+
+      if (!submission) {
+        return json({ error: "Review status was not found." }, 404);
+      }
+
+      if (
+        submission.status === "rejected" &&
+        submission.reviewed_by_email === "Automated photo check"
+      ) {
+        return json({ review_status: "rejected" });
+      }
+
+      if (submission.ai_check_status === "pending") {
+        return json({ review_status: "reviewing" });
+      }
+
+      if (
+        submission.ai_check_status === "error" ||
+        submission.ai_check_status === "unavailable"
+      ) {
+        return json({ review_status: "manual" });
+      }
+
+      return json({ review_status: "accepted" });
+    } catch {
+      return json({ error: "Invalid review status request." }, 400);
+    }
   }
 
   const forwardedFor = req.headers.get("x-forwarded-for");
@@ -414,9 +591,6 @@ Deno.serve(async (req: Request) => {
     return json({ error: "Photo must be an image no larger than 10 MB." }, 400);
   }
 
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
   const ipHash = await hashIp(ip, serviceRoleKey);
   const authorization = req.headers.get("authorization") || "";
   const accessToken = authorization.match(/^Bearer\s+(.+)$/i)?.[1] || null;
@@ -483,37 +657,6 @@ Deno.serve(async (req: Request) => {
     if (uploadError) throw uploadError;
     uploaded = true;
 
-    const photoCheck = await checkPhoto({
-      supabase,
-      filePath,
-      serialId,
-    });
-    const checkResult = photoCheck.result;
-    const confidentNonCard =
-      checkResult?.subject_type === "not_card" &&
-      checkResult?.confidence >= 95;
-    const confidentWrongCard =
-      checkResult?.subject_type === "trading_card" &&
-      checkResult?.card_match === false &&
-      checkResult?.confidence >= 95;
-
-    if (confidentNonCard || confidentWrongCard) {
-      await supabase.storage.from("submission-evidence").remove([filePath]);
-      uploaded = false;
-      if (slotReserved) {
-        await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
-      }
-
-      return json(
-        {
-          error: confidentNonCard
-            ? "This image does not appear to show a trading card. Please upload a clear photo of the card."
-            : "This photo appears to show a different card from the one selected. Please check the card selection and upload the correct photo.",
-        },
-        422
-      );
-    }
-
     const { data: submissionId, error: submitError } = await supabase.rpc(
       "submit_pull",
       {
@@ -530,48 +673,39 @@ Deno.serve(async (req: Request) => {
     }
 
     const exactDuplicateOf = duplicate?.id || null;
-    const duplicateReason = exactDuplicateOf
-      ? [`Exact duplicate of submission #${exactDuplicateOf}.`]
-      : [];
-    const checkUnavailable = photoCheck.status !== "complete" || !checkResult;
+    const receipt = `${crypto.randomUUID()}${crypto.randomUUID()}`;
+    const receiptHash = await hashReceipt(receipt);
     const { error: analysisSetupError } = await supabase
       .from("submissions")
       .update({
+        public_status_token_hash: receiptHash,
         photo_sha256: photoSha256,
         exact_duplicate_of: exactDuplicateOf,
-        ai_check_status: checkUnavailable ? photoCheck.status : "complete",
-        ai_risk_level: exactDuplicateOf
-          ? "high"
-          : checkUnavailable
-            ? "unavailable"
-            : checkResult.risk_level,
-        ai_reasons: checkUnavailable
-          ? [
-              ...duplicateReason,
-              "Automated photo check could not be completed. Review manually.",
-              ...(photoCheck.diagnostic
-                ? [`Photo service result: ${photoCheck.diagnostic}.`]
-                : []),
-            ]
-          : [...duplicateReason, ...(checkResult.reasons || [])],
-        ai_summary: exactDuplicateOf
-          ? `This exact image has been submitted before. ${
-              checkResult?.summary || ""
-            }`.trim()
-          : checkResult?.summary || "Automated photo check was unavailable.",
-        ai_serial_read: checkResult?.serial_read || null,
-        ai_card_match: checkResult?.card_match ?? null,
-        ai_serial_match: checkResult?.serial_match ?? null,
-        ai_possible_edit: checkResult?.possible_edit ?? null,
-        ai_confidence: checkResult?.confidence ?? null,
-        ai_checked_at: new Date().toISOString(),
+        ai_check_status: "pending",
+        ai_risk_level: null,
+        ai_reasons: [],
+        ai_summary: "Submission received and is being reviewed.",
       })
       .eq("id", submissionId);
-    if (analysisSetupError) {
-      console.error("submission analysis update failed", analysisSetupError);
-    }
+    if (analysisSetupError) throw analysisSetupError;
 
-    return json({ success: true });
+    EdgeRuntime.waitUntil(
+      finishPhotoReview({
+        supabase,
+        filePath,
+        serialId,
+        submissionId: Number(submissionId),
+        photoSha256,
+        exactDuplicateOf,
+      })
+    );
+
+    return json({
+      success: true,
+      review_status: "reviewing",
+      submission_id: submissionId,
+      receipt,
+    });
   } catch (error) {
     if (uploaded) {
       await supabase.storage.from("submission-evidence").remove([filePath]);
