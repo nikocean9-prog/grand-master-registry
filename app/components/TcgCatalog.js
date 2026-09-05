@@ -25,7 +25,8 @@ export default function TcgCatalog({ tcgs }) {
       <div className="live-registry-list">
         {liveTcgs.flatMap((tcg) => tcg.sets.filter((set) => set.status === "live").map((set) => (
           <Link href={set.href} className="live-registry-card" key={`${tcg.slug}-${set.slug}`}>
-            <div><span>{tcg.name}</span><h3>{set.name}</h3><p>{set.summary}</p></div>
+            <span className="live-registry-art" aria-hidden="true" />
+            <div className="live-registry-copy"><span>{tcg.name}</span><h3>{set.name}</h3><p>{set.summary}</p></div>
             <strong>Open registry <i aria-hidden="true">→</i></strong>
           </Link>
         )))}
