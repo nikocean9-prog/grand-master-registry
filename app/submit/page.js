@@ -12,7 +12,7 @@ const supabase = createClient(
 
 async function preparePhotoForUpload(file) {
   const bitmap = await createImageBitmap(file);
-  const maxDimension = 2048;
+  const maxDimension = 1024;
   const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
   const width = Math.max(1, Math.round(bitmap.width * scale));
   const height = Math.max(1, Math.round(bitmap.height * scale));
@@ -34,7 +34,7 @@ async function preparePhotoForUpload(file) {
       (result) =>
         result ? resolve(result) : reject(new Error("The photo could not be prepared.")),
       "image/jpeg",
-      0.82
+      0.76
     );
   });
   const baseName = file.name.replace(/\.[^.]+$/, "") || "card-photo";
@@ -43,6 +43,10 @@ async function preparePhotoForUpload(file) {
     type: "image/jpeg",
     lastModified: Date.now(),
   });
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
 export default function SubmitPage() {
@@ -190,7 +194,7 @@ if (serial) {
       submissionForm.append("submitter_email", submitterEmail.trim());
       submissionForm.append("website", honeypotValue);
 
-      const { error } = await supabase.functions.invoke("submit-pull", {
+      const { data, error } = await supabase.functions.invoke("submit-pull", {
         body: submissionForm,
       });
 
@@ -210,7 +214,50 @@ if (serial) {
         return;
       }
 
-      setMessage("Pull submitted for verification.");
+      setMessage("Submission received and is being reviewed…");
+
+      let reviewStatus = data?.review_status || "reviewing";
+
+      if (data?.submission_id && data?.receipt) {
+        const reviewStartedAt = Date.now();
+
+        while (reviewStatus === "reviewing" && Date.now() - reviewStartedAt < 8_000) {
+          await wait(650);
+          const { data: statusData, error: statusError } =
+            await supabase.functions.invoke("submit-pull", {
+              body: {
+                action: "review-status",
+                submission_id: data.submission_id,
+                receipt: data.receipt,
+              },
+            });
+
+          if (statusError) break;
+          reviewStatus = statusData?.review_status || "reviewing";
+        }
+      }
+
+      if (reviewStatus === "rejected") {
+        setMessage(
+          "Photo not accepted. Please check that it clearly shows the selected trading card and try again."
+        );
+        return;
+      }
+
+      if (reviewStatus === "manual") {
+        setMessage(
+          "Submission received. The automated check was uncertain, so it will be reviewed manually."
+        );
+      } else if (reviewStatus === "accepted") {
+        setMessage(
+          "Accepted for verification. Your submission is now awaiting admin approval."
+        );
+      } else {
+        setMessage(
+          "Submission received and is still being reviewed. It will not appear publicly unless approved."
+        );
+      }
+
       setCardId("");
       setRegion(sets.find((cardSet) => String(cardSet.id) === setId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
       setSerialNumber("1");
