@@ -14,6 +14,38 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+function riskDisplay(submission) {
+  if (submission.ai_check_status === "pending") {
+    return { label: "Checking photo…", tone: "pending" };
+  }
+  if (submission.ai_check_status === "not_analyzed") {
+    return { label: "Not analysed", tone: "unavailable" };
+  }
+  if (
+    submission.ai_check_status === "unavailable" ||
+    submission.ai_check_status === "error" ||
+    submission.ai_risk_level === "unavailable"
+  ) {
+    return { label: "Check unavailable", tone: "unavailable" };
+  }
+  if (submission.ai_risk_level === "high") {
+    return { label: "High risk", tone: "high" };
+  }
+  if (submission.ai_risk_level === "review") {
+    return { label: "Review required", tone: "review" };
+  }
+  if (submission.ai_risk_level === "low") {
+    return { label: "Low risk", tone: "low" };
+  }
+  return { label: "Not analysed", tone: "unavailable" };
+}
+
+function checkValue(value, trueLabel, falseLabel) {
+  if (value === true) return trueLabel;
+  if (value === false) return falseLabel;
+  return "Unable to determine";
+}
+
 export default function AdminApprovals() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -187,14 +219,22 @@ export default function AdminApprovals() {
 
       <hr />
 
-      <h2>Pending Submissions</h2>
+      <div className="admin-section-heading">
+        <h2>Pending Submissions</h2>
+        <button type="button" onClick={loadApprovals}>
+          Refresh checks
+        </button>
+      </div>
 
       {message && <p>{message}</p>}
 
       {submissions.length === 0 ? (
         <p>No pending submissions.</p>
       ) : (
-        submissions.map((submission) => (
+        submissions.map((submission) => {
+          const risk = riskDisplay(submission);
+
+          return (
           <div
             key={submission.id}
             style={{
@@ -235,6 +275,75 @@ export default function AdminApprovals() {
                 </p>
               </div>
             )}
+
+            <section className={`photo-check photo-check-${risk.tone}`}>
+              <div className="photo-check-heading">
+                <h3>Automated Photo Check</h3>
+                <span className="photo-check-badge">{risk.label}</span>
+              </div>
+
+              {submission.ai_summary && <p>{submission.ai_summary}</p>}
+
+              {Array.isArray(submission.ai_reasons) &&
+                submission.ai_reasons.length > 0 && (
+                  <ul>
+                    {submission.ai_reasons.map((reason, index) => (
+                      <li key={`${submission.id}-reason-${index}`}>{reason}</li>
+                    ))}
+                  </ul>
+                )}
+
+              {submission.ai_check_status === "complete" && (
+                <dl className="photo-check-details">
+                  <div>
+                    <dt>Serial read</dt>
+                    <dd>{submission.ai_serial_read || "Unable to determine"}</dd>
+                  </div>
+                  <div>
+                    <dt>Card match</dt>
+                    <dd>
+                      {checkValue(submission.ai_card_match, "Matches", "Mismatch")}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Serial match</dt>
+                    <dd>
+                      {checkValue(submission.ai_serial_match, "Matches", "Mismatch")}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Possible editing</dt>
+                    <dd>
+                      {checkValue(
+                        submission.ai_possible_edit,
+                        "Flagged",
+                        "Not detected"
+                      )}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>AI confidence</dt>
+                    <dd>
+                      {Number.isInteger(submission.ai_confidence)
+                        ? `${submission.ai_confidence}%`
+                        : "Not available"}
+                    </dd>
+                  </div>
+                </dl>
+              )}
+
+              {submission.exact_duplicate_of && (
+                <p>
+                  <strong>Exact duplicate:</strong> Matches submission #
+                  {submission.exact_duplicate_of}.
+                </p>
+              )}
+
+              <p className="photo-check-disclaimer">
+                Automated checks can be wrong. Review the original evidence
+                before approving or rejecting.
+              </p>
+            </section>
 
             <p>
               <strong>Country:</strong>{" "}
@@ -348,7 +457,8 @@ export default function AdminApprovals() {
               </button>
             </div>
           </div>
-        ))
+          );
+        })
       )}
     </main>
   );
