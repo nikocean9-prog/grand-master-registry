@@ -64,18 +64,22 @@ function blobToDataUrl(blob: Blob) {
 }
 
 function parsePhotoCheck(content: unknown) {
-  if (typeof content !== "string" || !content.trim()) {
+  let parsed: Record<string, any>;
+
+  if (content && typeof content === "object" && !Array.isArray(content)) {
+    parsed = content as Record<string, any>;
+  } else if (typeof content === "string" && content.trim()) {
+    const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+    const firstBrace = content.indexOf("{");
+    const lastBrace = content.lastIndexOf("}");
+    const candidate = fenced ||
+      (firstBrace >= 0 && lastBrace > firstBrace
+        ? content.slice(firstBrace, lastBrace + 1)
+        : content);
+    parsed = JSON.parse(candidate.trim());
+  } else {
     throw new Error("Cloudflare returned no analysis");
   }
-
-  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
-  const firstBrace = content.indexOf("{");
-  const lastBrace = content.lastIndexOf("}");
-  const candidate = fenced ||
-    (firstBrace >= 0 && lastBrace > firstBrace
-      ? content.slice(firstBrace, lastBrace + 1)
-      : content);
-  const parsed = JSON.parse(candidate.trim());
   const riskLevels = ["low", "review", "high"];
   const subjectTypes = ["trading_card", "not_card", "unclear"];
 
@@ -251,16 +255,21 @@ async function checkPhoto({
     }
 
     const completion = await response.json();
-    const content = completion?.result?.response;
+    const content = completion?.result?.response ?? completion?.result;
     return { status: "complete", result: parsePhotoCheck(content) };
   } catch (error) {
     console.error("photo screening failed", error);
+    const safeError = String(
+      error instanceof Error ? error.message : "unknown error"
+    )
+      .replace(/[^a-zA-Z0-9 .,()_:-]/g, "")
+      .slice(0, 180);
     return {
       status: "error",
       diagnostic:
         error instanceof DOMException && error.name === "AbortError"
           ? "cloudflare_timeout"
-          : "cloudflare_error",
+          : `cloudflare_error (${safeError})`,
       result: null,
     };
   }
