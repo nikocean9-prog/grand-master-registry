@@ -10,6 +10,41 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+async function preparePhotoForUpload(file) {
+  const bitmap = await createImageBitmap(file);
+  const maxDimension = 2048;
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    bitmap.close();
+    throw new Error("This browser could not prepare the photo.");
+  }
+
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (result) =>
+        result ? resolve(result) : reject(new Error("The photo could not be prepared.")),
+      "image/jpeg",
+      0.82
+    );
+  });
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "card-photo";
+
+  return new File([blob], `${baseName}.jpg`, {
+    type: "image/jpeg",
+    lastModified: Date.now(),
+  });
+}
+
 export default function SubmitPage() {
   const [sets, setSets] = useState([]);
   const [setId, setSetId] = useState("");
@@ -126,6 +161,13 @@ if (serial) {
     setSubmitting(true);
 
     try {
+      const preparedPhoto = await preparePhotoForUpload(photo);
+
+      if (preparedPhoto.size > 6 * 1024 * 1024) {
+        setMessage("This photo is still too large after processing. Please choose a smaller image.");
+        return;
+      }
+
       const { data: serial, error: serialError } = await supabase
         .from("serials")
         .select("id")
@@ -141,7 +183,7 @@ if (serial) {
 
       const submissionForm = new FormData();
       submissionForm.append("serial_id", String(serial.id));
-      submissionForm.append("photo", photo);
+      submissionForm.append("photo", preparedPhoto);
       submissionForm.append("country", country);
       submissionForm.append("source_url", sourceUrl);
       submissionForm.append("notes", notes);
