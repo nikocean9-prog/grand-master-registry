@@ -5,6 +5,8 @@ import { tcgs } from "./lib/catalog";
 
 export default function Home() {
   const liveSets = tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live");
+  const liveTcgCount = tcgs.filter((tcg) => tcg.sets.some((set) => set.status === "live")).length;
+  const serialCount = liveSets.reduce((total, set) => total + (set.serials || 0), 0);
 
   return (
     <main>
@@ -17,7 +19,7 @@ export default function Home() {
           organised by trading card game and set.
         </p>
       </section>
-      <section className="compact-stats" aria-label="Registry overview"><div><strong>1</strong><span>Live TCG</span></div><div><strong>{liveSets.length}</strong><span>Live set</span></div><div><strong>3,600</strong><span>Serials</span></div></section>
+      <section className="compact-stats" aria-label="Registry overview"><div><strong>{liveTcgCount}</strong><span>Live TCGs</span></div><div><strong>{liveSets.length}</strong><span>Live sets</span></div><div><strong>{serialCount.toLocaleString()}</strong><span>Serials</span></div></section>
       <section className="registry-section" id="tcgs">
         <div className="section-heading">
           <div><p className="eyebrow">Available now</p><h2>Live registries</h2></div>

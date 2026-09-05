@@ -14,7 +14,7 @@ export default async function CardPage({ params }) {
 
   const { data: card, error: cardError } = await supabase
     .from("cards")
-    .select("id, name, image_url")
+    .select("id, name, image_url, serial_total, card_sets(name, slug, serial_scheme)")
     .eq("id", id)
     .single();
 
@@ -27,7 +27,7 @@ export default async function CardPage({ params }) {
   if (cardError && cardError.code !== "PGRST116") {
     return (
       <main>
-        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
+        <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Card unavailable</h1>
         <p>This card could not be loaded. Check your connection and try again.</p>
       </main>
@@ -37,7 +37,7 @@ export default async function CardPage({ params }) {
   if (!card) {
     return (
       <main>
-        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
+        <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Card not found</h1>
       </main>
     );
@@ -46,7 +46,7 @@ export default async function CardPage({ params }) {
   if (serialsError) {
     return (
       <main>
-        <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
+        <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
         <h1>{card.name}</h1>
         <p>Could not load serial numbers.</p>
       </main>
@@ -55,18 +55,22 @@ export default async function CardPage({ params }) {
 
   const standard = serials.filter((serial) => serial.region === "AMERICAS");
   const eRegion = serials.filter((serial) => serial.region === "E");
+  const worldwide = serials.filter((serial) => serial.region === "GLOBAL");
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
   ).length;
   const eConfirmed = eRegion.filter(
     (serial) => serial.status === "confirmed"
   ).length;
-  const totalConfirmed = standardConfirmed + eConfirmed;
-  const percentage = ((totalConfirmed / 200) * 100).toFixed(1);
+  const worldwideConfirmed = worldwide.filter((serial) => serial.status === "confirmed").length;
+  const totalConfirmed = standardConfirmed + eConfirmed + worldwideConfirmed;
+  const total = card.serial_total || serials.length;
+  const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
+  const isGlobal = card.card_sets?.serial_scheme === "global";
 
   return (
     <main>
-      <Link href="/sets/magnificent-monsters" className="back-link">← Back to Registry</Link>
+      <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">
         {card.image_url && (
@@ -74,9 +78,9 @@ export default async function CardPage({ params }) {
         )}
 
         <div className="card-detail-copy">
-          <p className="eyebrow">Magnificent Monsters</p>
+          <p className="eyebrow">{card.card_sets?.name || "Serial Registry"}</p>
           <h1>{card.name}</h1>
-          <h2>{totalConfirmed} / 200 confirmed</h2>
+          <h2>{totalConfirmed} / {total.toLocaleString()} confirmed</h2>
           <p>{percentage}% of this card documented</p>
           <div className="overall-progress" aria-hidden="true">
             <span style={{ width: `${percentage}%` }} />
@@ -90,12 +94,18 @@ export default async function CardPage({ params }) {
         <span><i className="legend-dot unreported" /> Not reported</span>
       </div>
 
-      <section className="serial-section">
+      {isGlobal ? <section className="serial-section">
+        <div className="serial-section-heading">
+          <h2>Worldwide</h2>
+          <strong>{worldwideConfirmed} / {total.toLocaleString()} confirmed</strong>
+        </div>
+        <SerialGrid serials={worldwide} total={total} />
+      </section> : <><section className="serial-section">
         <div className="serial-section-heading">
           <h2>Americas</h2>
           <strong>{standardConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={standard} />
+        <SerialGrid serials={standard} total={100} />
       </section>
 
       <section className="serial-section">
@@ -103,8 +113,8 @@ export default async function CardPage({ params }) {
           <h2>Europe-distributed</h2>
           <strong>{eConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={eRegion} />
-      </section>
+        <SerialGrid serials={eRegion} total={100} />
+      </section></>}
     </main>
   );
 }

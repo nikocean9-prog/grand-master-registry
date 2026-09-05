@@ -31,7 +31,7 @@ export default function SubmitPage() {
     async function loadCatalog() {
       const { data: liveSets, error: setsError } = await supabase
         .from("card_sets")
-        .select("id, name")
+        .select("id, name, serial_scheme")
         .eq("status", "live")
         .order("release_date");
 
@@ -42,7 +42,7 @@ export default function SubmitPage() {
 
       const { data, error } = await supabase
         .from("cards")
-        .select("id, name, set_id")
+        .select("id, name, set_id, serial_total")
         .in("set_id", liveSets.map((cardSet) => cardSet.id))
         .order("id");
 
@@ -54,6 +54,7 @@ export default function SubmitPage() {
       setSets(liveSets);
       setSetId(String(liveSets[0].id));
       setCards(data || []);
+      setRegion(liveSets[0].serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
     }
     loadCatalog();
   }, []);
@@ -71,7 +72,7 @@ export default function SubmitPage() {
       if (
         !Number.isInteger(serialValue) ||
         serialValue < 1 ||
-        serialValue > 100
+        serialValue > (cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100)
       ) {
         return;
       }
@@ -97,7 +98,7 @@ if (serial) {
     }
 
     checkSerialStatus();
-  }, [cardId, region, serialNumber]);
+  }, [cardId, region, serialNumber, cards]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -169,7 +170,7 @@ if (serial) {
 
       setMessage("Pull submitted for verification.");
       setCardId("");
-      setRegion("AMERICAS");
+      setRegion(sets.find((cardSet) => String(cardSet.id) === setId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
       setSerialNumber("1");
       setCountry("");
       setSourceUrl("");
@@ -186,7 +187,7 @@ if (serial) {
 
   return (
     <main>
-      <Link href="/sets/magnificent-monsters">← Back to Registry</Link>
+      <Link href="/">← Back to Home</Link>
 
       <h1>Submit a Pull</h1>
 
@@ -221,7 +222,7 @@ if (serial) {
         {sets.length > 1 && <><div>
           <label>Set</label>
           <br />
-          <select value={setId} onChange={(event) => { setSetId(event.target.value); setCardId(""); }} required>
+          <select value={setId} onChange={(event) => { const nextSetId = event.target.value; setSetId(nextSetId); setCardId(""); setSerialNumber("1"); setRegion(sets.find((cardSet) => String(cardSet.id) === nextSetId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS"); }} required>
             {sets.map((cardSet) => <option key={cardSet.id} value={cardSet.id}>{cardSet.name}</option>)}
           </select>
         </div><br /></>}
@@ -230,7 +231,7 @@ if (serial) {
           <br />
           <select
             value={cardId}
-            onChange={(e) => setCardId(e.target.value)}
+            onChange={(e) => { setCardId(e.target.value); setSerialNumber("1"); }}
             required
             disabled={cardsError}
           >
@@ -246,7 +247,7 @@ if (serial) {
 
         <br />
 
-        <div>
+        {sets.find((cardSet) => String(cardSet.id) === setId)?.serial_scheme !== "global" && <div>
           <label>Region</label>
           <br />
           <select
@@ -256,7 +257,7 @@ if (serial) {
             <option value="AMERICAS">Americas — 001 to 100</option>
             <option value="E">E-Region — 001E to 100E</option>
           </select>
-        </div>
+        </div>}
 
         <br />
 
@@ -267,9 +268,9 @@ if (serial) {
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
           >
-            {Array.from({ length: 100 }, (_, i) => i + 1).map((number) => (
+            {Array.from({ length: cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100 }, (_, i) => i + 1).map((number) => (
               <option key={number} value={number}>
-                {String(number).padStart(3, "0")}
+                {String(number).padStart((cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100) < 100 ? 2 : 3, "0")}
                 {region === "E" ? "E" : ""}
               </option>
             ))}

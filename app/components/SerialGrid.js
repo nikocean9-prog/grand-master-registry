@@ -10,7 +10,7 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-export default function SerialGrid({ serials }) {
+export default function SerialGrid({ serials, total = 100 }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -32,7 +32,7 @@ export default function SerialGrid({ serials }) {
   }, []);
 
   const formatNumber = (number, region) => {
-    const formatted = String(number).padStart(3, "0");
+    const formatted = String(number).padStart(total < 100 ? 2 : 3, "0");
     return region === "E" ? `${formatted}E` : formatted;
   };
 

@@ -39,7 +39,7 @@ export default async function SerialPage({ params }) {
 
   const { data: card } = await supabase
     .from("cards")
-    .select("id, name, image_url")
+    .select("id, name, image_url, serial_total")
     .eq("id", serial.card_id)
     .single();
 
@@ -53,10 +53,11 @@ export default async function SerialPage({ params }) {
     .maybeSingle();
 
   const evidenceUrl = await getEvidenceUrl(supabase, submission?.photo_url);
-  const serialNumber = String(serial.serial_number).padStart(3, "0");
+  const serialNumber = String(serial.serial_number).padStart((card?.serial_total || 100) < 100 ? 2 : 3, "0");
   const serialLabel = serial.region === "E" ? `${serialNumber}E` : serialNumber;
-  const regionLabel =
-    serial.region === "E" ? "Europe-distributed" : "Americas";
+  const regionLabel = serial.region === "GLOBAL"
+    ? "Worldwide"
+    : serial.region === "E" ? "Europe-distributed" : "Americas";
 
   return (
     <main>
