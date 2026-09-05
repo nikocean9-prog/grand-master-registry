@@ -284,6 +284,12 @@ if (serial) {
             onChange={(e) => setPhoto(e.target.files?.[0] || null)}
             required
           />
+          <p className="photo-processing-notice">
+            Submitted photos are checked automatically using OpenAI to help
+            identify unreadable details, mismatches, possible editing, and
+            duplicate evidence. The result is visible only to administrators,
+            who make the final decision. Contact details are not sent to OpenAI.
+          </p>
         </div>
 
         <br />
