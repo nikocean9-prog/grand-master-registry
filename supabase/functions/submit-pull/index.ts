@@ -50,6 +50,54 @@ function expectedSerial(serialNumber: number, region: string) {
   return region === "E" ? `${number}E` : number;
 }
 
+function parsePhotoCheck(content: unknown) {
+  if (typeof content !== "string" || !content.trim()) {
+    throw new Error("Cloudflare returned no analysis");
+  }
+
+  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i)?.[1];
+  const firstBrace = content.indexOf("{");
+  const lastBrace = content.lastIndexOf("}");
+  const candidate = fenced ||
+    (firstBrace >= 0 && lastBrace > firstBrace
+      ? content.slice(firstBrace, lastBrace + 1)
+      : content);
+  const parsed = JSON.parse(candidate.trim());
+  const riskLevels = ["low", "review", "high"];
+  const subjectTypes = ["trading_card", "not_card", "unclear"];
+
+  if (
+    !riskLevels.includes(parsed?.risk_level) ||
+    !subjectTypes.includes(parsed?.subject_type) ||
+    typeof parsed?.summary !== "string" ||
+    !Array.isArray(parsed?.reasons) ||
+    !Number.isFinite(Number(parsed?.confidence))
+  ) {
+    throw new Error("Cloudflare returned an invalid analysis");
+  }
+
+  const nullableBoolean = (value: unknown) =>
+    typeof value === "boolean" ? value : null;
+
+  return {
+    risk_level: parsed.risk_level,
+    subject_type: parsed.subject_type,
+    summary: parsed.summary.slice(0, 1000),
+    reasons: parsed.reasons
+      .filter((reason: unknown) => typeof reason === "string")
+      .slice(0, 6)
+      .map((reason: string) => reason.slice(0, 500)),
+    serial_read:
+      typeof parsed.serial_read === "string"
+        ? parsed.serial_read.slice(0, 100)
+        : null,
+    card_match: nullableBoolean(parsed.card_match),
+    serial_match: nullableBoolean(parsed.serial_match),
+    possible_edit: nullableBoolean(parsed.possible_edit),
+    confidence: Math.max(0, Math.min(100, Math.round(Number(parsed.confidence)))),
+  };
+}
+
 async function checkPhoto({
   supabase,
   filePath,
@@ -60,10 +108,11 @@ async function checkPhoto({
   serialId: number;
 }) {
   try {
-    const openAiKey = Deno.env.get("OPENAI_API_KEY");
+    const cloudflareAccountId = Deno.env.get("CLOUDFLARE_ACCOUNT_ID");
+    const cloudflareToken = Deno.env.get("CLOUDFLARE_AI_TOKEN");
 
-    if (!openAiKey) {
-      return { status: "unavailable", result: null };
+    if (!cloudflareAccountId || !cloudflareToken) {
+      return { status: "cloudflare_not_configured", result: null };
     }
 
     const { data: serial, error: serialError } = await supabase
@@ -84,15 +133,24 @@ async function checkPhoto({
 
     const card = Array.isArray(serial.cards) ? serial.cards[0] : serial.cards;
     const expected = expectedSerial(serial.serial_number, serial.region);
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20_000);
+    let response: Response;
+
+    try {
+      response = await fetch(
+        `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/v1/chat/completions`,
+        {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${openAiKey}`,
+        Authorization: `Bearer ${cloudflareToken}`,
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "@cf/meta/llama-3.2-11b-vision-instruct",
         temperature: 0,
+        max_tokens: 700,
         messages: [
           {
             role: "system",
@@ -104,7 +162,7 @@ async function checkPhoto({
             content: [
               {
                 type: "text",
-                text: `The user selected this database card: ${card?.name || "Unknown"}\nExpected card number: ${card?.card_number || "Not recorded"}\nExpected serial: ${expected}\nExpected region: ${serial.region}\nAssess the upload. High confidence means the visible evidence is exceptionally clear. Use high risk for a clear mismatch or strong visible manipulation concern, review when details are unclear, and low otherwise.`,
+                text: `The user selected this database card: ${card?.name || "Unknown"}\nExpected card number: ${card?.card_number || "Not recorded"}\nExpected serial: ${expected}\nExpected region: ${serial.region}\nAssess the upload. High confidence means the visible evidence is exceptionally clear. Use high risk for a clear mismatch or strong visible manipulation concern, review when details are unclear, and low otherwise. Return ONLY valid JSON with exactly these fields: {"risk_level":"low|review|high","subject_type":"trading_card|not_card|unclear","summary":"string","reasons":["string"],"serial_read":"string or null","card_match":"boolean or null","serial_match":"boolean or null","possible_edit":"boolean or null","confidence":0}. Confidence must be an integer from 0 to 100.`,
               },
               {
                 type: "image_url",
@@ -113,57 +171,28 @@ async function checkPhoto({
             ],
           },
         ],
-        response_format: {
-          type: "json_schema",
-          json_schema: {
-            name: "photo_risk_check",
-            strict: true,
-            schema: {
-              type: "object",
-              additionalProperties: false,
-              properties: {
-                risk_level: { type: "string", enum: ["low", "review", "high"] },
-                subject_type: {
-                  type: "string",
-                  enum: ["trading_card", "not_card", "unclear"],
-                },
-                summary: { type: "string" },
-                reasons: { type: "array", items: { type: "string" }, maxItems: 6 },
-                serial_read: { type: ["string", "null"] },
-                card_match: { type: ["boolean", "null"] },
-                serial_match: { type: ["boolean", "null"] },
-                possible_edit: { type: ["boolean", "null"] },
-                confidence: { type: "integer", minimum: 0, maximum: 100 },
-              },
-              required: [
-                "risk_level",
-                "subject_type",
-                "summary",
-                "reasons",
-                "serial_read",
-                "card_match",
-                "serial_match",
-                "possible_edit",
-                "confidence",
-              ],
-            },
-          },
-        },
       }),
-    });
+        }
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
-      throw new Error(`OpenAI returned ${response.status}`);
+      return { status: `cloudflare_http_${response.status}`, result: null };
     }
 
     const completion = await response.json();
     const content = completion?.choices?.[0]?.message?.content;
-    if (!content) throw new Error("OpenAI returned no analysis");
-
-    return { status: "complete", result: JSON.parse(content) };
+    return { status: "complete", result: parsePhotoCheck(content) };
   } catch (error) {
     console.error("photo screening failed", error);
-    return { status: "error", result: null };
+    return {
+      status: error instanceof DOMException && error.name === "AbortError"
+        ? "cloudflare_timeout"
+        : "cloudflare_error",
+      result: null,
+    };
   }
 }
 
