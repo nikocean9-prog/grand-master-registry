@@ -66,6 +66,24 @@ button {
   cursor: pointer;
 }
 
+.email-guidance {
+  max-width: 500px;
+  margin: 8px 0 0;
+  border-left: 4px solid #d5a526;
+  border-radius: 4px;
+  background: #fff7da;
+  color: #5d4a17;
+  padding: 11px 13px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.email-guidance.important {
+  border-left-color: #b64a3a;
+  background: #fff0ed;
+  color: #6d2920;
+}
+
 .card-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
