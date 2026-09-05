@@ -184,8 +184,23 @@ async function checkPhoto({
           signal: controller.signal,
           body: JSON.stringify({ prompt: "agree" }),
         });
+        let agreementAccepted = agreement.ok;
 
-        if (agreement.ok) {
+        if (!agreementAccepted) {
+          try {
+            const agreementBody = await agreement.clone().json();
+            const agreementError = agreementBody?.errors?.[0];
+            agreementAccepted =
+              Number(agreementError?.code) === 5016 ||
+              String(agreementError?.message || "")
+                .toLowerCase()
+                .includes("may now use the model");
+          } catch {
+            // Treat an unreadable non-success response as a failed agreement.
+          }
+        }
+
+        if (agreementAccepted) {
           response = await runVisionCheck();
         } else {
           response = agreement;
