@@ -9,21 +9,18 @@ export default function Home() {
   return (
     <main>
       <PublicHeader />
-      <section className="home-hero">
-        <div>
+      <section className="compact-home-intro">
         <p className="eyebrow">The global serialised card registry</p>
-        <h1>Tracking every serial. Preserving every pull.</h1>
-        <p className="hero-copy">
+        <h1>Find and track serialised cards</h1>
+        <p>
           Explore community-built registries for serial-numbered trading cards,
           organised by trading card game and set.
         </p>
-        <div className="hero-actions"><Link href="#tcgs" className="hero-button hero-button-primary">Browse TCGs</Link><Link href="/submit" className="hero-button hero-button-secondary">Submit a Pull</Link></div>
-        </div>
-        <div className="home-stats" aria-label="Registry overview"><div><strong>1</strong><span>Live TCG</span></div><div><strong>{liveSets.length}</strong><span>Live set</span></div><div><strong>3,600</strong><span>Serials tracked</span></div></div>
       </section>
+      <section className="compact-stats" aria-label="Registry overview"><div><strong>1</strong><span>Live TCG</span></div><div><strong>{liveSets.length}</strong><span>Live set</span></div><div><strong>3,600</strong><span>Serials</span></div></section>
       <section className="registry-section" id="tcgs">
         <div className="section-heading">
-          <div><p className="eyebrow">Explore the registry</p><h2>Choose a TCG</h2></div><p>Select a game, then choose the set you want to explore.</p>
+          <div><p className="eyebrow">Available now</p><h2>Live registries</h2></div>
         </div>
         <TcgCatalog tcgs={tcgs} />
       </section>
