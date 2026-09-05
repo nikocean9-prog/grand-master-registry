@@ -163,6 +163,7 @@ if (serial) {
     }
 
     setSubmitting(true);
+    setMessage("Submission received and is being reviewed…");
 
     try {
       const preparedPhoto = await preparePhotoForUpload(photo);
