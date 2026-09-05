@@ -242,6 +242,7 @@ if (serial) {
         setMessage(
           "Photo not accepted. Please check that it clearly shows the selected trading card and try again."
         );
+        setSubmitting(false);
         return;
       }
 
@@ -259,6 +260,7 @@ if (serial) {
         );
       }
 
+      setSubmitting(false);
       setCardId("");
       setRegion(sets.find((cardSet) => String(cardSet.id) === setId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
       setSerialNumber("1");
