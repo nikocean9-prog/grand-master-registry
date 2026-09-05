@@ -112,7 +112,11 @@ async function checkPhoto({
     const cloudflareToken = Deno.env.get("CLOUDFLARE_AI_TOKEN");
 
     if (!cloudflareAccountId || !cloudflareToken) {
-      return { status: "cloudflare_not_configured", result: null };
+      return {
+        status: "unavailable",
+        diagnostic: "cloudflare_not_configured",
+        result: null,
+      };
     }
 
     const { data: serial, error: serialError } = await supabase
@@ -179,7 +183,11 @@ async function checkPhoto({
     }
 
     if (!response.ok) {
-      return { status: `cloudflare_http_${response.status}`, result: null };
+      return {
+        status: "error",
+        diagnostic: `cloudflare_http_${response.status}`,
+        result: null,
+      };
     }
 
     const completion = await response.json();
@@ -188,9 +196,11 @@ async function checkPhoto({
   } catch (error) {
     console.error("photo screening failed", error);
     return {
-      status: error instanceof DOMException && error.name === "AbortError"
-        ? "cloudflare_timeout"
-        : "cloudflare_error",
+      status: "error",
+      diagnostic:
+        error instanceof DOMException && error.name === "AbortError"
+          ? "cloudflare_timeout"
+          : "cloudflare_error",
       result: null,
     };
   }
@@ -358,6 +368,9 @@ Deno.serve(async (req: Request) => {
           ? [
               ...duplicateReason,
               "Automated photo check could not be completed. Review manually.",
+              ...(photoCheck.diagnostic
+                ? [`Photo service result: ${photoCheck.diagnostic}.`]
+                : []),
             ]
           : [...duplicateReason, ...(checkResult.reasons || [])],
         ai_summary: exactDuplicateOf
@@ -373,7 +386,9 @@ Deno.serve(async (req: Request) => {
         ai_checked_at: new Date().toISOString(),
       })
       .eq("id", submissionId);
-    if (analysisSetupError) throw analysisSetupError;
+    if (analysisSetupError) {
+      console.error("submission analysis update failed", analysisSetupError);
+    }
 
     return json({ success: true });
   } catch (error) {
