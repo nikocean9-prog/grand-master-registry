@@ -17,24 +17,20 @@ export default function TcgCatalog({ tcgs }) {
     getCurrentAdmin(supabase).then((admin) => setIsAdmin(Boolean(admin)));
   }, []);
 
-  const visibleTcgs = tcgs.filter(
-    (tcg) => isAdmin || tcg.sets.some((set) => set.status === "live")
-  );
+  const liveTcgs = tcgs.filter((tcg) => tcg.sets.some((set) => set.status === "live"));
+  const futureTcgs = tcgs.filter((tcg) => !tcg.sets.some((set) => set.status === "live"));
 
   return (
     <>
-      {isAdmin && <p className="admin-catalog-note">Admin view: future TCGs are visible to you.</p>}
-      <div className="tcg-grid">
-        {visibleTcgs.map((tcg) => (
-          <Link href={`/tcg/${tcg.slug}`} className={`tcg-card ${tcg.status}`} key={tcg.slug}>
-            {tcg.status !== "live" && <span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span>}
-            <span className={`status-badge ${tcg.status}`}>{tcg.status === "live" ? "Live" : "Coming soon"}</span>
-            <h3>{tcg.name}</h3>
-            <p>{tcg.description}</p>
-            <strong>{tcg.sets.length || "No"} {tcg.sets.length === 1 ? "set" : "sets"} listed →</strong>
+      <div className="live-registry-list">
+        {liveTcgs.flatMap((tcg) => tcg.sets.filter((set) => set.status === "live").map((set) => (
+          <Link href={set.href} className="live-registry-card" key={`${tcg.slug}-${set.slug}`}>
+            <div><span>{tcg.name}</span><h3>{set.name}</h3><p>{set.summary}</p></div>
+            <strong>Open registry <i aria-hidden="true">→</i></strong>
           </Link>
-        ))}
+        )))}
       </div>
+      {isAdmin && <section className="admin-future-section"><p className="admin-catalog-note">Admin view: future TCGs are visible only to you.</p><h2>Future TCGs</h2><div className="tcg-grid">{futureTcgs.map((tcg) => <Link href={`/tcg/${tcg.slug}`} className="tcg-card planned" key={tcg.slug}><span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span><span className="status-badge planned">Coming soon</span><h3>{tcg.name}</h3><p>{tcg.description}</p><strong>{tcg.sets.length || "No"} {tcg.sets.length === 1 ? "set" : "sets"} listed →</strong></Link>)}</div></section>}
     </>
   );
 }
