@@ -259,8 +259,13 @@ async function checkTradingCardGate({
         return { status: "complete", decision: "card" };
       }
 
-      console.warn("unrecognised trading card gate response", rawAnswer.slice(0, 160));
-      return { status: "complete", decision: "unclear" };
+      const diagnostic = rawAnswer
+        .replace(/[\u0000-\u001F\u007F]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 300) || "(empty response)";
+      console.warn("unrecognised trading card gate response", diagnostic);
+      return { status: "complete", decision: "unclear", diagnostic };
     } finally {
       clearTimeout(timeout);
     }
@@ -810,6 +815,9 @@ Deno.serve(async (req: Request) => {
             ? ["A physical trading card is visible. Detailed checks are continuing."]
             : [
                 "The initial check could not confidently determine whether a trading card is visible.",
+                ...("diagnostic" in gate && gate.diagnostic
+                  ? [`Initial AI response: ${gate.diagnostic}`]
+                  : []),
               ],
         ai_summary:
           gate.decision === "card"
