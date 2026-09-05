@@ -50,6 +50,19 @@ function expectedSerial(serialNumber: number, region: string) {
   return region === "E" ? `${number}E` : number;
 }
 
+function blobToDataUrl(blob: Blob) {
+  return blob.arrayBuffer().then((buffer) => {
+    const bytes = new Uint8Array(buffer);
+    let binary = "";
+
+    for (let offset = 0; offset < bytes.length; offset += 32_768) {
+      binary += String.fromCharCode(...bytes.subarray(offset, offset + 32_768));
+    }
+
+    return `data:${blob.type || "image/jpeg"};base64,${btoa(binary)}`;
+  });
+}
+
 function parsePhotoCheck(content: unknown) {
   if (typeof content !== "string" || !content.trim()) {
     throw new Error("Cloudflare returned no analysis");
@@ -127,13 +140,15 @@ async function checkPhoto({
 
     if (serialError || !serial) throw serialError || new Error("Serial not found");
 
-    const { data: signed, error: signedError } = await supabase.storage
+    const { data: evidencePhoto, error: downloadError } = await supabase.storage
       .from("submission-evidence")
-      .createSignedUrl(filePath, 600);
+      .download(filePath);
 
-    if (signedError || !signed?.signedUrl) {
-      throw signedError || new Error("Could not create evidence URL");
+    if (downloadError || !evidencePhoto) {
+      throw downloadError || new Error("Could not load evidence photo");
     }
+
+    const encodedPhoto = await blobToDataUrl(evidencePhoto);
 
     const card = Array.isArray(serial.cards) ? serial.cards[0] : serial.cards;
     const expected = expectedSerial(serial.serial_number, serial.region);
@@ -162,7 +177,7 @@ async function checkPhoto({
     };
     const visionBody = JSON.stringify({
       prompt: screeningPrompt,
-      image: signed.signedUrl,
+      image: encodedPhoto,
       temperature: 0,
       max_tokens: 700,
     });
