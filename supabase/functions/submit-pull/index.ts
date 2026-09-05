@@ -179,17 +179,50 @@ async function checkTradingCardGate({
     const timeout = setTimeout(() => controller.abort(), 7_000);
 
     try {
-      const detectionResponse = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        signal: controller.signal,
-        body: JSON.stringify({
-          task: "detect",
-          image: encodedPhoto,
-          target: "physical trading card",
-          max_objects: 5,
+      const [detectionResponse, safetyResponse] = await Promise.all([
+        fetch(endpoint, {
+          method: "POST",
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            task: "detect",
+            image: encodedPhoto,
+            target: "physical trading card",
+            max_objects: 5,
+          }),
         }),
-      });
+        fetch(endpoint, {
+          method: "POST",
+          headers,
+          signal: controller.signal,
+          body: JSON.stringify({
+            task: "query",
+            image: encodedPhoto,
+            question:
+              "Safety check only. Does this image contain nudity, sexual content, graphic violence, hateful or racist imagery? Answer SAFE only when none are present. Otherwise answer UNSAFE. Output one word only.",
+            reasoning: false,
+            temperature: 0,
+            max_tokens: 8,
+            stream: false,
+          }),
+        }),
+      ]);
+
+      // Fail closed: an unsafe, unreadable, or unavailable safety decision must
+      // never place the uploaded image into the administrator approval queue.
+      if (!safetyResponse.ok) {
+        return { status: "complete", decision: "unsafe" };
+      }
+      const safety = await safetyResponse.json();
+      const rawSafetyAnswer = String(
+        safety?.result?.answer ??
+          safety?.answer ??
+          safety?.result?.response ??
+          ""
+      ).trim();
+      if (!/^["'`*\s]*SAFE\b/i.test(rawSafetyAnswer)) {
+        return { status: "complete", decision: "unsafe" };
+      }
 
       if (!detectionResponse.ok) {
         return { status: "unavailable", decision: "unclear" };
