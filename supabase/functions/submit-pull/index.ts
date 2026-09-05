@@ -311,7 +311,14 @@ async function checkPhoto({
             signal: formatterController.signal,
             body: JSON.stringify({
               prompt:
-                "Convert the following vision assessment into the required JSON schema. Preserve its conclusions and do not invent visible details. If the assessment is insufficient or ambiguous, use subject_type unclear, risk_level review, null comparison fields, and confidence no higher than 50.\n\nVISION ASSESSMENT:\n" +
+                "Convert the vision assessment below into the required JSON schema and classify what the assessment actually describes. " +
+                "The submission is valid only if a physical trading card is visibly the main subject. " +
+                "If it describes food, groceries, people, animals, scenery, buildings, construction materials, screenshots, products, or any other scene without a visible physical trading card, set subject_type to not_card, risk_level to high, card_match/serial_match/possible_edit to null, serial_read to null, and confidence from 95 to 100 when clear. " +
+                "Never set card_match or serial_match true unless the assessment explicitly says a trading card is visible and identifies the relevant card or serial. " +
+                "Do not copy descriptive prose into serial_read; serial_read must be null unless an actual serial number was read from a visible card. " +
+                "If a trading card is visible but its identity cannot be confirmed, set subject_type trading_card, risk_level review, comparison fields null, and confidence below 95. " +
+                "If the assessment is insufficient or ambiguous about whether a card is visible, use subject_type unclear, risk_level review, null comparison fields, and confidence no higher than 50. " +
+                "Preserve visible facts, do not invent details, and return JSON only.\n\nVISION ASSESSMENT:\n" +
                 content.slice(0, 4000),
               temperature: 0,
               max_tokens: 500,
