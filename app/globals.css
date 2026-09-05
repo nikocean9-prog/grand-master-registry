@@ -565,7 +565,19 @@ button {
   color: #fff9e7;
   box-shadow: 0 9px 28px rgba(7,27,18,.27);
 }
-.tcg-card.live h3 { margin-top: 56px; color: #fff2c8; font-family: Georgia, "Times New Roman", serif; font-size: 29px; text-shadow: 0 2px 8px rgba(0,0,0,.4); }
+.tcg-card.live h3 {
+  margin-top: 56px;
+  color: #f6d982;
+  background: linear-gradient(180deg,#fff9df 8%,#f8e7a9 42%,#d6a63e 56%,#fff0b6 86%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 31px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,.5)) drop-shadow(0 0 8px rgba(214,166,62,.18));
+}
 .tcg-card.live p { color: #d9e1dc; }
 .tcg-card.live > strong { color: #a9edbf; }
 .tcg-card.live .status-badge.live { z-index: 1; background: #d9f7df; color: #185a31; }
