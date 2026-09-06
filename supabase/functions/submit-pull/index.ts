@@ -535,17 +535,97 @@ async function checkPhoto({
       }
     };
 
+    const addSerialFallback = async (result: Record<string, any>) => {
+      const initialObserved = normalizeSerializedMarking(result.serial_read);
+      const expectedValue = normalizeSerializedMarking(expected);
+      if (initialObserved && expectedValue && initialObserved === expectedValue) {
+        return result;
+      }
+
+      const serialController = new AbortController();
+      const serialTimeout = setTimeout(() => serialController.abort(), 8_000);
+      try {
+        const serialResponse = await fetch(cloudflareEndpoint, {
+          method: "POST",
+          headers: cloudflareHeaders,
+          signal: serialController.signal,
+          body: JSON.stringify({
+            prompt:
+              "Read only the serialized edition marking printed near the bottom-left of this physical trading card. " +
+              "It normally looks like 035/100, 035/100E, 035E/100 or 035E. " +
+              "Preserve the slash and any letter suffix exactly. Ignore set codes, passcodes, ATK/DEF values, copyright text and edition text. " +
+              "Return exactly SERIAL: followed by the marking, or exactly UNREADABLE. Do not explain or guess.",
+            image: encodedPhoto,
+            temperature: 0,
+            max_tokens: 30,
+          }),
+        });
+        if (!serialResponse.ok) return result;
+
+        const serialCompletion = await serialResponse.json();
+        const rawSerial =
+          serialCompletion?.result?.response ?? serialCompletion?.result ?? "";
+        if (typeof rawSerial !== "string") return result;
+
+        const cleaned = rawSerial
+          .trim()
+          .replace(/^```[^\n]*\n?/i, "")
+          .replace(/```$/i, "")
+          .replace(/^SERIAL\s*:\s*/i, "")
+          .replace(/^["']|["']$/g, "")
+          .split(/\r?\n/)[0]
+          .trim();
+        const observed = normalizeSerializedMarking(cleaned);
+
+        if (!observed || !expectedValue || /^(UNREADABLE|UNKNOWN|UNCLEAR)/i.test(cleaned)) {
+          return initialObserved
+            ? result
+            : { ...result, serial_read: null, serial_match: null, serial_confidence: 0 };
+        }
+
+        return {
+          ...result,
+          serial_read: cleaned,
+          serial_match: observed === expectedValue,
+          serial_confidence: 100,
+        };
+      } catch (serialError) {
+        console.warn("serial-only reading unavailable", serialError);
+        return initialObserved
+          ? result
+          : { ...result, serial_read: null, serial_match: null, serial_confidence: 0 };
+      } finally {
+        clearTimeout(serialTimeout);
+      }
+    };
+
     const completeAssessment = async (result: Record<string, any>) => {
       const withTitle = await addTitleFallback(result);
-      const nameComparison = withTitle.card_name_read && card?.name
-        ? compareTitles(withTitle.card_name_read, card.name)
+      const withSerial = await addSerialFallback(withTitle);
+      const nameComparison = withSerial.card_name_read && card?.name
+        ? compareTitles(withSerial.card_name_read, card.name)
         : { match: null, similarity: 0 };
+      const thumbnailConfident =
+        Number(withSerial.thumbnail_confidence) >= 75;
+      const editingConfident = Number(withSerial.edit_confidence) >= 75;
 
       return finalizePhotoAssessment(
         {
-          ...withTitle,
+          ...withSerial,
           name_match: nameComparison.match,
           name_confidence: nameComparison.similarity,
+          thumbnail_match: thumbnailConfident
+            ? withSerial.thumbnail_match
+            : null,
+          thumbnail_confidence: thumbnailConfident
+            ? withSerial.thumbnail_confidence
+            : 0,
+          possible_edit: withSerial.possible_edit === true && !editingConfident
+            ? null
+            : withSerial.possible_edit,
+          edit_confidence: withSerial.possible_edit === true && !editingConfident
+            ? 0
+            : withSerial.edit_confidence,
         },
         card?.name,
         expected
