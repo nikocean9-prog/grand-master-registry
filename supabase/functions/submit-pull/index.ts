@@ -112,18 +112,61 @@ function normalizeSerializedMarking(value: string | null) {
   return `${match[1].padStart(3, "0")}${suffix}`;
 }
 
-function finalizePhotoAssessment(result: Record<string, any>) {
+function finalizePhotoAssessment(
+  result: Record<string, any>,
+  expectedName?: string | null,
+  expectedSerialValue?: string | null
+) {
   const identityMismatch =
     result.name_match === false ||
     result.serial_match === false ||
     result.thumbnail_match === false;
 
-  if (!identityMismatch) return result;
+  const comparisonReasons: string[] = [];
+  if (result.name_match === false && result.card_name_read && expectedName) {
+    comparisonReasons.push(
+      `Card name mismatch: photo reads "${result.card_name_read}"; submission expects "${expectedName}".`
+    );
+  } else if (result.name_match === true && result.card_name_read && expectedName) {
+    comparisonReasons.push(
+      `Card name matches: photo reads "${result.card_name_read}"; submission expects "${expectedName}".`
+    );
+  }
+
+  if (result.serial_match === false && result.serial_read && expectedSerialValue) {
+    comparisonReasons.push(
+      `Serial mismatch: photo reads ${result.serial_read}; submission expects ${expectedSerialValue}.`
+    );
+  } else if (
+    result.serial_match === true &&
+    result.serial_read &&
+    expectedSerialValue
+  ) {
+    comparisonReasons.push(
+      `Serial matches: photo reads ${result.serial_read}; submission expects ${expectedSerialValue}.`
+    );
+  }
+
+  const aiReasons = Array.isArray(result.reasons)
+    ? result.reasons.filter(
+        (reason: unknown) =>
+          typeof reason === "string" &&
+          !/(card name|card title|serial|card number|authentic)/i.test(reason)
+      )
+    : [];
+
+  const summary = identityMismatch
+    ? "The submitted trading card does not match the selected registry record. Review the exact comparison results below."
+    : "The photo appears to show the selected trading card. Review the exact comparison results below.";
 
   return {
     ...result,
-    risk_level: "high",
-    card_match: false,
+    risk_level: identityMismatch ? "high" : result.risk_level,
+    card_match: identityMismatch ? false : result.card_match,
+    summary,
+    reasons: [...comparisonReasons, ...aiReasons].slice(0, 6),
+    serial_confidence:
+      result.serial_match === null ? result.serial_confidence : 100,
   };
 }
 
@@ -206,20 +249,14 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
   const serialExpected = normalizeSerializedMarking(expectedSerialValue);
   const serialMatch =
     serialObserved && serialExpected ? serialObserved === serialExpected : null;
-  const serialMismatchReason = serialMatch === false
-    ? [`Serial mismatch: read ${serialRead}; expected ${expectedSerialValue}.`]
-    : [];
-
   return finalizePhotoAssessment({
     risk_level: parsed.risk_level,
     subject_type: parsed.subject_type,
     summary: parsed.summary.slice(0, 1000),
-    reasons: [
-      ...serialMismatchReason,
-      ...parsed.reasons
-        .filter((reason: unknown) => typeof reason === "string")
-        .map((reason: string) => reason.slice(0, 500)),
-    ].slice(0, 6),
+    reasons: parsed.reasons
+      .filter((reason: unknown) => typeof reason === "string")
+      .slice(0, 6)
+      .map((reason: string) => reason.slice(0, 500)),
     card_name_read: nullableText(parsed.card_name_read, 200),
     name_match: nullableBoolean(parsed.name_match),
     name_confidence: confidence(parsed.name_confidence),
@@ -238,7 +275,7 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
           .map((indicator: string) => indicator.slice(0, 300))
       : [],
     confidence: confidence(parsed.confidence),
-  });
+  }, null, expectedSerialValue);
 }
 
 async function checkTradingCardGate({
@@ -490,7 +527,7 @@ async function checkPhoto({
             ...(result.reasons || []),
             `Title-only reading: "${cleaned}" (${comparison.similarity}% text match).`,
           ].slice(0, 6),
-        });
+        }, card.name, expected);
       } catch (titleError) {
         console.warn("title-only reading unavailable", titleError);
         return result;
@@ -636,7 +673,11 @@ async function checkPhoto({
       const parsedResult = parsePhotoCheck(content, expected);
       return {
         status: "complete",
-        result: await addTitleFallback(parsedResult),
+        result: finalizePhotoAssessment(
+          await addTitleFallback(parsedResult),
+          card?.name,
+          expected
+        ),
       };
     } catch (parseError) {
       if (typeof content !== "string" || !content.trim()) throw parseError;
@@ -690,7 +731,11 @@ async function checkPhoto({
         const parsedResult = parsePhotoCheck(formatted, expected);
         return {
           status: "complete",
-          result: await addTitleFallback(parsedResult),
+          result: finalizePhotoAssessment(
+            await addTitleFallback(parsedResult),
+            card?.name,
+            expected
+          ),
         };
       } finally {
         clearTimeout(formatterTimeout);
