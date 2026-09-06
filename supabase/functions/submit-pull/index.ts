@@ -119,7 +119,7 @@ function blobToDataUrl(blob: Blob) {
   });
 }
 
-function parsePhotoCheck(content: unknown) {
+function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
   let parsed: Record<string, any>;
 
   if (content && typeof content === "object" && !Array.isArray(content)) {
@@ -139,14 +139,25 @@ function parsePhotoCheck(content: unknown) {
   const riskLevels = ["low", "review", "high"];
   const subjectTypes = ["trading_card", "not_card", "unclear"];
 
+  const detailedFields = [
+    "card_name_read", "name_match", "name_confidence", "serial_read",
+    "serial_match", "serial_confidence", "thumbnail_match",
+    "thumbnail_confidence", "possible_edit", "edit_confidence",
+    "edit_indicators", "confidence",
+  ];
+
   if (
     !riskLevels.includes(parsed?.risk_level) ||
     !subjectTypes.includes(parsed?.subject_type) ||
     typeof parsed?.summary !== "string" ||
     !Array.isArray(parsed?.reasons) ||
+    !Array.isArray(parsed?.edit_indicators) ||
+    detailedFields.some(
+      (field) => !Object.prototype.hasOwnProperty.call(parsed, field)
+    ) ||
     !Number.isFinite(Number(parsed?.confidence))
   ) {
-    throw new Error("Cloudflare returned an invalid analysis");
+    throw new Error("Cloudflare returned an incomplete comparison report");
   }
 
   const nullableBoolean = (value: unknown) =>
@@ -159,6 +170,19 @@ function parsePhotoCheck(content: unknown) {
     typeof value === "string" && value.trim()
       ? value.trim().slice(0, length)
       : null;
+  const serialRead = nullableText(parsed.serial_read);
+  const normalizeSerial = (value: string | null) => {
+    if (!value) return null;
+    const cleaned = value.toUpperCase().replace(/\s+/g, "");
+    const numbered = cleaned.match(/(?:^|[^A-Z0-9])(\d{1,3})([A-Z]?)(?:\/|OF)\d+(?:$|[^A-Z0-9])/);
+    const standalone = cleaned.match(/^(\d{1,3})([A-Z]?)$/);
+    const match = numbered || standalone;
+    return match ? `${match[1].padStart(3, "0")}${match[2] || ""}` : null;
+  };
+  const serialObserved = normalizeSerial(serialRead);
+  const serialExpected = normalizeSerial(expectedSerialValue);
+  const serialMatch =
+    serialObserved && serialExpected ? serialObserved === serialExpected : null;
 
   return {
     risk_level: parsed.risk_level,
@@ -171,9 +195,9 @@ function parsePhotoCheck(content: unknown) {
     card_name_read: nullableText(parsed.card_name_read, 200),
     name_match: nullableBoolean(parsed.name_match),
     name_confidence: confidence(parsed.name_confidence),
-    serial_read: nullableText(parsed.serial_read),
+    serial_read: serialRead,
     card_match: nullableBoolean(parsed.card_match),
-    serial_match: nullableBoolean(parsed.serial_match),
+    serial_match: serialMatch,
     serial_confidence: confidence(parsed.serial_confidence),
     thumbnail_match: nullableBoolean(parsed.thumbnail_match),
     thumbnail_confidence: confidence(parsed.thumbnail_confidence),
@@ -383,9 +407,10 @@ async function checkPhoto({
       "Each confidence field measures confidence in that one conclusion. A null conclusion should have low confidence.\n\n" +
       `Expected database card name: ${card?.name || "Unknown"}\n` +
       `Expected database card number: ${card?.card_number || "Not recorded"}\n` +
-      `Expected serial: ${expected}\nExpected region: ${serial.region}\n` +
+      `Expected region: ${serial.region}\n` +
       `Reference thumbnail description: ${referenceDescription}\n\n` +
-      "Read the visible card name when possible. Compare it with the expected name, allowing harmless punctuation, spacing and minor OCR errors. " +
+      "Read the serialized edition marking blindly without being shown the expected value. It normally looks like 032/100 or 032 of 100. Do not treat a set code such as MAMA-EN003, a passcode, copyright number, ATK/DEF value or edition text as the serial. Set serial_match to null because application code will compare the transcription. " +
+      "Read the visible card name when possible. Compare it with the expected name, allowing harmless punctuation, spacing and minor OCR errors. A visibly different title, franchise, character or artwork is a clear mismatch, even if smaller text is unreadable. Never turn a clear mismatch into null. " +
       "Read and compare the visible serial exactly after normalising spaces and leading zeros. " +
       "Compare the submitted card artwork, colours, frame and layout with the reference description; normal foil, lighting, angle and crop differences should not cause a mismatch. " +
       'Return ONLY valid JSON with exactly these fields: {"risk_level":"low|review|high","subject_type":"trading_card|not_card|unclear","summary":"string","reasons":["string"],"card_name_read":"string or null","name_match":"boolean or null","name_confidence":0,"serial_read":"string or null","card_match":"boolean or null","serial_match":"boolean or null","serial_confidence":0,"thumbnail_match":"boolean or null","thumbnail_confidence":0,"possible_edit":"boolean or null","edit_confidence":0,"edit_indicators":["string"],"confidence":0}. ' +
@@ -469,43 +494,50 @@ async function checkPhoto({
     const content = completion?.result?.response ?? completion?.result;
 
     try {
-      return { status: "complete", result: parsePhotoCheck(content) };
+      return { status: "complete", result: parsePhotoCheck(content, expected) };
     } catch (parseError) {
       if (typeof content !== "string" || !content.trim()) throw parseError;
-      const formatterController = new AbortController();
-      const formatterTimeout = setTimeout(() => formatterController.abort(), 8_000);
+
+      const retryController = new AbortController();
+      const retryTimeout = setTimeout(() => retryController.abort(), 16_000);
       try {
-        const formatterResponse = await fetch(
-          `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.1-8b-instruct-fast`,
-          {
-            method: "POST",
-            headers: cloudflareHeaders,
-            signal: formatterController.signal,
-            body: JSON.stringify({
-              prompt:
-                "Convert the vision assessment into the required JSON schema without inventing visible facts. " +
-                "Use null and low per-field confidence for unreadable or uncertain comparisons. " +
-                "Overlays, crops, glare, sleeves and foil are not editing evidence by themselves. " +
-                "Return JSON only.\n\nVISION ASSESSMENT:\n" +
-                content.slice(0, 5000),
-              temperature: 0,
-              max_tokens: 400,
-              response_format: {
-                type: "json_schema",
-                json_schema: photoCheckSchema,
-              },
-            }),
-          }
-        );
-        if (!formatterResponse.ok) {
-          throw new Error(`Cloudflare formatter returned ${formatterResponse.status}`);
+        const retryResponse = await fetch(cloudflareEndpoint, {
+          method: "POST",
+          headers: cloudflareHeaders,
+          signal: retryController.signal,
+          body: JSON.stringify({
+            prompt:
+              "Return a complete administrator comparison report with every required JSON field. " +
+              "Expected card name: " + (card?.name || "Unknown") + ". " +
+              "Expected card number: " + (card?.card_number || "not recorded") + ". " +
+              "Reference thumbnail: " + referenceDescription + ". " +
+              "A visibly different title, franchise, character or artwork must be a mismatch. " +
+              "Read the serialized edition marking blindly. It normally looks like 032/100 or 032 of 100. " +
+              "Do not treat set codes, passcodes, copyright numbers, ATK/DEF values or edition text as a serial. Set serial_match to null because application code compares it. " +
+              "Use null only when evidence genuinely cannot be seen. Do not assess authenticity. Return JSON only.",
+            image: encodedPhoto,
+            temperature: 0,
+            max_tokens: 380,
+            response_format: {
+              type: "json_schema",
+              json_schema: photoCheckSchema,
+            },
+          }),
+        });
+
+        if (!retryResponse.ok) {
+          throw new Error(`Cloudflare retry returned ${retryResponse.status}`);
         }
-        const formatterCompletion = await formatterResponse.json();
-        const formatted =
-          formatterCompletion?.result?.response ?? formatterCompletion?.result;
-        return { status: "complete", result: parsePhotoCheck(formatted) };
+
+        const retryCompletion = await retryResponse.json();
+        const retryContent =
+          retryCompletion?.result?.response ?? retryCompletion?.result;
+        return {
+          status: "complete",
+          result: parsePhotoCheck(retryContent, expected),
+        };
       } finally {
-        clearTimeout(formatterTimeout);
+        clearTimeout(retryTimeout);
       }
     }
   } catch (error) {
