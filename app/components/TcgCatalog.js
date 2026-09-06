@@ -26,14 +26,9 @@ export default function TcgCatalog({ tcgs }) {
         {liveTcgs.map((tcg) => {
           const liveSetCount = tcg.sets.filter((set) => set.status === "live").length;
           const previewCount = tcg.sets.filter((set) => set.status !== "live").length;
-          const logoSrc = tcg.slug === "yugioh"
-            ? "/graphics/yugioh-official-logo.svg"
-            : tcg.slug === "magic-the-gathering"
-              ? "/graphics/magic-official-logo.svg"
-              : null;
           return (
             <Link href={`/tcg/${tcg.slug}`} className={`live-registry-card tcg-${tcg.slug}`} key={tcg.slug}>
-              <span className="live-registry-art" aria-hidden="true">{logoSrc && <img src={logoSrc} alt="" />}</span>
+              <span className="live-registry-art" aria-hidden="true">{tcg.logo && <img src={tcg.logo} alt="" />}</span>
               <div className="live-registry-copy">
                 <span>Trading card game</span>
                 <h3>{tcg.name}</h3>
@@ -56,7 +51,7 @@ export default function TcgCatalog({ tcgs }) {
                 key={tcg.slug}
               >
                 <span className="live-registry-art" aria-hidden="true">
-                  <span className="future-registry-logo">{tcg.name}</span>
+                  <img src={tcg.logo} alt="" />
                 </span>
                 <div className="live-registry-copy">
                   <span>Trading card game</span>

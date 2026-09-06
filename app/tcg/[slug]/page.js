@@ -21,7 +21,7 @@ export default async function TcgPage({ params }) {
     return (
       <main><PublicHeader /><Link href="/#tcgs" className="back-link">← All TCGs</Link>
         <section className="catalog-heading planned-tcg-heading">
-          <span className="planned-tcg-wordmark" aria-hidden="true">{tcg.name}</span>
+          <span className="planned-tcg-wordmark" aria-hidden="true"><img src={tcg.logo} alt="" /></span>
           <div><p className="eyebrow">Coming soon</p><h1>{tcg.name}</h1><p>{tcg.description}</p></div>
         </section>
         <section className="registry-section">
