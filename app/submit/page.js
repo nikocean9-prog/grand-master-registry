@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { safeSubmissionMessage } from "../lib/userMessages";
+import { tcgs as tcgCatalog } from "../lib/catalog";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -50,6 +51,7 @@ function wait(milliseconds) {
 }
 
 export default function SubmitPage() {
+  const [tcgSlug, setTcgSlug] = useState("");
   const [sets, setSets] = useState([]);
   const [setId, setSetId] = useState("");
   const [cards, setCards] = useState([]);
@@ -71,7 +73,7 @@ export default function SubmitPage() {
     async function loadCatalog() {
       const { data: liveSets, error: setsError } = await supabase
         .from("card_sets")
-        .select("id, name, serial_scheme")
+        .select("id, name, serial_scheme, tcg_slug")
         .eq("status", "live")
         .order("release_date");
 
@@ -91,10 +93,14 @@ export default function SubmitPage() {
         return;
       }
 
+      const firstTcgSlug = liveSets[0].tcg_slug;
+      const firstSet = liveSets.find((cardSet) => cardSet.tcg_slug === firstTcgSlug);
+
       setSets(liveSets);
-      setSetId(String(liveSets[0].id));
+      setTcgSlug(firstTcgSlug);
+      setSetId(String(firstSet.id));
       setCards(data || []);
-      setRegion(liveSets[0].serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
+      setRegion(firstSet.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
     }
     loadCatalog();
   }, []);
@@ -318,11 +324,30 @@ if (serial) {
             autoComplete="off"
           />
         </div>
-        {sets.length > 1 && <><div>
+        {sets.length > 0 && <><div>
+          <label>TCG</label>
+          <br />
+          <select value={tcgSlug} onChange={(event) => {
+            const nextTcgSlug = event.target.value;
+            const nextSet = sets.find((cardSet) => cardSet.tcg_slug === nextTcgSlug);
+            setTcgSlug(nextTcgSlug);
+            setSetId(nextSet ? String(nextSet.id) : "");
+            setCardId("");
+            setSerialNumber("1");
+            setRegion(nextSet?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
+          }} required>
+            {[...new Set(sets.map((cardSet) => cardSet.tcg_slug))].map((slug) => (
+              <option key={slug} value={slug}>
+                {tcgCatalog.find((tcg) => tcg.slug === slug)?.name || slug}
+              </option>
+            ))}
+          </select>
+        </div><br /></>}
+        {sets.filter((cardSet) => cardSet.tcg_slug === tcgSlug).length > 0 && <><div>
           <label>Set</label>
           <br />
           <select value={setId} onChange={(event) => { const nextSetId = event.target.value; setSetId(nextSetId); setCardId(""); setSerialNumber("1"); setRegion(sets.find((cardSet) => String(cardSet.id) === nextSetId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS"); }} required>
-            {sets.map((cardSet) => <option key={cardSet.id} value={cardSet.id}>{cardSet.name}</option>)}
+            {sets.filter((cardSet) => cardSet.tcg_slug === tcgSlug).map((cardSet) => <option key={cardSet.id} value={cardSet.id}>{cardSet.name}</option>)}
           </select>
         </div><br /></>}
         <div>
