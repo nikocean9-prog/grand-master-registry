@@ -768,6 +768,36 @@ async function finishPhotoReview({
   }
 }
 
+function publicReviewStatus(submission: {
+  status?: string | null;
+  ai_check_status?: string | null;
+  reviewed_by_email?: string | null;
+}) {
+  if (
+    submission.status === "rejected" &&
+    submission.reviewed_by_email === "Automated photo check"
+  ) {
+    return "rejected";
+  }
+
+  if (
+    submission.ai_check_status === "pending" ||
+    submission.ai_check_status === "screened"
+  ) {
+    return "reviewing";
+  }
+
+  if (
+    submission.ai_check_status === "error" ||
+    submission.ai_check_status === "unavailable" ||
+    submission.ai_check_status === "manual"
+  ) {
+    return "manual";
+  }
+
+  return "accepted";
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -815,26 +845,7 @@ Deno.serve(async (req: Request) => {
         return json({ error: "Review status was not found." }, 404);
       }
 
-      if (
-        submission.status === "rejected" &&
-        submission.reviewed_by_email === "Automated photo check"
-      ) {
-        return json({ review_status: "rejected" });
-      }
-
-      if (submission.ai_check_status === "pending") {
-        return json({ review_status: "reviewing" });
-      }
-
-      if (
-        submission.ai_check_status === "error" ||
-        submission.ai_check_status === "unavailable" ||
-        submission.ai_check_status === "manual"
-      ) {
-        return json({ review_status: "manual" });
-      }
-
-      return json({ review_status: "accepted" });
+      return json({ review_status: publicReviewStatus(submission) });
     } catch {
       return json({ error: "Invalid review status request." }, 400);
     }
@@ -865,6 +876,38 @@ Deno.serve(async (req: Request) => {
   const sourceUrl = cleanText(form.get("source_url"));
   const notes = cleanText(form.get("notes"));
   const submitterEmail = cleanText(form.get("submitter_email"));
+  const clientRequestId = cleanText(form.get("client_request_id"));
+  const requestIdPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  if (!clientRequestId || !requestIdPattern.test(clientRequestId)) {
+    return json({ error: "Invalid submission request." }, 400);
+  }
+
+  const receipt = await hashIp(
+    `submission-receipt:${clientRequestId}`,
+    serviceRoleKey
+  );
+  const receiptHash = await hashReceipt(receipt);
+  const { data: existingSubmission, error: existingError } = await supabase
+    .from("submissions")
+    .select("id, status, ai_check_status, reviewed_by_email")
+    .eq("client_request_id", clientRequestId)
+    .maybeSingle();
+
+  if (existingError) {
+    return json({ error: "Could not verify the submission request. Please try again." }, 500);
+  }
+
+  if (existingSubmission) {
+    return json({
+      success: true,
+      review_status: publicReviewStatus(existingSubmission),
+      submission_id: existingSubmission.id,
+      receipt,
+      existing: true,
+    });
+  }
 
   if (!Number.isInteger(serialId) || serialId < 1) {
     return json({ error: "Invalid serial number." }, 400);
@@ -961,15 +1004,41 @@ Deno.serve(async (req: Request) => {
         p_source_url: sourceUrl,
         p_notes: notes,
         p_submitter_email: submitterEmail,
+        p_client_request_id: clientRequestId,
       }
     );
     if (submitError || !submissionId) {
       throw submitError || new Error("Submission was not created");
     }
 
+    const { data: savedSubmission, error: savedSubmissionError } = await supabase
+      .from("submissions")
+      .select("photo_url, status, ai_check_status, reviewed_by_email")
+      .eq("id", submissionId)
+      .single();
+
+    if (savedSubmissionError || !savedSubmission) {
+      throw savedSubmissionError || new Error("Submission could not be verified");
+    }
+
+    if (savedSubmission.photo_url !== filePath) {
+      await supabase.storage.from("submission-evidence").remove([filePath]);
+      uploaded = false;
+      if (slotReserved) {
+        await supabase.rpc("release_submission_slot", { p_ip_hash: ipHash });
+        slotReserved = false;
+      }
+
+      return json({
+        success: true,
+        review_status: publicReviewStatus(savedSubmission),
+        submission_id: submissionId,
+        receipt,
+        existing: true,
+      });
+    }
+
     const exactDuplicateOf = duplicate?.id || null;
-    const receipt = `${crypto.randomUUID()}${crypto.randomUUID()}`;
-    const receiptHash = await hashReceipt(receipt);
     const { error: analysisSetupError } = await supabase
       .from("submissions")
       .update({
