@@ -1195,7 +1195,7 @@ button {
 
 
 /* Premium Yu-Gi-Oh TCG heading */
-.catalog-heading.tcg-heading-yu-gi-oh {
+.catalog-heading.tcg-heading-yugioh {
   position: relative;
   min-height: 280px;
   align-items: flex-end;
@@ -1210,7 +1210,7 @@ button {
   box-shadow: 0 9px 28px rgba(7, 27, 18, 0.27);
 }
 
-.catalog-heading.tcg-heading-yu-gi-oh::after {
+.catalog-heading.tcg-heading-yugioh::after {
   content: "";
   position: absolute;
   inset: 11px;
@@ -1219,17 +1219,17 @@ button {
   border-radius: 10px;
 }
 
-.catalog-heading.tcg-heading-yu-gi-oh > div {
+.catalog-heading.tcg-heading-yugioh > div {
   position: relative;
   z-index: 1;
   max-width: 58%;
 }
 
-.catalog-heading.tcg-heading-yu-gi-oh .eyebrow {
+.catalog-heading.tcg-heading-yugioh .eyebrow {
   color: #daba65;
 }
 
-.catalog-heading.tcg-heading-yu-gi-oh h1 {
+.catalog-heading.tcg-heading-yugioh h1 {
   margin: 10px 0 12px;
   background: linear-gradient(180deg, #fff9df 8%, #f8e7a9 42%, #d6a63e 56%, #fff0b6 86%);
   background-clip: text;
@@ -1244,29 +1244,29 @@ button {
   filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 0 8px rgba(214, 166, 62, 0.18));
 }
 
-.catalog-heading.tcg-heading-yu-gi-oh p:last-child {
+.catalog-heading.tcg-heading-yugioh p:last-child {
   color: #e0e4df;
   font-size: 17px;
   line-height: 1.5;
 }
 
 @media (max-width: 700px) {
-  .catalog-heading.tcg-heading-yu-gi-oh {
+  .catalog-heading.tcg-heading-yugioh {
     min-height: 300px;
     align-items: flex-end;
     padding: 34px 28px;
     background-position: 62% center;
   }
 
-  .catalog-heading.tcg-heading-yu-gi-oh > div {
+  .catalog-heading.tcg-heading-yugioh > div {
     max-width: 76%;
   }
 
-  .catalog-heading.tcg-heading-yu-gi-oh h1 {
+  .catalog-heading.tcg-heading-yugioh h1 {
     font-size: 42px;
   }
 
-  .catalog-heading.tcg-heading-yu-gi-oh p:last-child {
+  .catalog-heading.tcg-heading-yugioh p:last-child {
     font-size: 16px;
   }
 }
