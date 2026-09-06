@@ -52,6 +52,13 @@ function checkValue(value, trueLabel, falseLabel) {
   return "Unable to determine";
 }
 
+function checkWithConfidence(value, trueLabel, falseLabel, confidence) {
+  const result = checkValue(value, trueLabel, falseLabel);
+  return Number.isInteger(confidence)
+    ? `${result} (${confidence}% confidence)`
+    : result;
+}
+
 export default function AdminApprovals() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -301,42 +308,98 @@ export default function AdminApprovals() {
                 )}
 
               {submission.ai_check_status === "complete" && (
-                <dl className="photo-check-details">
-                  <div>
-                    <dt>Serial read</dt>
-                    <dd>{submission.ai_serial_read || "Unable to determine"}</dd>
-                  </div>
-                  <div>
-                    <dt>Card match</dt>
-                    <dd>
-                      {checkValue(submission.ai_card_match, "Matches", "Mismatch")}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Serial match</dt>
-                    <dd>
-                      {checkValue(submission.ai_serial_match, "Matches", "Mismatch")}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Possible editing</dt>
-                    <dd>
-                      {checkValue(
-                        submission.ai_possible_edit,
-                        "Flagged",
-                        "Not detected"
-                      )}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>AI confidence</dt>
-                    <dd>
-                      {Number.isInteger(submission.ai_confidence)
-                        ? `${submission.ai_confidence}%`
-                        : "Not available"}
-                    </dd>
-                  </div>
-                </dl>
+                <>
+                  <dl className="photo-check-details">
+                    <div>
+                      <dt>Card name read</dt>
+                      <dd>
+                        {submission.ai_card_name_read || "Unable to determine"}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Card name match</dt>
+                      <dd>
+                        {checkWithConfidence(
+                          submission.ai_name_match,
+                          "Matches",
+                          "Mismatch",
+                          submission.ai_name_confidence
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Serial read</dt>
+                      <dd>{submission.ai_serial_read || "Unable to determine"}</dd>
+                    </div>
+                    <div>
+                      <dt>Serial match</dt>
+                      <dd>
+                        {checkWithConfidence(
+                          submission.ai_serial_match,
+                          "Matches",
+                          "Mismatch",
+                          submission.ai_serial_confidence
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Reference thumbnail match</dt>
+                      <dd>
+                        {checkWithConfidence(
+                          submission.ai_thumbnail_match,
+                          "Matches",
+                          "Mismatch",
+                          submission.ai_thumbnail_confidence
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Overall card identity</dt>
+                      <dd>
+                        {checkValue(
+                          submission.ai_card_match,
+                          "Matches",
+                          "Mismatch"
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Visible editing indicators</dt>
+                      <dd>
+                        {checkWithConfidence(
+                          submission.ai_possible_edit,
+                          "Flagged",
+                          "Not detected",
+                          submission.ai_edit_confidence
+                        )}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Overall assessment confidence</dt>
+                      <dd>
+                        {Number.isInteger(submission.ai_confidence)
+                          ? `${submission.ai_confidence}%`
+                          : "Not available"}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {Array.isArray(submission.ai_edit_indicators) &&
+                    submission.ai_edit_indicators.length > 0 && (
+                      <div>
+                        <strong>Editing indicators reported:</strong>
+                        <ul>
+                          {submission.ai_edit_indicators.map(
+                            (indicator, index) => (
+                              <li key={`${submission.id}-edit-${index}`}>
+                                {indicator}
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </>
               )}
 
               {submission.exact_duplicate_of && (
@@ -347,8 +410,9 @@ export default function AdminApprovals() {
               )}
 
               <p className="photo-check-disclaimer">
-                Automated checks can be wrong. Review the original evidence
-                before approving or rejecting.
+                This is an advisory visual comparison, not proof of
+                authenticity or image manipulation. Automated checks can be
+                wrong; review the original evidence before deciding.
               </p>
             </section>
 
