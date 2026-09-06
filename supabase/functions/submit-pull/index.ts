@@ -876,13 +876,16 @@ Deno.serve(async (req: Request) => {
   const sourceUrl = cleanText(form.get("source_url"));
   const notes = cleanText(form.get("notes"));
   const submitterEmail = cleanText(form.get("submitter_email"));
-  const clientRequestId = cleanText(form.get("client_request_id"));
+  const suppliedRequestId = cleanText(form.get("client_request_id"));
   const requestIdPattern =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-  if (!clientRequestId || !requestIdPattern.test(clientRequestId)) {
+  if (suppliedRequestId && !requestIdPattern.test(suppliedRequestId)) {
     return json({ error: "Invalid submission request." }, 400);
   }
+
+  // Older cached pages may not send an ID during rollout.
+  const clientRequestId = suppliedRequestId || crypto.randomUUID();
 
   const receipt = await hashIp(
     `submission-receipt:${clientRequestId}`,
