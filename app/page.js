@@ -19,7 +19,7 @@ export default function Home() {
           organised by trading card game and set.
         </p>
       </section>
-      <section className="compact-stats" aria-label="Registry overview"><div><strong>{liveTcgCount}</strong><span>Live TCGs</span></div><div><strong>{liveSets.length}</strong><span>Live sets</span></div><div><strong>{serialCount.toLocaleString()}</strong><span>Serials</span></div></section>
+      <section className="compact-stats" aria-label="Registry overview"><div><strong>{liveTcgCount}</strong><span>Live TCGs</span></div><div><strong>{liveSets.length}</strong><span>Live sets</span></div><div><strong>{serialCount.toLocaleString()}</strong><span>Serials found</span></div></section>
       <section className="registry-section" id="tcgs">
         <div className="section-heading">
           <div><p className="eyebrow">Available now</p><h2>Live registries</h2></div>
