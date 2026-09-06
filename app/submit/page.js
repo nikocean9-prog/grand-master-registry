@@ -84,7 +84,7 @@ export default function SubmitPage() {
 
       const { data, error } = await supabase
         .from("cards")
-        .select("id, name, set_id, serial_total")
+        .select("id, name, set_id, serial_total, image_url")
         .in("set_id", liveSets.map((cardSet) => cardSet.id))
         .order("id");
 
@@ -290,13 +290,21 @@ if (serial) {
     }
   }
 
+  const selectedSet = sets.find((cardSet) => String(cardSet.id) === setId);
+  const selectedCard = cards.find((card) => String(card.id) === String(cardId));
+  const hasRegionalVariants = selectedSet?.serial_scheme !== "global";
+  const selectedTcgName =
+    tcgCatalog.find((tcg) => tcg.slug === tcgSlug)?.name || tcgSlug;
+
   return (
-    <main>
-      <Link href="/">← Back to Home</Link>
+    <main className="submission-page">
+      <Link href="/" className="submission-back-link">← Back to Home</Link>
 
-      <h1>Submit a Pull</h1>
-
-      <p>Report a serial-numbered card that has been pulled.</p>
+      <div className="submission-heading">
+        <p className="eyebrow">Document a card</p>
+        <h1>Submit a Pull</h1>
+        <p>Report a serial-numbered card for review and inclusion in the registry.</p>
+      </div>
 
       {cardsError && (
         <p role="alert">
@@ -304,7 +312,7 @@ if (serial) {
         </p>
       )}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="submission-layout">
         <div
           aria-hidden="true"
           style={{
@@ -324,9 +332,10 @@ if (serial) {
             autoComplete="off"
           />
         </div>
-        {sets.length > 0 && <><div>
-          <label>TCG</label>
-          <br />
+        <section className="submission-form-card">
+        <div className="submission-fields">
+        {sets.length > 0 && <div className="submission-field">
+          <label htmlFor="submission-tcg">TCG</label>
           <select value={tcgSlug} onChange={(event) => {
             const nextTcgSlug = event.target.value;
             const nextSet = sets.find((cardSet) => cardSet.tcg_slug === nextTcgSlug);
@@ -335,25 +344,24 @@ if (serial) {
             setCardId("");
             setSerialNumber("1");
             setRegion(nextSet?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
-          }} required>
+          }} required id="submission-tcg">
             {[...new Set(sets.map((cardSet) => cardSet.tcg_slug))].map((slug) => (
               <option key={slug} value={slug}>
                 {tcgCatalog.find((tcg) => tcg.slug === slug)?.name || slug}
               </option>
             ))}
           </select>
-        </div><br /></>}
-        {sets.filter((cardSet) => cardSet.tcg_slug === tcgSlug).length > 0 && <><div>
-          <label>Set</label>
-          <br />
-          <select value={setId} onChange={(event) => { const nextSetId = event.target.value; setSetId(nextSetId); setCardId(""); setSerialNumber("1"); setRegion(sets.find((cardSet) => String(cardSet.id) === nextSetId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS"); }} required>
+        </div>}
+        {sets.filter((cardSet) => cardSet.tcg_slug === tcgSlug).length > 0 && <div className="submission-field">
+          <label htmlFor="submission-set">Set</label>
+          <select id="submission-set" value={setId} onChange={(event) => { const nextSetId = event.target.value; setSetId(nextSetId); setCardId(""); setSerialNumber("1"); setRegion(sets.find((cardSet) => String(cardSet.id) === nextSetId)?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS"); }} required>
             {sets.filter((cardSet) => cardSet.tcg_slug === tcgSlug).map((cardSet) => <option key={cardSet.id} value={cardSet.id}>{cardSet.name}</option>)}
           </select>
-        </div><br /></>}
-        <div>
-          <label>Card</label>
-          <br />
+        </div>}
+        <div className="submission-field submission-field-wide">
+          <label htmlFor="submission-card">Card</label>
           <select
+            id="submission-card"
             value={cardId}
             onChange={(e) => { setCardId(e.target.value); setSerialNumber("1"); }}
             required
@@ -369,12 +377,10 @@ if (serial) {
           </select>
         </div>
 
-        <br />
-
-        {sets.find((cardSet) => String(cardSet.id) === setId)?.serial_scheme !== "global" && <div>
-          <label>Region</label>
-          <br />
+        {hasRegionalVariants && <div className="submission-field">
+          <label htmlFor="submission-region">Region</label>
           <select
+            id="submission-region"
             value={region}
             onChange={(e) => setRegion(e.target.value)}
           >
@@ -383,12 +389,10 @@ if (serial) {
           </select>
         </div>}
 
-        <br />
-
-        <div>
-          <label>Serial Number</label>
-          <br />
+        <div className={`submission-field ${hasRegionalVariants ? "" : "submission-field-wide"}`}>
+          <label htmlFor="submission-serial">Serial Number</label>
           <select
+            id="submission-serial"
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
           >
@@ -399,16 +403,10 @@ if (serial) {
               </option>
             ))}
           </select>
-             </div>
+        </div>
 
       {serialStatus === "confirmed" && (
-        <div
-          style={{
-            border: "1px solid #d6a700",
-            padding: "15px",
-            marginBottom: "20px",
-          }}
-        >
+        <div className="submission-warning submission-field-wide">
           <strong>This serial is already listed as confirmed.</strong>
 
           <p style={{ marginBottom: 0 }}>
@@ -419,17 +417,18 @@ if (serial) {
         </div>
       )}
 
-      <br />
-
-      <div>
-        <label>Photo Evidence</label>
-          <br />
+      <div className="submission-field submission-field-wide">
+        <label htmlFor="submission-photo">Photo evidence</label>
+          <div className="submission-upload">
           <input
+            id="submission-photo"
             type="file"
             accept="image/*"
             onChange={(e) => setPhoto(e.target.files?.[0] || null)}
             required
           />
+          <span>{photo ? photo.name : "Choose a clear photo showing the full card"}</span>
+          </div>
           <p className="photo-processing-notice">
             Submitted photos are checked automatically to help
             identify unreadable details, mismatches, possible editing, and
@@ -440,12 +439,10 @@ if (serial) {
           </p>
         </div>
 
-        <br />
-
-        <div>
-          <label>Country (optional)</label>
-          <br />
+        <div className="submission-field">
+          <label htmlFor="submission-country">Country <small>Optional</small></label>
           <input
+            id="submission-country"
             type="text"
             value={country}
             onChange={(e) => setCountry(e.target.value)}
@@ -453,12 +450,10 @@ if (serial) {
           />
         </div>
 
-        <br />
-
-        <div>
-          <label>Source link (optional)</label>
-          <br />
+        <div className="submission-field">
+          <label htmlFor="submission-source">Source link <small>Optional</small></label>
           <input
+            id="submission-source"
             type="url"
             value={sourceUrl}
             onChange={(e) => setSourceUrl(e.target.value)}
@@ -466,27 +461,23 @@ if (serial) {
           />
         </div>
 
-        <br />
-<div>
-  <label>Notes (optional)</label>
-  <br />
+<div className="submission-field submission-field-wide">
+  <label htmlFor="submission-notes">Notes <small>Optional</small></label>
   <textarea
+    id="submission-notes"
     value={notes}
     onChange={(e) => setNotes(e.target.value)}
     placeholder="Add any additional information about this pull or existing record..."
     rows="5"
-    style={{ width: "100%", maxWidth: "500px" }}
   />
 </div>
 
-<br />
-
-        <div>
-          <label>
-            Email{serialStatus === "confirmed" ? " (required)" : " (optional)"}
+        <div className="submission-field submission-field-wide">
+          <label htmlFor="submission-email">
+            Email <small>{serialStatus === "confirmed" ? "Required" : "Optional"}</small>
           </label>
-          <br />
           <input
+            id="submission-email"
             type="email"
             value={submitterEmail}
             onChange={(e) => setSubmitterEmail(e.target.value)}
@@ -508,14 +499,32 @@ if (serial) {
           )}
         </div>
 
-        <br />
-
-        <button type="submit" disabled={submitting}>
+        <button type="submit" disabled={submitting} className="submission-button submission-field-wide">
           {submitting ? "Submitting..." : "Submit for Verification"}
         </button>
+        </div>
+        </section>
+
+        <aside className="submission-preview">
+          <div className="submission-preview-image">
+            {selectedCard?.image_url ? (
+              <img src={selectedCard.image_url} alt={selectedCard.name} />
+            ) : (
+              <span>Select a card to preview it here</span>
+            )}
+          </div>
+          <p className="eyebrow">Selected card</p>
+          <h2>{selectedCard?.name || "No card selected"}</h2>
+          <dl>
+            <div><dt>TCG</dt><dd>{selectedTcgName || "—"}</dd></div>
+            <div><dt>Set</dt><dd>{selectedSet?.name || "—"}</dd></div>
+            {hasRegionalVariants && <div><dt>Region</dt><dd>{region === "E" ? "E-Region" : "Americas"}</dd></div>}
+            <div><dt>Serial</dt><dd>{String(serialNumber).padStart((selectedCard?.serial_total || 100) < 100 ? 2 : 3, "0")}{region === "E" ? "E" : ""}</dd></div>
+          </dl>
+        </aside>
       </form>
 
-      {message && <p>{message}</p>}
+      {message && <p className="submission-message" role="status">{message}</p>}
     </main>
   );
 }
