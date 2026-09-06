@@ -376,23 +376,36 @@ button {
 
 
 .public-nav {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
+  overflow: hidden;
   margin-bottom: 32px;
-  border: 1px solid #dfdfdf;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  padding: 10px 12px;
-  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.06);
+  border: 1px solid #b58a39;
+  border-radius: 16px;
+  background: radial-gradient(circle at 12% -80%, rgba(66, 142, 98, .58), transparent 58%), linear-gradient(115deg, #08281d, #041a12);
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(5, 35, 23, .2);
+}
+
+.public-nav::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+  border: 1px solid rgba(220, 181, 88, .22);
+  border-radius: 11px;
 }
 
 .site-name {
   display: inline-flex;
   align-items: center;
   gap: 11px;
-  color: #171717;
+  position: relative;
+  z-index: 1;
+  color: #fff8df;
   text-decoration: none;
 }
 
@@ -400,7 +413,7 @@ button {
   display: block;
   flex: 0 0 auto;
   border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 5px 13px rgba(0, 0, 0, .32);
 }
 
 .brand-copy {
@@ -411,20 +424,34 @@ button {
 }
 
 .brand-copy strong {
-  font-size: 23px;
-  font-weight: 850;
-  letter-spacing: -0.015em;
+  color: #fff3c8;
+  font-family: "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: -.025em;
+}
+
+.brand-copy strong span {
+  margin-right: 5px;
+  color: #e5bd5c;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: .6em;
+  font-weight: 900;
+  letter-spacing: .12em;
+  vertical-align: .2em;
 }
 
 .brand-copy small {
-  color: #5f6b63;
+  color: #b8c9bf;
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: .11em;
   text-transform: uppercase;
 }
 
 .nav-actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -440,8 +467,10 @@ button {
 }
 
 .nav-link-primary {
-  background: #1f6b3b;
-  color: white;
+  border: 1px solid #e5c068;
+  background: linear-gradient(180deg, #ffe6a0, #d7a844);
+  color: #172219;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
 }
 
 .nav-link-secondary {
@@ -683,7 +712,7 @@ button {
 .compact-home-intro { border:1px solid #d8ded9; border-radius:16px; background:#fff; padding:36px 40px; box-shadow:0 3px 12px rgba(17,24,39,.05); }
 .compact-home-intro h1 { max-width:680px; margin:7px 0 10px; font-size:clamp(34px,5vw,48px); line-height:1.08; }
 .compact-home-intro > p:last-child { max-width:700px; margin:0; color:#667069; font-size:17px; line-height:1.5; }
-.compact-stats { display:grid; grid-template-columns:repeat(3,1fr); margin-top:18px; border:1px solid #d8ded9; border-radius:14px; background:#fff; padding:18px 12px; }
+.compact-stats { display:grid; width:min(620px,calc(100% - 40px)); grid-template-columns:repeat(3,1fr); box-sizing:border-box; margin:18px auto 0; border:1px solid #d8ded9; border-radius:14px; background:#fff; padding:14px 10px; }
 .compact-stats div { display:flex; align-items:baseline; justify-content:center; gap:8px; border-right:1px solid #e0e4e1; }
 .compact-stats div:last-child { border-right:0; }
 .compact-stats strong { color:#183d29; font-size:25px; }
@@ -822,13 +851,13 @@ button {
   .public-nav { align-items:center; flex-direction:row; }
   .nav-actions { width:auto; flex-wrap:nowrap; }
   .nav-link { padding:8px 10px; font-size:13px; }
-  .brand-copy strong { font-size:19px; }
+  .brand-copy strong { font-size:20px; }
   .brand-copy small { display:none; }
   .brand-mark { width:42px; height:42px; }
   .compact-home-intro { padding:26px 24px; }
   .compact-home-intro h1 { font-size:34px; }
   .compact-home-intro > p:last-child { font-size:16px; }
-  .compact-stats { padding:15px 6px; }
+  .compact-stats { width:calc(100% - 36px); padding:12px 5px; }
   .compact-stats div { align-items:center; flex-direction:column; gap:2px; }
   .compact-stats strong { font-size:22px; }
   .compact-stats span { font-size:12px; }
@@ -931,7 +960,7 @@ button {
     align-items: center;
     gap: 12px;
     margin-bottom: 22px;
-    padding: 9px;
+    padding: 10px;
   }
 
   .site-name {
@@ -944,7 +973,7 @@ button {
   }
 
   .brand-copy strong {
-    font-size: 15px;
+    font-size: 18px;
   }
 
   .brand-copy small {
