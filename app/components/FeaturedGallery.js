@@ -63,20 +63,6 @@ export default function FeaturedGallery({ features }) {
         </div>
       </article>
 
-      <div className="featured-gallery-controls" aria-label="Choose a featured story">
-        {features.map((feature, index) => (
-          <button
-            type="button"
-            key={feature.title}
-            className={index === activeIndex ? "active" : ""}
-            aria-pressed={index === activeIndex}
-            onClick={() => setActiveIndex(index)}
-          >
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            {feature.shortTitle}
-          </button>
-        ))}
-      </div>
     </section>
   );
 }
