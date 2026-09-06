@@ -81,7 +81,10 @@ function CheckRow({
       </div>
       <dd>
         <strong>{result}</strong>
-        {Number.isInteger(confidence) && <small>{confidence}% confidence</small>}
+        {value !== null &&
+          typeof value !== "undefined" &&
+          Number.isInteger(confidence) &&
+          confidence > 0 && <small>{confidence}% confidence</small>}
       </dd>
     </div>
   );

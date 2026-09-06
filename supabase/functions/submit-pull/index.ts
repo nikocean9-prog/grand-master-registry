@@ -117,10 +117,23 @@ function finalizePhotoAssessment(
   expectedName?: string | null,
   expectedSerialValue?: string | null
 ) {
-  const identityMismatch =
-    result.name_match === false ||
-    result.serial_match === false ||
-    result.thumbnail_match === false;
+  const identityChecks = [
+    result.name_match,
+    result.serial_match,
+    result.thumbnail_match,
+  ];
+  const identityMismatch = identityChecks.some((value) => value === false);
+  const identityUnknown = identityChecks.some(
+    (value) => value === null || typeof value === "undefined"
+  );
+  const allIdentityChecksMatch = identityChecks.every((value) => value === true);
+  const finalRisk =
+    identityMismatch || result.possible_edit === true
+      ? "high"
+      : identityUnknown || result.possible_edit === null ||
+          typeof result.possible_edit === "undefined"
+        ? "review"
+        : "low";
 
   const comparisonReasons: string[] = [];
   if (result.name_match === false && result.card_name_read && expectedName) {
@@ -157,12 +170,18 @@ function finalizePhotoAssessment(
 
   const summary = identityMismatch
     ? "The submitted trading card does not match the selected registry record. Review the exact comparison results below."
-    : "The photo appears to show the selected trading card. Review the exact comparison results below.";
+    : identityUnknown
+      ? "The photo appears to show a trading card, but one or more comparisons could not be completed. Review it manually."
+      : "The photo appears to show the selected trading card. Review the exact comparison results below.";
 
   return {
     ...result,
-    risk_level: identityMismatch ? "high" : result.risk_level,
-    card_match: identityMismatch ? false : result.card_match,
+    risk_level: finalRisk,
+    card_match: identityMismatch
+      ? false
+      : allIdentityChecksMatch
+        ? true
+        : null,
     summary,
     reasons: [...comparisonReasons, ...aiReasons].slice(0, 6),
     serial_confidence:
@@ -249,7 +268,7 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
   const serialExpected = normalizeSerializedMarking(expectedSerialValue);
   const serialMatch =
     serialObserved && serialExpected ? serialObserved === serialExpected : null;
-  return finalizePhotoAssessment({
+  return {
     risk_level: parsed.risk_level,
     subject_type: parsed.subject_type,
     summary: parsed.summary.slice(0, 1000),
@@ -263,7 +282,9 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
     serial_read: serialRead,
     card_match: nullableBoolean(parsed.card_match),
     serial_match: serialMatch,
-    serial_confidence: confidence(parsed.serial_confidence),
+    serial_confidence: serialMatch === null
+      ? confidence(parsed.serial_confidence)
+      : 100,
     thumbnail_match: nullableBoolean(parsed.thumbnail_match),
     thumbnail_confidence: confidence(parsed.thumbnail_confidence),
     possible_edit: nullableBoolean(parsed.possible_edit),
@@ -275,7 +296,7 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
           .map((indicator: string) => indicator.slice(0, 300))
       : [],
     confidence: confidence(parsed.confidence),
-  }, null, expectedSerialValue);
+  };
 }
 
 async function checkTradingCardGate({
@@ -498,42 +519,37 @@ async function checkPhoto({
           return result;
         }
 
-        const comparison = compareTitles(cleaned, card.name);
-        const thumbnailMatch = result.thumbnail_match;
-        const serialMatch = result.serial_match;
-        const overallMatch =
-          comparison.match === false ||
-          serialMatch === false ||
-          thumbnailMatch === false
-            ? false
-            : comparison.match === true && thumbnailMatch === true
-              ? true
-              : null;
-        const riskLevel =
-          overallMatch === false || result.possible_edit === true
-            ? "high"
-            : overallMatch === null || result.possible_edit === null
-              ? "review"
-              : "low";
-
-        return finalizePhotoAssessment({
+        return {
           ...result,
-          risk_level: riskLevel,
           card_name_read: cleaned,
-          name_match: comparison.match,
-          name_confidence: comparison.similarity,
-          card_match: overallMatch,
           reasons: [
             ...(result.reasons || []),
-            `Title-only reading: "${cleaned}" (${comparison.similarity}% text match).`,
+            `Title-only reading: "${cleaned}".`,
           ].slice(0, 6),
-        }, card.name, expected);
+        };
       } catch (titleError) {
         console.warn("title-only reading unavailable", titleError);
         return result;
       } finally {
         clearTimeout(titleTimeout);
       }
+    };
+
+    const completeAssessment = async (result: Record<string, any>) => {
+      const withTitle = await addTitleFallback(result);
+      const nameComparison = withTitle.card_name_read && card?.name
+        ? compareTitles(withTitle.card_name_read, card.name)
+        : { match: null, similarity: 0 };
+
+      return finalizePhotoAssessment(
+        {
+          ...withTitle,
+          name_match: nameComparison.match,
+          name_confidence: nameComparison.similarity,
+        },
+        card?.name,
+        expected
+      );
     };
 
     let referenceDescription = "Reference thumbnail unavailable.";
@@ -673,11 +689,7 @@ async function checkPhoto({
       const parsedResult = parsePhotoCheck(content, expected);
       return {
         status: "complete",
-        result: finalizePhotoAssessment(
-          await addTitleFallback(parsedResult),
-          card?.name,
-          expected
-        ),
+        result: await completeAssessment(parsedResult),
       };
     } catch (parseError) {
       if (typeof content !== "string" || !content.trim()) throw parseError;
@@ -731,11 +743,7 @@ async function checkPhoto({
         const parsedResult = parsePhotoCheck(formatted, expected);
         return {
           status: "complete",
-          result: finalizePhotoAssessment(
-            await addTitleFallback(parsedResult),
-            card?.name,
-            expected
-          ),
+          result: await completeAssessment(parsedResult),
         };
       } finally {
         clearTimeout(formatterTimeout);
