@@ -22,7 +22,7 @@ function riskDisplay(submission) {
     return { label: "Detailed check running…", tone: "pending" };
   }
   if (submission.ai_check_status === "manual") {
-    return { label: "Review required", tone: "review" };
+    return { label: "Medium risk", tone: "review" };
   }
   if (submission.ai_check_status === "not_analyzed") {
     return { label: "Not analysed", tone: "unavailable" };
@@ -38,7 +38,7 @@ function riskDisplay(submission) {
     return { label: "High risk", tone: "high" };
   }
   if (submission.ai_risk_level === "review") {
-    return { label: "Review required", tone: "review" };
+    return { label: "Medium risk", tone: "review" };
   }
   if (submission.ai_risk_level === "low") {
     return { label: "Low risk", tone: "low" };
@@ -60,18 +60,25 @@ function checkWithConfidence(value, trueLabel, falseLabel, confidence) {
 }
 
 export default function AdminApprovals() {
+  const PAGE_SIZE = 25;
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [busyId, setBusyId] = useState(null);
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [expandedId, setExpandedId] = useState(null);
+  const [evidenceUrls, setEvidenceUrls] = useState({});
+  const [evidenceLoadingId, setEvidenceLoadingId] = useState(null);
 
   useEffect(() => {
-    loadApprovals();
-  }, []);
+    loadApprovals(page);
+  }, [page]);
 
-  async function loadApprovals() {
+  async function loadApprovals(pageNumber = page) {
     setLoading(true);
     setMessage("");
+    setExpandedId(null);
 
     const admin = await getCurrentAdmin(supabase);
 
@@ -81,10 +88,16 @@ export default function AdminApprovals() {
       return;
     }
 
-    const { data: submissionData, error: submissionError } =
-      await supabase
-        .from("submissions")
-        .select(`
+    const from = pageNumber * PAGE_SIZE;
+    const to = from + PAGE_SIZE - 1;
+    const {
+      data: submissionData,
+      error: submissionError,
+      count,
+    } = await supabase
+      .from("submissions")
+      .select(
+        `
           *,
           serial:serials (
             id,
@@ -97,10 +110,13 @@ export default function AdminApprovals() {
               name
             )
           )
-        `)
-        .eq("status", "pending")
-        .neq("ai_check_status", "pending")
-        .order("created_at", { ascending: true });
+        `,
+        { count: "exact" }
+      )
+      .eq("status", "pending")
+      .neq("ai_check_status", "pending")
+      .order("created_at", { ascending: true })
+      .range(from, to);
 
     if (submissionError) {
       console.error("Could not load submissions:", submissionError);
@@ -109,42 +125,49 @@ export default function AdminApprovals() {
       return;
     }
 
-    const rows = submissionData || [];
-    const evidencePaths = rows.map((submission) =>
-      getEvidencePath(submission.photo_url)
-    );
-    const validPaths = evidencePaths.filter(Boolean);
-    let signedUrls = [];
+    const rows = (submissionData || []).map((submission) => ({
+      ...submission,
+      serial: submission.serial || null,
+      card: submission.serial?.card || null,
+    }));
 
-    if (validPaths.length > 0) {
-      const { data, error } = await supabase.storage
-        .from("submission-evidence")
-        .createSignedUrls(validPaths, 3600);
-
-      if (error) {
-        console.error("Could not create evidence URLs:", error);
-      } else {
-        signedUrls = data || [];
-      }
+    if (rows.length === 0 && pageNumber > 0) {
+      setPage(pageNumber - 1);
+      return;
     }
 
-    let signedIndex = 0;
-    const completedSubmissions = rows.map((submission, index) => {
-      const hasEvidence = Boolean(evidencePaths[index]);
-      const evidenceUrl = hasEvidence
-        ? signedUrls[signedIndex++]?.signedUrl || null
-        : null;
-
-      return {
-        ...submission,
-        serial: submission.serial || null,
-        card: submission.serial?.card || null,
-        evidence_url: evidenceUrl,
-      };
-    });
-
-    setSubmissions(completedSubmissions);
+    setSubmissions(rows);
+    setTotalCount(count || 0);
     setLoading(false);
+  }
+
+  async function toggleSubmission(submission) {
+    if (expandedId === submission.id) {
+      setExpandedId(null);
+      return;
+    }
+
+    setExpandedId(submission.id);
+    if (evidenceUrls[submission.id] || !submission.photo_url) return;
+
+    const evidencePath = getEvidencePath(submission.photo_url);
+    if (!evidencePath) return;
+
+    setEvidenceLoadingId(submission.id);
+    const { data, error } = await supabase.storage
+      .from("submission-evidence")
+      .createSignedUrl(evidencePath, 3600);
+
+    if (error) {
+      console.error("Could not create evidence URL:", error);
+      setMessage("The evidence photo could not be loaded.");
+    } else if (data?.signedUrl) {
+      setEvidenceUrls((current) => ({
+        ...current,
+        [submission.id]: data.signedUrl,
+      }));
+    }
+    setEvidenceLoadingId(null);
   }
 
   async function handleApprove(submissionId) {
@@ -166,7 +189,7 @@ export default function AdminApprovals() {
       return;
     }
 
-    await loadApprovals();
+    await loadApprovals(page);
     setMessage("Submission approved.");
     setBusyId(null);
   }
@@ -198,7 +221,7 @@ export default function AdminApprovals() {
       return;
     }
 
-    await loadApprovals();
+    await loadApprovals(page);
     setMessage("Submission rejected.");
     setBusyId(null);
   }
@@ -224,6 +247,9 @@ export default function AdminApprovals() {
       : "Americas";
   }
 
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
   if (loading) {
     return (
       <main>
@@ -248,8 +274,13 @@ export default function AdminApprovals() {
       <hr />
 
       <div className="admin-section-heading">
-        <h2>Pending Submissions</h2>
-        <button type="button" onClick={loadApprovals}>
+        <div>
+          <h2>Pending Submissions</h2>
+          <p className="approval-count">
+            {totalCount} pending · Page {page + 1} of {totalPages}
+          </p>
+        </div>
+        <button type="button" onClick={() => loadApprovals(page)}>
           Refresh checks
         </button>
       </div>
@@ -259,291 +290,311 @@ export default function AdminApprovals() {
       {submissions.length === 0 ? (
         <p>No pending submissions.</p>
       ) : (
-        submissions.map((submission) => {
-          const risk = riskDisplay(submission);
+        <div className="approval-list">
+          {submissions.map((submission) => {
+            const risk = riskDisplay(submission);
+            const isExpanded = expandedId === submission.id;
+            const evidenceUrl = evidenceUrls[submission.id] || null;
 
-          return (
-          <div
-            key={submission.id}
-            style={{
-              border:
-                submission.serial?.status === "confirmed"
-                  ? "3px solid #c62828"
-                  : "1px solid #ccc",
-              padding: "20px",
-              marginBottom: "25px",
-            }}
-          >
-            <h2>{submission.card?.name || "Unknown Card"}</h2>
-
-            <p>
-              <strong>Serial:</strong>{" "}
-              {formatSerial(submission.serial)}
-            </p>
-
-            <p>
-              <strong>Region:</strong>{" "}
-              {formatRegion(submission.serial)}
-            </p>
-
-            {submission.serial?.status === "confirmed" && (
-              <div
-                style={{
-                  border: "1px solid #d6a700",
-                  backgroundColor: "#fff8d6",
-                  color: "#5f4900",
-                  padding: "15px",
-                  marginBottom: "20px",
-                }}
+            return (
+              <article
+                key={submission.id}
+                className={`approval-row approval-row-${risk.tone} ${
+                  isExpanded ? "is-expanded" : ""
+                }`}
               >
-                <strong>Warning: This serial has already been confirmed.</strong>
-                <p style={{ marginBottom: 0 }}>
-                  Approving this submission may replace the existing public
-                  record. Check the current evidence before continuing.
-                </p>
-              </div>
-            )}
+                <button
+                  type="button"
+                  className="approval-summary"
+                  onClick={() => toggleSubmission(submission)}
+                  aria-expanded={isExpanded}
+                >
+                  <span className="approval-summary-main">
+                    <strong>{submission.card?.name || "Unknown Card"}</strong>
+                    <span>
+                      Serial {formatSerial(submission.serial)} ·{" "}
+                      {formatRegion(submission.serial)}
+                    </span>
+                  </span>
+                  <span className="approval-summary-meta">
+                    {submission.exact_duplicate_of && (
+                      <span className="approval-duplicate">Duplicate</span>
+                    )}
+                    <span className={`photo-check-badge approval-risk-${risk.tone}`}>
+                      {risk.label}
+                    </span>
+                    <span aria-hidden="true">{isExpanded ? "▲" : "▼"}</span>
+                  </span>
+                </button>
 
-            <section className={`photo-check photo-check-${risk.tone}`}>
-              <div className="photo-check-heading">
-                <h3>Automated Photo Check</h3>
-                <span className="photo-check-badge">{risk.label}</span>
-              </div>
-
-              {submission.ai_summary && <p>{submission.ai_summary}</p>}
-
-              {Array.isArray(submission.ai_reasons) &&
-                submission.ai_reasons.length > 0 && (
-                  <ul>
-                    {submission.ai_reasons.map((reason, index) => (
-                      <li key={`${submission.id}-reason-${index}`}>{reason}</li>
-                    ))}
-                  </ul>
-                )}
-
-              {submission.ai_check_status === "complete" && (
-                <>
-                  <dl className="photo-check-details">
-                    <div>
-                      <dt>Card name read</dt>
-                      <dd>
-                        {submission.ai_card_name_read || "Unable to determine"}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Card name match</dt>
-                      <dd>
-                        {checkWithConfidence(
-                          submission.ai_name_match,
-                          "Matches",
-                          "Mismatch",
-                          submission.ai_name_confidence
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Serial read</dt>
-                      <dd>{submission.ai_serial_read || "Unable to determine"}</dd>
-                    </div>
-                    <div>
-                      <dt>Serial match</dt>
-                      <dd>
-                        {checkWithConfidence(
-                          submission.ai_serial_match,
-                          "Matches",
-                          "Mismatch",
-                          submission.ai_serial_confidence
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Reference thumbnail match</dt>
-                      <dd>
-                        {checkWithConfidence(
-                          submission.ai_thumbnail_match,
-                          "Matches",
-                          "Mismatch",
-                          submission.ai_thumbnail_confidence
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Overall card identity</dt>
-                      <dd>
-                        {checkValue(
-                          submission.ai_card_match,
-                          "Matches",
-                          "Mismatch"
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Visible editing indicators</dt>
-                      <dd>
-                        {checkWithConfidence(
-                          submission.ai_possible_edit,
-                          "Flagged",
-                          "Not detected",
-                          submission.ai_edit_confidence
-                        )}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Overall assessment confidence</dt>
-                      <dd>
-                        {Number.isInteger(submission.ai_confidence)
-                          ? `${submission.ai_confidence}%`
-                          : "Not available"}
-                      </dd>
-                    </div>
-                  </dl>
-
-                  {Array.isArray(submission.ai_edit_indicators) &&
-                    submission.ai_edit_indicators.length > 0 && (
-                      <div>
-                        <strong>Editing indicators reported:</strong>
-                        <ul>
-                          {submission.ai_edit_indicators.map(
-                            (indicator, index) => (
-                              <li key={`${submission.id}-edit-${index}`}>
-                                {indicator}
-                              </li>
-                            )
-                          )}
-                        </ul>
+                {isExpanded && (
+                  <div className="approval-details">
+                    {submission.serial?.status === "confirmed" && (
+                      <div className="approval-warning">
+                        <strong>
+                          Warning: This serial has already been confirmed.
+                        </strong>
+                        <p>
+                          Approving this submission may replace the existing
+                          public record. Check the current evidence first.
+                        </p>
                       </div>
                     )}
-                </>
-              )}
 
-              {submission.exact_duplicate_of && (
-                <p>
-                  <strong>Exact duplicate:</strong> Matches submission #
-                  {submission.exact_duplicate_of}.
-                </p>
-              )}
+                    <section className={`photo-check photo-check-${risk.tone}`}>
+                      <div className="photo-check-heading">
+                        <h3>Automated Photo Check</h3>
+                        <span className="photo-check-badge">{risk.label}</span>
+                      </div>
 
-              <p className="photo-check-disclaimer">
-                This is an advisory visual comparison, not proof of
-                authenticity or image manipulation. Automated checks can be
-                wrong; review the original evidence before deciding.
-              </p>
-            </section>
+                      {submission.ai_summary && <p>{submission.ai_summary}</p>}
 
-            <p>
-              <strong>Country:</strong>{" "}
-              {submission.country || "Not provided"}
-            </p>
+                      {Array.isArray(submission.ai_reasons) &&
+                        submission.ai_reasons.length > 0 && (
+                          <ul>
+                            {submission.ai_reasons.map((reason, index) => (
+                              <li key={`${submission.id}-reason-${index}`}>
+                                {reason}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
 
-            {submission.notes && (
-              <div>
-                <p>
-                  <strong>Notes:</strong>
-                </p>
-                <p style={{ whiteSpace: "pre-wrap" }}>
-                  {submission.notes}
-                </p>
-              </div>
-            )}
+                      {submission.ai_check_status === "complete" && (
+                        <>
+                          <dl className="photo-check-details">
+                            <div>
+                              <dt>Card name read</dt>
+                              <dd>
+                                {submission.ai_card_name_read ||
+                                  "Unable to determine"}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Card name match</dt>
+                              <dd>
+                                {checkWithConfidence(
+                                  submission.ai_name_match,
+                                  "Matches",
+                                  "Mismatch",
+                                  submission.ai_name_confidence
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Serial read</dt>
+                              <dd>
+                                {submission.ai_serial_read ||
+                                  "Unable to determine"}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Serial match</dt>
+                              <dd>
+                                {checkWithConfidence(
+                                  submission.ai_serial_match,
+                                  "Matches",
+                                  "Mismatch",
+                                  submission.ai_serial_confidence
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Reference thumbnail match</dt>
+                              <dd>
+                                {checkWithConfidence(
+                                  submission.ai_thumbnail_match,
+                                  "Matches",
+                                  "Mismatch",
+                                  submission.ai_thumbnail_confidence
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Overall card identity</dt>
+                              <dd>
+                                {checkValue(
+                                  submission.ai_card_match,
+                                  "Matches",
+                                  "Mismatch"
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Visible editing indicators</dt>
+                              <dd>
+                                {checkWithConfidence(
+                                  submission.ai_possible_edit,
+                                  "Flagged",
+                                  "Not detected",
+                                  submission.ai_edit_confidence
+                                )}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Overall assessment confidence</dt>
+                              <dd>
+                                {Number.isInteger(submission.ai_confidence)
+                                  ? `${submission.ai_confidence}%`
+                                  : "Not available"}
+                              </dd>
+                            </div>
+                          </dl>
 
-            {submission.submitter_email && (
-              <div style={{ marginBottom: "16px" }}>
-                <p>
-                  <strong>Contact email:</strong>{" "}
-                  {submission.submitter_email}
-                </p>
-                <a
-                  href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
-                    `TCG Serial Tracker submission: ${
-                      submission.card?.name || "Unknown Card"
-                    } ${formatSerial(submission.serial)}`
-                  )}`}
-                  style={{
-                    display: "inline-block",
-                    border: "1px solid #333",
-                    padding: "8px 14px",
-                    textDecoration: "none",
-                  }}
-                >
-                  Contact submitter
-                </a>
-              </div>
-            )}
+                          {Array.isArray(submission.ai_edit_indicators) &&
+                            submission.ai_edit_indicators.length > 0 && (
+                              <div>
+                                <strong>Editing indicators reported:</strong>
+                                <ul>
+                                  {submission.ai_edit_indicators.map(
+                                    (indicator, index) => (
+                                      <li
+                                        key={`${submission.id}-edit-${index}`}
+                                      >
+                                        {indicator}
+                                      </li>
+                                    )
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                        </>
+                      )}
 
-            <p>
-              <strong>Submitted:</strong>{" "}
-              {submission.created_at
-                ? new Date(submission.created_at).toLocaleString()
-                : "Unknown"}
-            </p>
+                      {submission.exact_duplicate_of && (
+                        <p>
+                          <strong>Exact duplicate:</strong> Matches submission #
+                          {submission.exact_duplicate_of}.
+                        </p>
+                      )}
 
-            {submission.source_url && (
-              <p>
-                <strong>Source:</strong>{" "}
-                <a
-                  href={submission.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View source
-                </a>
-              </p>
-            )}
+                      <p className="photo-check-disclaimer">
+                        This is an advisory visual comparison, not proof of
+                        authenticity or image manipulation. Automated checks can
+                        be wrong; review the original evidence before deciding.
+                      </p>
+                    </section>
 
-            {submission.evidence_url && (
-              <div>
-                <p>
-                  <strong>Photo Evidence:</strong>
-                </p>
+                    <div className="approval-information">
+                      <p>
+                        <strong>Country:</strong>{" "}
+                        {submission.country || "Not provided"}
+                      </p>
+                      <p>
+                        <strong>Submitted:</strong>{" "}
+                        {submission.created_at
+                          ? new Date(submission.created_at).toLocaleString()
+                          : "Unknown"}
+                      </p>
+                    </div>
 
-                <a
-                  href={submission.evidence_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={submission.evidence_url}
-                    alt="Submission evidence"
-                    style={{
-                      display: "block",
-                      maxWidth: "400px",
-                      width: "100%",
-                      height: "auto",
-                    }}
-                  />
-                </a>
-              </div>
-            )}
+                    {submission.notes && (
+                      <div>
+                        <p>
+                          <strong>Notes:</strong>
+                        </p>
+                        <p style={{ whiteSpace: "pre-wrap" }}>
+                          {submission.notes}
+                        </p>
+                      </div>
+                    )}
 
-            <div style={{ marginTop: "20px" }}>
-              <button
-                type="button"
-                onClick={() => handleApprove(submission.id)}
-                disabled={busyId === submission.id}
-                style={{
-                  marginRight: "10px",
-                  padding: "10px 18px",
-                }}
-              >
-                {busyId === submission.id
-                  ? "Processing..."
-                  : "Approve"}
-              </button>
+                    {submission.submitter_email && (
+                      <p>
+                        <strong>Contact:</strong>{" "}
+                        <a
+                          href={`mailto:${submission.submitter_email}?subject=${encodeURIComponent(
+                            `TCG Serial Tracker submission: ${
+                              submission.card?.name || "Unknown Card"
+                            } ${formatSerial(submission.serial)}`
+                          )}`}
+                        >
+                          {submission.submitter_email}
+                        </a>
+                      </p>
+                    )}
 
-              <button
-                type="button"
-                onClick={() => handleReject(submission.id)}
-                disabled={busyId === submission.id}
-                style={{
-                  padding: "10px 18px",
-                }}
-              >
-                Reject
-              </button>
-            </div>
-          </div>
-          );
-        })
+                    {submission.source_url && (
+                      <p>
+                        <strong>Source:</strong>{" "}
+                        <a
+                          href={submission.source_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          View source
+                        </a>
+                      </p>
+                    )}
+
+                    <div className="approval-evidence">
+                      <p>
+                        <strong>Photo Evidence:</strong>
+                      </p>
+                      {evidenceLoadingId === submission.id && (
+                        <p>Loading photo...</p>
+                      )}
+                      {!evidenceLoadingId && evidenceUrl && (
+                        <a
+                          href={evidenceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <img
+                            src={evidenceUrl}
+                            alt="Submission evidence"
+                            loading="lazy"
+                          />
+                        </a>
+                      )}
+                    </div>
+
+                    <div className="approval-actions">
+                      <button
+                        type="button"
+                        onClick={() => handleApprove(submission.id)}
+                        disabled={busyId === submission.id}
+                      >
+                        {busyId === submission.id
+                          ? "Processing..."
+                          : "Approve"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleReject(submission.id)}
+                        disabled={busyId === submission.id}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <nav className="approval-pagination" aria-label="Pending submissions pages">
+          <button
+            type="button"
+            disabled={page === 0}
+            onClick={() => setPage((current) => Math.max(0, current - 1))}
+          >
+            Previous
+          </button>
+          <span>
+            Page {page + 1} of {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={page + 1 >= totalPages}
+            onClick={() => setPage((current) => current + 1)}
+          >
+            Next
+          </button>
+        </nav>
       )}
     </main>
   );
