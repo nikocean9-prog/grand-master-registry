@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
-import { getEvidenceUrl } from "../../lib/evidenceUrl";
+import { getEvidencePath } from "../../lib/evidenceUrl";
 import {
   isMfaRequiredError,
   safeAdminActionMessage,
@@ -84,50 +84,64 @@ export default function AdminApprovals() {
     const { data: submissionData, error: submissionError } =
       await supabase
         .from("submissions")
-        .select("*")
+        .select(`
+          *,
+          serial:serials (
+            id,
+            card_id,
+            serial_number,
+            region,
+            status,
+            card:cards (
+              id,
+              name
+            )
+          )
+        `)
         .eq("status", "pending")
         .neq("ai_check_status", "pending")
         .order("created_at", { ascending: true });
 
     if (submissionError) {
+      console.error("Could not load submissions:", submissionError);
       setMessage("Could not load submissions.");
       setLoading(false);
       return;
     }
 
-    const completedSubmissions = [];
+    const rows = submissionData || [];
+    const evidencePaths = rows.map((submission) =>
+      getEvidencePath(submission.photo_url)
+    );
+    const validPaths = evidencePaths.filter(Boolean);
+    let signedUrls = [];
 
-    for (const submission of submissionData || []) {
-      const { data: serial } = await supabase
-        .from("serials")
-        .select("id, card_id, serial_number, region, status")
-        .eq("id", submission.serial_id)
-        .single();
+    if (validPaths.length > 0) {
+      const { data, error } = await supabase.storage
+        .from("submission-evidence")
+        .createSignedUrls(validPaths, 3600);
 
-      let card = null;
-
-      if (serial) {
-        const { data: cardData } = await supabase
-          .from("cards")
-          .select("id, name")
-          .eq("id", serial.card_id)
-          .single();
-
-        card = cardData;
+      if (error) {
+        console.error("Could not create evidence URLs:", error);
+      } else {
+        signedUrls = data || [];
       }
-
-      const evidenceUrl = await getEvidenceUrl(
-        supabase,
-        submission.photo_url
-      );
-
-      completedSubmissions.push({
-        ...submission,
-        serial,
-        card,
-        evidence_url: evidenceUrl,
-      });
     }
+
+    let signedIndex = 0;
+    const completedSubmissions = rows.map((submission, index) => {
+      const hasEvidence = Boolean(evidencePaths[index]);
+      const evidenceUrl = hasEvidence
+        ? signedUrls[signedIndex++]?.signedUrl || null
+        : null;
+
+      return {
+        ...submission,
+        serial: submission.serial || null,
+        card: submission.serial?.card || null,
+        evidence_url: evidenceUrl,
+      };
+    });
 
     setSubmissions(completedSubmissions);
     setLoading(false);
