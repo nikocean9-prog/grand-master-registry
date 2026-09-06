@@ -287,6 +287,9 @@ export default function SubmitPage() {
   const selectedSet = sets.find((cardSet) => String(cardSet.id) === setId);
   const selectedCard = cards.find((card) => String(card.id) === String(cardId));
   const hasRegionalVariants = selectedSet?.serial_scheme !== "global";
+  const serialsPerRegion = hasRegionalVariants
+    ? Math.ceil((selectedCard?.serial_total || 200) / 2)
+    : selectedCard?.serial_total || 100;
   const selectedTcgName =
     tcgCatalog.find((tcg) => tcg.slug === tcgSlug)?.name || tcgSlug;
 
@@ -390,9 +393,9 @@ export default function SubmitPage() {
             value={serialNumber}
             onChange={(e) => setSerialNumber(e.target.value)}
           >
-            {Array.from({ length: cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100 }, (_, i) => i + 1).map((number) => (
+            {Array.from({ length: serialsPerRegion }, (_, i) => i + 1).map((number) => (
               <option key={number} value={number}>
-                {String(number).padStart((cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100) < 100 ? 2 : 3, "0")}
+                {String(number).padStart(serialsPerRegion < 100 ? 2 : 3, "0")}
                 {region === "E" ? "E" : ""}{serialStatuses[String(number)] === "confirmed" ? " — already confirmed" : ""}
               </option>
             ))}
@@ -513,7 +516,7 @@ export default function SubmitPage() {
             <div><dt>TCG</dt><dd>{selectedTcgName || "—"}</dd></div>
             <div><dt>Set</dt><dd>{selectedSet?.name || "—"}</dd></div>
             {hasRegionalVariants && <div><dt>Region</dt><dd>{region === "E" ? "E-Region" : "Americas"}</dd></div>}
-            <div><dt>Serial</dt><dd>{String(serialNumber).padStart((selectedCard?.serial_total || 100) < 100 ? 2 : 3, "0")}{region === "E" ? "E" : ""}</dd></div>
+            <div><dt>Serial</dt><dd>{String(serialNumber).padStart(serialsPerRegion < 100 ? 2 : 3, "0")}{region === "E" ? "E" : ""}</dd></div>
           </dl>
         </aside>
       </form>
