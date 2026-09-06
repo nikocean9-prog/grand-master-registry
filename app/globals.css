@@ -1197,8 +1197,8 @@ button {
 /* Premium Yu-Gi-Oh TCG heading */
 .catalog-heading.tcg-heading-yugioh {
   position: relative;
-  min-height: 280px;
-  align-items: flex-end;
+  min-height: 160px;
+  align-items: center;
   overflow: hidden;
   border: 2px solid #b48a38;
   background-color: #061a11;
@@ -1206,7 +1206,7 @@ button {
   background-position: center;
   background-size: cover;
   color: #fff9e7;
-  padding: 42px 44px;
+  padding: 28px 44px;
   box-shadow: 0 9px 28px rgba(7, 27, 18, 0.27);
 }
 
@@ -1226,7 +1226,7 @@ button {
 }
 
 .catalog-heading.tcg-heading-yugioh .eyebrow {
-  color: #daba65;
+  display: none;
 }
 
 .catalog-heading.tcg-heading-yugioh h1 {
@@ -1252,10 +1252,10 @@ button {
 
 @media (max-width: 700px) {
   .catalog-heading.tcg-heading-yugioh {
-    min-height: 300px;
-    align-items: flex-end;
-    padding: 34px 28px;
-    background-position: 62% center;
+    min-height: 170px;
+    align-items: center;
+    padding: 24px 28px;
+    background-position: 62% 50%;
   }
 
   .catalog-heading.tcg-heading-yugioh > div {
