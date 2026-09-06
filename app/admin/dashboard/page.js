@@ -12,6 +12,7 @@ const supabase = createClient(
 
 export default function AdminHome() {
   const [loading, setLoading] = useState(true);
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     async function checkAdmin() {
@@ -34,6 +35,7 @@ export default function AdminHome() {
         return;
       }
 
+      setIsOwner(admin.isOwner);
       setLoading(false);
     }
 
@@ -78,6 +80,13 @@ export default function AdminHome() {
           <strong>Submission History</strong>
           <div>View all approved and rejected submissions.</div>
         </Link>
+
+        {isOwner && (
+          <Link href="/admin/operations" style={linkStyle}>
+            <strong>Owner Operations</strong>
+            <div>Manage discoveries, content drafts and automated work.</div>
+          </Link>
+        )}
 
         <Link href="/admin/security" style={linkStyle}>
           <strong>Admin Security</strong>
