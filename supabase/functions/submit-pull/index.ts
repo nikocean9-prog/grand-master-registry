@@ -96,6 +96,37 @@ function expectedSerial(serialNumber: number, region: string) {
   return region === "E" ? `${number}E` : number;
 }
 
+function normalizeSerializedMarking(value: string | null) {
+  if (!value) return null;
+
+  const cleaned = value.toUpperCase().replace(/\s+/g, "");
+  const numbered = cleaned.match(
+    /(?:^|[^A-Z0-9])(\d{1,3})([A-Z]?)(?:\/|OF)\d+([A-Z]?)(?:$|[^A-Z0-9])/
+  );
+  const standalone = cleaned.match(/^(\d{1,3})([A-Z]?)$/);
+  const match = numbered || standalone;
+  if (!match) return null;
+
+  // European markings can be printed as either 001E or 001/100E.
+  const suffix = numbered ? numbered[2] || numbered[3] || "" : match[2] || "";
+  return `${match[1].padStart(3, "0")}${suffix}`;
+}
+
+function finalizePhotoAssessment(result: Record<string, any>) {
+  const identityMismatch =
+    result.name_match === false ||
+    result.serial_match === false ||
+    result.thumbnail_match === false;
+
+  if (!identityMismatch) return result;
+
+  return {
+    ...result,
+    risk_level: "high",
+    card_match: false,
+  };
+}
+
 async function hashReceipt(receipt: string) {
   const digest = await crypto.subtle.digest(
     "SHA-256",
@@ -171,27 +202,24 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
       ? value.trim().slice(0, length)
       : null;
   const serialRead = nullableText(parsed.serial_read);
-  const normalizeSerial = (value: string | null) => {
-    if (!value) return null;
-    const cleaned = value.toUpperCase().replace(/\s+/g, "");
-    const numbered = cleaned.match(/(?:^|[^A-Z0-9])(\d{1,3})([A-Z]?)(?:\/|OF)\d+(?:$|[^A-Z0-9])/);
-    const standalone = cleaned.match(/^(\d{1,3})([A-Z]?)$/);
-    const match = numbered || standalone;
-    return match ? `${match[1].padStart(3, "0")}${match[2] || ""}` : null;
-  };
-  const serialObserved = normalizeSerial(serialRead);
-  const serialExpected = normalizeSerial(expectedSerialValue);
+  const serialObserved = normalizeSerializedMarking(serialRead);
+  const serialExpected = normalizeSerializedMarking(expectedSerialValue);
   const serialMatch =
     serialObserved && serialExpected ? serialObserved === serialExpected : null;
+  const serialMismatchReason = serialMatch === false
+    ? [`Serial mismatch: read ${serialRead}; expected ${expectedSerialValue}.`]
+    : [];
 
-  return {
+  return finalizePhotoAssessment({
     risk_level: parsed.risk_level,
     subject_type: parsed.subject_type,
     summary: parsed.summary.slice(0, 1000),
-    reasons: parsed.reasons
-      .filter((reason: unknown) => typeof reason === "string")
-      .slice(0, 6)
-      .map((reason: string) => reason.slice(0, 500)),
+    reasons: [
+      ...serialMismatchReason,
+      ...parsed.reasons
+        .filter((reason: unknown) => typeof reason === "string")
+        .map((reason: string) => reason.slice(0, 500)),
+    ].slice(0, 6),
     card_name_read: nullableText(parsed.card_name_read, 200),
     name_match: nullableBoolean(parsed.name_match),
     name_confidence: confidence(parsed.name_confidence),
@@ -210,7 +238,7 @@ function parsePhotoCheck(content: unknown, expectedSerialValue: string) {
           .map((indicator: string) => indicator.slice(0, 300))
       : [],
     confidence: confidence(parsed.confidence),
-  };
+  });
 }
 
 async function checkTradingCardGate({
@@ -435,8 +463,11 @@ async function checkPhoto({
 
         const comparison = compareTitles(cleaned, card.name);
         const thumbnailMatch = result.thumbnail_match;
+        const serialMatch = result.serial_match;
         const overallMatch =
-          comparison.match === false || thumbnailMatch === false
+          comparison.match === false ||
+          serialMatch === false ||
+          thumbnailMatch === false
             ? false
             : comparison.match === true && thumbnailMatch === true
               ? true
@@ -448,7 +479,7 @@ async function checkPhoto({
               ? "review"
               : "low";
 
-        return {
+        return finalizePhotoAssessment({
           ...result,
           risk_level: riskLevel,
           card_name_read: cleaned,
@@ -459,7 +490,7 @@ async function checkPhoto({
             ...(result.reasons || []),
             `Title-only reading: "${cleaned}" (${comparison.similarity}% text match).`,
           ].slice(0, 6),
-        };
+        });
       } catch (titleError) {
         console.warn("title-only reading unavailable", titleError);
         return result;

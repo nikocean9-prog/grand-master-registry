@@ -55,7 +55,7 @@ function checkValue(value, trueLabel, falseLabel) {
 function checkWithConfidence(value, trueLabel, falseLabel, confidence) {
   const result = checkValue(value, trueLabel, falseLabel);
   return Number.isInteger(confidence)
-    ? `${result} (${confidence}% confidence)`
+    ? `${result} — ${confidence}% confidence in this assessment`
     : result;
 }
 
@@ -432,7 +432,7 @@ export default function AdminApprovals() {
                               </dd>
                             </div>
                             <div>
-                              <dt>Overall assessment confidence</dt>
+                              <dt>Confidence in the overall assessment</dt>
                               <dd>
                                 {Number.isInteger(submission.ai_confidence)
                                   ? `${submission.ai_confidence}%`
