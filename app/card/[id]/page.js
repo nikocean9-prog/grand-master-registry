@@ -90,7 +90,6 @@ export default async function CardPage({ params }) {
 
       <div className="serial-legend" aria-label="Serial status legend">
         <span><i className="legend-dot confirmed" /> Confirmed</span>
-        <span><i className="legend-dot reported" /> Awaiting verification</span>
         <span><i className="legend-dot unreported" /> Not reported</span>
       </div>
 
