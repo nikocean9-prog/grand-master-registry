@@ -1,12 +1,25 @@
 import Link from "next/link";
 import PublicHeader from "./components/PublicHeader";
 import TcgCatalog from "./components/TcgCatalog";
+import { createClient } from "@supabase/supabase-js";
 import { tcgs } from "./lib/catalog";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  { auth: { persistSession: false, autoRefreshToken: false } }
+);
+
+export default async function Home() {
   const liveSets = tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live");
   const liveTcgCount = tcgs.filter((tcg) => tcg.sets.some((set) => set.status === "live")).length;
-  const serialCount = liveSets.reduce((total, set) => total + (set.serials || 0), 0);
+  const { count: confirmedSerialCount, error: countError } = await supabase
+    .from("serials")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "confirmed");
+  const serialCount = countError ? 0 : confirmedSerialCount || 0;
 
   return (
     <main>
