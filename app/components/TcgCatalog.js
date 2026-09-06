@@ -44,7 +44,31 @@ export default function TcgCatalog({ tcgs }) {
           );
         })}
       </div>
-      {isAdmin && <section className="admin-future-section"><p className="admin-catalog-note">Admin view: future TCGs are visible only to you.</p><h2>Future TCGs</h2><div className="tcg-grid">{futureTcgs.map((tcg) => <Link href={`/tcg/${tcg.slug}`} className="tcg-card planned" key={tcg.slug}><span className="tcg-monogram" aria-hidden="true">{tcg.initials}</span><span className="status-badge planned">Coming soon</span><h3>{tcg.name}</h3><p>{tcg.description}</p><strong>{tcg.sets.length || "No"} {tcg.sets.length === 1 ? "set" : "sets"} listed →</strong></Link>)}</div></section>}
+      {futureTcgs.length > 0 && (
+        <section className="future-registry-section">
+          <p className="eyebrow">Coming soon</p>
+          <h2>Future TCGs</h2>
+          <div className="live-registry-list">
+            {futureTcgs.map((tcg) => (
+              <Link
+                href={`/tcg/${tcg.slug}`}
+                className={`live-registry-card future-registry-card tcg-${tcg.slug}`}
+                key={tcg.slug}
+              >
+                <span className="live-registry-art" aria-hidden="true">
+                  <span className="future-registry-logo">{tcg.name}</span>
+                </span>
+                <div className="live-registry-copy">
+                  <span>Trading card game</span>
+                  <h3>{tcg.name}</h3>
+                  <p>{tcg.description}</p>
+                </div>
+                <strong className="future-registry-status">Coming soon</strong>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }
