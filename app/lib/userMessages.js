@@ -29,7 +29,7 @@ export function safeAdminActionMessage(error, action) {
     message.includes("network") ||
     message.includes("load failed")
   ) {
-    return "Connection problem. Check your internet connection and try again.";
+    return "We could not confirm the submission result. Press Submit again to safely check or complete the submission.";
   }
 
   return `Could not ${action}. Please try again.`;
@@ -75,5 +75,5 @@ export function safeSubmissionMessage(serverMessage, error) {
     return "Connection problem. Check your internet connection and try again.";
   }
 
-  return "Submission could not be sent. Please try again. Your form has not been cleared.";
+  return "We could not confirm the submission result. Press Submit again to safely check or complete the submission.";
 }
