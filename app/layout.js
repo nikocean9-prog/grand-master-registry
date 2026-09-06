@@ -1,4 +1,5 @@
 import "./globals.css";
+import Link from "next/link";
 import AdminRegistryLink from "./components/AdminRegistryLink";
 
 export const metadata = {
@@ -41,14 +42,10 @@ export default function RootLayout({ children }) {
           <div className="site-content">{children}</div>
           <footer className="site-footer">
             <p>
-              TCG Serial Tracker is an independent, unofficial fan project
-              and is not affiliated with, endorsed by, or sponsored by Konami
-              Digital Entertainment.
-            </p>
-            <p>
-              Yu-Gi-Oh! and related card names, artwork and images belong to
-              their respective trademark and copyright owners. Card images are
-              displayed for identification and registry purposes.
+              TCG Serial Tracker is an independent, unofficial registry and is not affiliated with,
+              endorsed by, or sponsored by any trading card game publisher or rights holder.
+              All game names, card names, logos, artwork and images belong to their respective owners.
+              {" "}<Link href="/disclaimer">Disclaimer &amp; intellectual property</Link>
             </p>
             <div className="footer-admin"><AdminRegistryLink className="footer-admin-link" /></div>
           </footer>
