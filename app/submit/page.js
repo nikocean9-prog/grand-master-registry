@@ -65,6 +65,7 @@ export default function SubmitPage() {
   const [notes, setNotes] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [cardsError, setCardsError] = useState(false);
+  const [clientRequestId, setClientRequestId] = useState("");
 
   useEffect(() => {
     async function loadCatalog() {
@@ -186,7 +187,11 @@ if (serial) {
         return;
       }
 
+      const activeRequestId = clientRequestId || crypto.randomUUID();
+      if (!clientRequestId) setClientRequestId(activeRequestId);
+
       const submissionForm = new FormData();
+      submissionForm.append("client_request_id", activeRequestId);
       submissionForm.append("serial_id", String(serial.id));
       submissionForm.append("photo", preparedPhoto);
       submissionForm.append("country", country);
@@ -242,6 +247,7 @@ if (serial) {
         setMessage(
           "Photo not accepted. Please check that it clearly shows the selected trading card and try again."
         );
+        setClientRequestId("");
         setSubmitting(false);
         return;
       }
@@ -269,6 +275,7 @@ if (serial) {
       setNotes("");
       setSubmitterEmail("");
       setPhoto(null);
+      setClientRequestId("");
       form.reset();
     } catch (error) {
       setMessage(safeSubmissionMessage("", error));
