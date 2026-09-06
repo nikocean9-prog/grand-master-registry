@@ -703,10 +703,6 @@ button {
 .featured-story-copy ul { margin:0 0 22px; padding-left:20px; color:#d8e3dc; font-size:14px; line-height:1.55; }
 .featured-story-links { display:flex; flex-wrap:wrap; gap:12px 20px; }
 .featured-story-links a { color:#f0d37d; font-size:14px; font-weight:800; text-decoration:none; }
-.featured-gallery-controls { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:12px; }
-.featured-gallery-controls button { display:flex; align-items:center; gap:9px; min-height:48px; margin:0; border:1px solid #d7ded9; border-radius:9px; background:#fff; color:#344139; padding:10px 12px; font-size:13px; font-weight:700; text-align:left; }
-.featured-gallery-controls button span { color:#9a7b35; font-size:11px; }
-.featured-gallery-controls button.active { border-color:#397650; background:#edf5f0; color:#174e31; }
 .live-registry-list { display:grid; gap:14px; }
 .live-registry-card { display:flex; align-items:center; justify-content:space-between; gap:24px; border:1px solid #d8ded9; border-radius:14px; background:#fff; color:inherit; padding:24px 26px; text-decoration:none; box-shadow:0 3px 12px rgba(17,24,39,.06); }
 .live-registry-card:hover { border-color:#86a990; box-shadow:0 7px 20px rgba(17,24,39,.1); }
@@ -838,8 +834,6 @@ button {
   .featured-story-image img { max-height:250px; }
   .featured-story-copy { padding:26px 23px; }
   .featured-story-copy h3 { font-size:29px; }
-  .featured-gallery-controls { grid-template-columns:1fr; }
-  .featured-gallery-controls button { min-height:44px; }
   .live-registry-card { display:grid; grid-template-columns:72px minmax(0,1fr); align-items:center; gap:16px; padding:20px; }
   .live-registry-art { width:72px; min-height:60px; }
   .live-registry-art img { max-height:60px; }
