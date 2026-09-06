@@ -360,6 +360,114 @@ async function checkPhoto({
       "Content-Type": "application/json",
     };
 
+    const compareTitles = (observed: string, expectedName: string) => {
+      const normalize = (value: string) =>
+        value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+      const left = normalize(observed);
+      const right = normalize(expectedName);
+      if (!left || !right) return { match: null, similarity: 0 };
+
+      const previous = Array.from({ length: right.length + 1 }, (_, i) => i);
+      for (let i = 1; i <= left.length; i += 1) {
+        let diagonal = previous[0];
+        previous[0] = i;
+        for (let j = 1; j <= right.length; j += 1) {
+          const above = previous[j];
+          previous[j] = Math.min(
+            previous[j] + 1,
+            previous[j - 1] + 1,
+            diagonal + (left[i - 1] === right[j - 1] ? 0 : 1)
+          );
+          diagonal = above;
+        }
+      }
+      const similarity = Math.max(
+        0,
+        Math.round((1 - previous[right.length] / Math.max(left.length, right.length)) * 100)
+      );
+      return { match: similarity >= 90, similarity };
+    };
+
+    const addTitleFallback = async (result: Record<string, any>) => {
+      if (result.card_name_read || !card?.name) return result;
+
+      const titleController = new AbortController();
+      const titleTimeout = setTimeout(() => titleController.abort(), 10_000);
+      try {
+        const titleResponse = await fetch(cloudflareEndpoint, {
+          method: "POST",
+          headers: cloudflareHeaders,
+          signal: titleController.signal,
+          body: JSON.stringify({
+            prompt:
+              "Read only the printed title at the top of this physical trading card. " +
+              "Do not identify the card from its artwork and do not guess missing letters. " +
+              "Ignore set codes, serial numbers, effect text, watermarks and price overlays. " +
+              "Return exactly TITLE: followed by the visible title, or exactly UNREADABLE.",
+            image: encodedPhoto,
+            temperature: 0,
+            max_tokens: 60,
+          }),
+        });
+        if (!titleResponse.ok) return result;
+
+        const titleCompletion = await titleResponse.json();
+        const rawTitle =
+          titleCompletion?.result?.response ?? titleCompletion?.result ?? "";
+        if (typeof rawTitle !== "string") return result;
+
+        const cleaned = rawTitle
+          .trim()
+          .replace(/^```[^\n]*\n?/i, "")
+          .replace(/```$/i, "")
+          .replace(/^TITLE\s*:\s*/i, "")
+          .replace(/^["']|["']$/g, "")
+          .split(/\r?\n/)[0]
+          .trim();
+
+        if (
+          !cleaned ||
+          cleaned.length > 120 ||
+          /^(UNREADABLE|UNKNOWN|UNCLEAR|UNABLE)/i.test(cleaned)
+        ) {
+          return result;
+        }
+
+        const comparison = compareTitles(cleaned, card.name);
+        const thumbnailMatch = result.thumbnail_match;
+        const overallMatch =
+          comparison.match === false || thumbnailMatch === false
+            ? false
+            : comparison.match === true && thumbnailMatch === true
+              ? true
+              : null;
+        const riskLevel =
+          overallMatch === false || result.possible_edit === true
+            ? "high"
+            : overallMatch === null || result.possible_edit === null
+              ? "review"
+              : "low";
+
+        return {
+          ...result,
+          risk_level: riskLevel,
+          card_name_read: cleaned,
+          name_match: comparison.match,
+          name_confidence: comparison.similarity,
+          card_match: overallMatch,
+          reasons: [
+            ...(result.reasons || []),
+            `Title-only reading: "${cleaned}" (${comparison.similarity}% text match).`,
+          ].slice(0, 6),
+        };
+      } catch (titleError) {
+        console.warn("title-only reading unavailable", titleError);
+        return result;
+      } finally {
+        clearTimeout(titleTimeout);
+      }
+    };
+
     let referenceDescription = "Reference thumbnail unavailable.";
     if (card?.image_url) {
       const referenceController = new AbortController();
@@ -494,7 +602,11 @@ async function checkPhoto({
     const content = completion?.result?.response ?? completion?.result;
 
     try {
-      return { status: "complete", result: parsePhotoCheck(content, expected) };
+      const parsedResult = parsePhotoCheck(content, expected);
+      return {
+        status: "complete",
+        result: await addTitleFallback(parsedResult),
+      };
     } catch (parseError) {
       if (typeof content !== "string" || !content.trim()) throw parseError;
 
@@ -544,9 +656,10 @@ async function checkPhoto({
         const formatted =
           formatterCompletion?.result?.response ??
           formatterCompletion?.result;
+        const parsedResult = parsePhotoCheck(formatted, expected);
         return {
           status: "complete",
-          result: parsePhotoCheck(formatted, expected),
+          result: await addTitleFallback(parsedResult),
         };
       } finally {
         clearTimeout(formatterTimeout);
