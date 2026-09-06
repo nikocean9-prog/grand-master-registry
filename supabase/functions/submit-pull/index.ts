@@ -498,46 +498,58 @@ async function checkPhoto({
     } catch (parseError) {
       if (typeof content !== "string" || !content.trim()) throw parseError;
 
-      const retryController = new AbortController();
-      const retryTimeout = setTimeout(() => retryController.abort(), 16_000);
+      const formatterController = new AbortController();
+      const formatterTimeout = setTimeout(
+        () => formatterController.abort(),
+        8_000
+      );
       try {
-        const retryResponse = await fetch(cloudflareEndpoint, {
-          method: "POST",
-          headers: cloudflareHeaders,
-          signal: retryController.signal,
-          body: JSON.stringify({
-            prompt:
-              "Return a complete administrator comparison report with every required JSON field. " +
-              "Expected card name: " + (card?.name || "Unknown") + ". " +
-              "Expected card number: " + (card?.card_number || "not recorded") + ". " +
-              "Reference thumbnail: " + referenceDescription + ". " +
-              "A visibly different title, franchise, character or artwork must be a mismatch. " +
-              "Read the serialized edition marking blindly. It normally looks like 032/100 or 032 of 100. " +
-              "Do not treat set codes, passcodes, copyright numbers, ATK/DEF values or edition text as a serial. Set serial_match to null because application code compares it. " +
-              "Use null only when evidence genuinely cannot be seen. Do not assess authenticity. Return JSON only.",
-            image: encodedPhoto,
-            temperature: 0,
-            max_tokens: 380,
-            response_format: {
-              type: "json_schema",
-              json_schema: photoCheckSchema,
-            },
-          }),
-        });
+        const formatterResponse = await fetch(
+          `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(cloudflareAccountId)}/ai/run/@cf/meta/llama-3.1-8b-instruct-fast`,
+          {
+            method: "POST",
+            headers: cloudflareHeaders,
+            signal: formatterController.signal,
+            body: JSON.stringify({
+              prompt:
+                "Convert the raw vision assessment below into the complete required JSON schema. " +
+                "Do not invent anything that the raw assessment did not visibly identify. " +
+                "Expected card name: " + (card?.name || "Unknown") + ". " +
+                "Expected card number: " + (card?.card_number || "not recorded") + ". " +
+                "Reference thumbnail description: " + referenceDescription + ". " +
+                "A clearly different title, franchise, character or artwork is a mismatch. " +
+                "For serial_read, copy only an explicitly reported serialized marking such as 032/100. " +
+                "Never use set codes, passcodes, copyright numbers, ATK/DEF values or the expected database serial. " +
+                "If no serialized marking was explicitly read, serial_read and serial_match must be null and serial_confidence must be low. " +
+                "Set serial_match to null in all cases because application code performs that comparison. " +
+                "Do not assess authenticity. Return JSON only with every required field.\n\nRAW VISION ASSESSMENT:\n" +
+                content.slice(0, 5000),
+              temperature: 0,
+              max_tokens: 400,
+              response_format: {
+                type: "json_schema",
+                json_schema: photoCheckSchema,
+              },
+            }),
+          }
+        );
 
-        if (!retryResponse.ok) {
-          throw new Error(`Cloudflare retry returned ${retryResponse.status}`);
+        if (!formatterResponse.ok) {
+          throw new Error(
+            `Cloudflare formatter returned ${formatterResponse.status}`
+          );
         }
 
-        const retryCompletion = await retryResponse.json();
-        const retryContent =
-          retryCompletion?.result?.response ?? retryCompletion?.result;
+        const formatterCompletion = await formatterResponse.json();
+        const formatted =
+          formatterCompletion?.result?.response ??
+          formatterCompletion?.result;
         return {
           status: "complete",
-          result: parsePhotoCheck(retryContent, expected),
+          result: parsePhotoCheck(formatted, expected),
         };
       } finally {
-        clearTimeout(retryTimeout);
+        clearTimeout(formatterTimeout);
       }
     }
   } catch (error) {
