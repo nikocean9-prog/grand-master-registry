@@ -46,17 +46,45 @@ function riskDisplay(submission) {
   return { label: "Not analysed", tone: "unavailable" };
 }
 
-function checkValue(value, trueLabel, falseLabel) {
-  if (value === true) return trueLabel;
-  if (value === false) return falseLabel;
-  return "Unable to determine";
+function checkTone(value, positiveWhenTrue = true) {
+  if (value === null || typeof value === "undefined") return "review";
+  const isPositive = positiveWhenTrue ? value === true : value === false;
+  return isPositive ? "low" : "high";
 }
 
-function checkWithConfidence(value, trueLabel, falseLabel, confidence) {
-  const result = checkValue(value, trueLabel, falseLabel);
-  return Number.isInteger(confidence)
-    ? `${result} — ${confidence}% confidence in this assessment`
-    : result;
+function CheckRow({
+  label,
+  expected,
+  observed,
+  value,
+  confidence,
+  positiveWhenTrue = true,
+  toneOverride,
+  resultOverride,
+}) {
+  const tone = toneOverride || checkTone(value, positiveWhenTrue);
+  const result = resultOverride || (value === null || typeof value === "undefined"
+    ? "Unable to determine"
+    : positiveWhenTrue
+      ? value ? "Match" : "Mismatch"
+      : value ? "Flagged" : "Not detected");
+
+  return (
+    <div className={`approval-check-row approval-check-${tone}`}>
+      <span className="approval-check-icon" aria-hidden="true">
+        {tone === "low" ? "✓" : tone === "high" ? "×" : "!"}
+      </span>
+      <div className="approval-check-copy">
+        <dt>{label}</dt>
+        {expected && <span><b>Expected:</b> {expected}</span>}
+        {observed && <span><b>Photo reads:</b> {observed}</span>}
+      </div>
+      <dd>
+        <strong>{result}</strong>
+        {Number.isInteger(confidence) && <small>{confidence}% confidence</small>}
+      </dd>
+    </div>
+  );
 }
 
 export default function AdminApprovals() {
@@ -125,10 +153,28 @@ export default function AdminApprovals() {
       return;
     }
 
+    const duplicateIds = [...new Set(
+      (submissionData || [])
+        .map((submission) => submission.exact_duplicate_of)
+        .filter(Boolean)
+    )];
+    let duplicateStatuses = {};
+    if (duplicateIds.length > 0) {
+      const { data: duplicateData } = await supabase
+        .from("submissions")
+        .select("id, status")
+        .in("id", duplicateIds);
+      duplicateStatuses = Object.fromEntries(
+        (duplicateData || []).map((item) => [item.id, item.status])
+      );
+    }
+
     const rows = (submissionData || []).map((submission) => ({
       ...submission,
       serial: submission.serial || null,
       card: submission.serial?.card || null,
+      exact_duplicate_status:
+        duplicateStatuses[submission.exact_duplicate_of] || null,
     }));
 
     if (rows.length === 0 && pageNumber > 0) {
@@ -318,7 +364,9 @@ export default function AdminApprovals() {
                   </span>
                   <span className="approval-summary-meta">
                     {submission.exact_duplicate_of && (
-                      <span className="approval-duplicate">Duplicate</span>
+                      <span className={`approval-duplicate approval-duplicate-${
+                        submission.exact_duplicate_status === "approved" ? "high" : "review"
+                      }`}>Duplicate</span>
                     )}
                     <span className={`photo-check-badge approval-risk-${risk.tone}`}>
                       {risk.label}
@@ -340,140 +388,6 @@ export default function AdminApprovals() {
                         </p>
                       </div>
                     )}
-
-                    <section className={`photo-check photo-check-${risk.tone}`}>
-                      <div className="photo-check-heading">
-                        <h3>Automated Photo Check</h3>
-                        <span className="photo-check-badge">{risk.label}</span>
-                      </div>
-
-                      {submission.ai_summary && <p>{submission.ai_summary}</p>}
-
-                      {Array.isArray(submission.ai_reasons) &&
-                        submission.ai_reasons.length > 0 && (
-                          <ul>
-                            {submission.ai_reasons.map((reason, index) => (
-                              <li key={`${submission.id}-reason-${index}`}>
-                                {reason}
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-
-                      {submission.ai_check_status === "complete" && (
-                        <>
-                          <dl className="photo-check-details">
-                            <div>
-                              <dt>Card name read</dt>
-                              <dd>
-                                {submission.ai_card_name_read ||
-                                  "Unable to determine"}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Card name match</dt>
-                              <dd>
-                                {checkWithConfidence(
-                                  submission.ai_name_match,
-                                  "Matches",
-                                  "Mismatch",
-                                  submission.ai_name_confidence
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Serial read</dt>
-                              <dd>
-                                {submission.ai_serial_read ||
-                                  "Unable to determine"}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Serial match</dt>
-                              <dd>
-                                {checkWithConfidence(
-                                  submission.ai_serial_match,
-                                  "Matches",
-                                  "Mismatch",
-                                  submission.ai_serial_confidence
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Reference thumbnail match</dt>
-                              <dd>
-                                {checkWithConfidence(
-                                  submission.ai_thumbnail_match,
-                                  "Matches",
-                                  "Mismatch",
-                                  submission.ai_thumbnail_confidence
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Overall card identity</dt>
-                              <dd>
-                                {checkValue(
-                                  submission.ai_card_match,
-                                  "Matches",
-                                  "Mismatch"
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Visible editing indicators</dt>
-                              <dd>
-                                {checkWithConfidence(
-                                  submission.ai_possible_edit,
-                                  "Flagged",
-                                  "Not detected",
-                                  submission.ai_edit_confidence
-                                )}
-                              </dd>
-                            </div>
-                            <div>
-                              <dt>Confidence in the overall assessment</dt>
-                              <dd>
-                                {Number.isInteger(submission.ai_confidence)
-                                  ? `${submission.ai_confidence}%`
-                                  : "Not available"}
-                              </dd>
-                            </div>
-                          </dl>
-
-                          {Array.isArray(submission.ai_edit_indicators) &&
-                            submission.ai_edit_indicators.length > 0 && (
-                              <div>
-                                <strong>Editing indicators reported:</strong>
-                                <ul>
-                                  {submission.ai_edit_indicators.map(
-                                    (indicator, index) => (
-                                      <li
-                                        key={`${submission.id}-edit-${index}`}
-                                      >
-                                        {indicator}
-                                      </li>
-                                    )
-                                  )}
-                                </ul>
-                              </div>
-                            )}
-                        </>
-                      )}
-
-                      {submission.exact_duplicate_of && (
-                        <p>
-                          <strong>Exact duplicate:</strong> Matches submission #
-                          {submission.exact_duplicate_of}.
-                        </p>
-                      )}
-
-                      <p className="photo-check-disclaimer">
-                        This is an advisory visual comparison, not proof of
-                        authenticity or image manipulation. Automated checks can
-                        be wrong; review the original evidence before deciding.
-                      </p>
-                    </section>
 
                     <div className="approval-information">
                       <p>
@@ -527,26 +441,74 @@ export default function AdminApprovals() {
                       </p>
                     )}
 
-                    <div className="approval-evidence">
-                      <p>
-                        <strong>Photo Evidence:</strong>
-                      </p>
-                      {evidenceLoadingId === submission.id && (
-                        <p>Loading photo...</p>
-                      )}
-                      {!evidenceLoadingId && evidenceUrl && (
-                        <a
-                          href={evidenceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <img
-                            src={evidenceUrl}
-                            alt="Submission evidence"
-                            loading="lazy"
+                    <div className="approval-review-grid">
+                      <div className="approval-evidence">
+                        <h3>Photo evidence</h3>
+                        {evidenceLoadingId === submission.id && <p>Loading photo...</p>}
+                        {!evidenceLoadingId && evidenceUrl && (
+                          <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={evidenceUrl} alt="Submission evidence" loading="lazy" />
+                          </a>
+                        )}
+                      </div>
+
+                      <section className={`approval-report photo-check-${risk.tone}`}>
+                        <div className="photo-check-heading">
+                          <h3>Submission check</h3>
+                          <span className="photo-check-badge">{risk.label}</span>
+                        </div>
+                        <dl className="approval-check-list">
+                          <CheckRow
+                            label="Card name"
+                            expected={submission.card?.name || "Unknown"}
+                            observed={submission.ai_card_name_read || "Unable to determine"}
+                            value={submission.ai_name_match}
+                            confidence={submission.ai_name_confidence}
                           />
-                        </a>
-                      )}
+                          <CheckRow
+                            label="Serial number"
+                            expected={formatSerial(submission.serial)}
+                            observed={submission.ai_serial_read || "Unable to determine"}
+                            value={submission.ai_serial_match}
+                            confidence={submission.ai_serial_confidence}
+                          />
+                          <CheckRow
+                            label="Reference thumbnail"
+                            value={submission.ai_thumbnail_match}
+                            confidence={submission.ai_thumbnail_confidence}
+                          />
+                          <CheckRow
+                            label="Visible editing indicators"
+                            value={submission.ai_possible_edit}
+                            confidence={submission.ai_edit_confidence}
+                            positiveWhenTrue={false}
+                          />
+                          {submission.exact_duplicate_of && (
+                            <CheckRow
+                              label={`Previously submitted (#${submission.exact_duplicate_of})`}
+                              expected={submission.exact_duplicate_status
+                                ? `Earlier submission: ${submission.exact_duplicate_status}`
+                                : "Earlier submission status unavailable"}
+                              toneOverride={submission.exact_duplicate_status === "approved"
+                                ? "high"
+                                : "review"}
+                              resultOverride={submission.exact_duplicate_status === "approved"
+                                ? "Approved duplicate"
+                                : "Review only"}
+                            />
+                          )}
+                        </dl>
+                        {Array.isArray(submission.ai_edit_indicators) &&
+                          submission.ai_edit_indicators.length > 0 && (
+                            <p className="approval-edit-note">
+                              <strong>Editing indicators:</strong>{" "}
+                              {submission.ai_edit_indicators.join(", ")}
+                            </p>
+                          )}
+                        <p className="photo-check-disclaimer">
+                          Advisory check only. Review the original photo before deciding.
+                        </p>
+                      </section>
                     </div>
 
                     <div className="approval-actions">

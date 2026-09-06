@@ -766,6 +766,7 @@ async function finishPhotoReview({
   submissionId,
   photoSha256,
   exactDuplicateOf,
+  exactDuplicateStatus,
 }: {
   supabase: ReturnType<typeof createClient>;
   filePath: string;
@@ -773,14 +774,28 @@ async function finishPhotoReview({
   submissionId: number;
   photoSha256: string;
   exactDuplicateOf: number | null;
+  exactDuplicateStatus: string | null;
 }) {
   try {
     const photoCheck = await checkPhoto({ supabase, filePath, serialId });
     const checkResult = photoCheck.result;
     const checkUnavailable = photoCheck.status !== "complete" || !checkResult;
     const duplicateReason = exactDuplicateOf
-      ? [`Exact duplicate of submission #${exactDuplicateOf}.`]
+      ? [exactDuplicateStatus === "approved"
+          ? `Exact duplicate of approved submission #${exactDuplicateOf}.`
+          : `This image was previously used in ${exactDuplicateStatus || "another"} submission #${exactDuplicateOf}.`]
       : [];
+    const duplicateRisk = exactDuplicateStatus === "approved"
+      ? "high"
+      : exactDuplicateOf
+        ? "review"
+        : null;
+    const assessedRisk = checkUnavailable ? "unavailable" : checkResult.risk_level;
+    const finalRisk = duplicateRisk === "high" || assessedRisk === "high"
+      ? "high"
+      : duplicateRisk === "review" && assessedRisk === "low"
+        ? "review"
+        : assessedRisk;
 
     const { error: updateError } = await supabase
       .from("submissions")
@@ -788,11 +803,7 @@ async function finishPhotoReview({
         photo_sha256: photoSha256,
         exact_duplicate_of: exactDuplicateOf,
         ai_check_status: checkUnavailable ? photoCheck.status : "complete",
-        ai_risk_level: exactDuplicateOf
-          ? "high"
-          : checkUnavailable
-            ? "unavailable"
-            : checkResult.risk_level,
+        ai_risk_level: finalRisk,
         ai_reasons: checkUnavailable
           ? [
               ...duplicateReason,
@@ -1066,13 +1077,12 @@ Deno.serve(async (req: Request) => {
       return json({ success: true, review_status: "rejected" });
     }
 
-    const { data: duplicate } = await supabase
+    const { data: duplicates } = await supabase
       .from("submissions")
-      .select("id")
+      .select("id, status")
       .eq("photo_sha256", photoSha256)
       .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle();
+      .limit(20);
 
     const { data: submissionId, error: submitError } = await supabase.rpc(
       "submit_pull",
@@ -1117,7 +1127,12 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    const duplicate =
+      duplicates?.find((item) => item.status === "approved") ||
+      duplicates?.[0] ||
+      null;
     const exactDuplicateOf = duplicate?.id || null;
+    const exactDuplicateStatus = duplicate?.status || null;
     const { error: analysisSetupError } = await supabase
       .from("submissions")
       .update({
@@ -1158,6 +1173,7 @@ Deno.serve(async (req: Request) => {
           submissionId: Number(submissionId),
           photoSha256,
           exactDuplicateOf,
+          exactDuplicateStatus,
         })
       );
     }

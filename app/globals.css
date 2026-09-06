@@ -986,13 +986,15 @@ button {
 }
 
 .approval-duplicate {
-  border: 1px solid #bd3434;
+  border: 1px solid currentColor;
   border-radius: 999px;
   padding: 4px 9px;
-  color: #8b1f1f;
   font-size: 0.8rem;
   font-weight: 700;
 }
+
+.approval-duplicate-high { color: #8b1f1f; }
+.approval-duplicate-review { color: #765700; }
 
 .approval-risk-low {
   color: #176b34;
@@ -1030,12 +1032,74 @@ button {
   gap: 8px 28px;
 }
 
+.approval-review-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.82fr) minmax(360px, 1.18fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 18px;
+}
+
+.approval-evidence h3,
+.approval-report h3 {
+  margin-top: 0;
+}
+
 .approval-evidence img {
   display: block;
   width: 100%;
-  max-width: 400px;
+  max-width: 520px;
   height: auto;
+  border-radius: 8px;
 }
+
+.approval-report {
+  border: 2px solid #8a8a8a;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.approval-check-list {
+  display: grid;
+  gap: 0;
+  margin: 14px 0 0;
+}
+
+.approval-check-row {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 13px 0;
+}
+
+.approval-check-icon {
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-weight: 900;
+}
+
+.approval-check-copy {
+  display: grid;
+  gap: 3px;
+}
+
+.approval-check-copy dt { font-weight: 800; }
+.approval-check-copy span { color: #555; font-size: 0.84rem; }
+.approval-check-row dd { display: grid; gap: 2px; margin: 0; text-align: right; }
+.approval-check-row dd small { color: #666; font-size: 0.75rem; }
+.approval-check-low .approval-check-icon,
+.approval-check-low dd strong { color: #176b34; }
+.approval-check-review .approval-check-icon,
+.approval-check-review dd strong { color: #765700; }
+.approval-check-high .approval-check-icon,
+.approval-check-high dd strong { color: #9f2424; }
+.approval-edit-note { margin: 8px 0; }
 
 .approval-actions {
   display: flex;
@@ -1073,6 +1137,19 @@ button {
 
   .approval-details {
     padding: 14px;
+  }
+
+  .approval-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .approval-check-row {
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+
+  .approval-check-row dd {
+    grid-column: 2;
+    text-align: left;
   }
 }
 
