@@ -641,8 +641,9 @@ button {
 .live-registry-card p { margin:0; color:#667069; font-size:14px; }
 .live-registry-card > strong { color:#1f6b3b; white-space:nowrap; }
 .live-registry-card i { margin-left:6px; font-style:normal; }
-.live-registry-art { width:92px; height:92px; flex:0 0 auto; border-radius:12px; display:flex; align-items:center; justify-content:center; background-color:#071b12; background-image:url("/graphics/yugioh-tile-bg.webp"); background-position:72% center; background-size:cover; color:#f4d47d!important; font-weight:800; letter-spacing:.08em; box-shadow:0 4px 13px rgba(7,27,18,.2); }
-.tcg-magic-the-gathering .live-registry-art { background-image:linear-gradient(145deg,#172032,#654b22); }
+.live-registry-art { width:92px; min-height:72px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#fff; }
+.live-registry-art img { display:block; width:100%; max-height:72px; object-fit:contain; }
+.tcg-yugioh .live-registry-art img { width:92%; }
 .live-registry-copy { flex:1; min-width:0; }
 .admin-future-section { margin-top:40px; }
 .admin-future-section > h2 { margin:16px 0; }
@@ -756,7 +757,8 @@ button {
   .compact-stats strong { font-size:22px; }
   .compact-stats span { font-size:12px; }
   .live-registry-card { display:grid; grid-template-columns:72px minmax(0,1fr); align-items:center; gap:16px; padding:20px; }
-  .live-registry-art { width:72px; height:72px; }
+  .live-registry-art { width:72px; min-height:60px; }
+  .live-registry-art img { max-height:60px; }
   .live-registry-card h3 { font-size:21px; }
   .live-registry-card > strong { grid-column:1 / -1; width:100%; border-top:1px solid #e1e5e2; padding-top:15px; }
   .home-hero { padding:42px 24px; }
