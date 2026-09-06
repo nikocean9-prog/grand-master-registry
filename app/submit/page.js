@@ -64,6 +64,7 @@ export default function SubmitPage() {
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [serialStatus, setSerialStatus] = useState(null);
+  const [serialStatuses, setSerialStatuses] = useState({});
   const [notes, setNotes] = useState("");
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [cardsError, setCardsError] = useState(false);
@@ -106,45 +107,38 @@ export default function SubmitPage() {
   }, []);
 
   useEffect(() => {
-    async function checkSerialStatus() {
+    async function loadSerialStatuses() {
       setSerialStatus(null);
+      setSerialStatuses({});
 
-      if (!cardId || !serialNumber || !region) {
-        return;
-      }
-
-      const serialValue = Number(serialNumber);
-
-      if (
-        !Number.isInteger(serialValue) ||
-        serialValue < 1 ||
-        serialValue > (cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100)
-      ) {
+      if (!cardId || !region) {
         return;
       }
 
       const { data: serial, error } = await supabase
-  .from("serials")
-  .select("id, status, region, serial_number")
-  .eq("card_id", Number(cardId))
-  .eq("region", region)
-  .eq("serial_number", serialValue)
-  .maybeSingle();
+        .from("serials")
+        .select("status, serial_number")
+        .eq("card_id", Number(cardId))
+        .eq("region", region);
 
-if (error) {
-  console.error("Serial status check failed:", error);
-  return;
-}
+      if (error) {
+        console.error("Serial status check failed:", error);
+        return;
+      }
 
-if (serial) {
-  setSerialStatus(serial.status);
-} else {
-  setSerialStatus(null);
-}
+      const nextStatuses = Object.fromEntries(
+        (serial || []).map((item) => [String(item.serial_number), item.status])
+      );
+      setSerialStatuses(nextStatuses);
+      setSerialStatus(nextStatuses[String(Number(serialNumber))] || null);
     }
 
-    checkSerialStatus();
-  }, [cardId, region, serialNumber, cards]);
+    loadSerialStatuses();
+  }, [cardId, region]);
+
+  useEffect(() => {
+    setSerialStatus(serialStatuses[String(Number(serialNumber))] || null);
+  }, [serialNumber, serialStatuses]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -399,7 +393,7 @@ if (serial) {
             {Array.from({ length: cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100 }, (_, i) => i + 1).map((number) => (
               <option key={number} value={number}>
                 {String(number).padStart((cards.find((card) => String(card.id) === String(cardId))?.serial_total || 100) < 100 ? 2 : 3, "0")}
-                {region === "E" ? "E" : ""}
+                {region === "E" ? "E" : ""}{serialStatuses[String(number)] === "confirmed" ? " — already confirmed" : ""}
               </option>
             ))}
           </select>
