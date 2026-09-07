@@ -362,14 +362,12 @@ export default function SubmitPage() {
               onChange={(e) => setPhoto(e.target.files?.[0] || null)}
               required
             />
-            <span>{photo ? photo.name : "Choose a clear photo showing the full card"}</span>
+            <span>
+              {photo
+                ? "Photo selected — preview shown in the reference panel"
+                : "Choose a clear photo showing the full card"}
+            </span>
           </div>
-          {photoPreviewUrl && (
-            <div className="submission-photo-reference">
-              <img src={photoPreviewUrl} alt="Uploaded card for reference" />
-              <p>Use this photo to check the card name, region and serial number below.</p>
-            </div>
-          )}
           <p className="photo-processing-notice">
             Submitted photos are checked automatically to help identify unreadable
             details, mismatches, possible editing, and duplicate evidence. Unclear
@@ -543,7 +541,7 @@ export default function SubmitPage() {
               <span>Select a card to preview it here</span>
             )}
           </div>
-          <p className="eyebrow">{photoPreviewUrl ? "Uploaded evidence" : "Selected card"}</p>
+          <p className="eyebrow">{photoPreviewUrl ? "Photo reference" : "Selected card"}</p>
           <h2>{selectedCard?.name || "No card selected"}</h2>
           <dl>
             <div><dt>TCG</dt><dd>{selectedTcgName || "—"}</dd></div>
