@@ -183,9 +183,6 @@ button {
 .submission-upload { display: grid; gap: 9px; justify-items: center; border: 1.5px dashed #397b55; border-radius: 12px; background: #f0f7f2; padding: 24px; text-align: center; color: #28633f; }
 .submission-upload input { max-width: 100%; }
 .submission-upload span { font-size: 14px; font-weight: 700; }
-.submission-photo-reference { margin-top: 12px; overflow: hidden; border: 1px solid #d5ddd7; border-radius: 12px; background: #f6f8f6; }
-.submission-photo-reference img { display: block; width: 100%; max-height: 520px; object-fit: contain; background: #e8efea; }
-.submission-photo-reference p { margin: 0; padding: 10px 12px; color: #435149; font-size: 14px; font-weight: 700; }
 .submission-warning { border: 1px solid #d5a526; border-radius: 10px; background: #fff8df; padding: 14px; }
 .submission-warning p { margin-bottom: 0; }
 .submission-button { width: 100%; margin: 0; border: 0; border-radius: 10px; background: #236b43; color: #fff; font-weight: 800; }
