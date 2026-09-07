@@ -122,6 +122,24 @@ export default function BulkUploadPage() {
     setSavingIdentification(false);
   }
 
+  async function rejectItem() {
+    if (!window.confirm("Reject this bulk-upload item and remove it from the list?")) return;
+    setSavingIdentification(true);
+    setMessage("");
+    const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
+      body: { action: "dismiss_item", item_id: openItem.id },
+    });
+    if (error || data?.error) {
+      setMessage(data?.error || "This item could not be rejected.");
+      setSavingIdentification(false);
+      return;
+    }
+    closeItem();
+    await loadBatches();
+    setMessage("The unsuitable item was removed from the bulk review list.");
+    setSavingIdentification(false);
+  }
+
   useEffect(() => {
     async function initialise() {
       const { data: assurance } =
@@ -349,7 +367,7 @@ export default function BulkUploadPage() {
 
             {batch.items?.length > 0 && (
               <div className="bulk-item-list">
-                {batch.items.map((item) => {
+                {batch.items.filter((item) => item.status !== "dismissed").map((item) => {
                   const number = item.detected_serial_number
                     ? `${String(item.detected_serial_number).padStart(3, "0")}${item.detected_region === "E" ? "E" : ""}`
                     : "Serial unreadable";
@@ -421,6 +439,7 @@ export default function BulkUploadPage() {
                 </button>
               </div>
               <button type="button" className="secondary-button" onClick={closeItem} disabled={savingIdentification}>Close</button>
+              <button type="button" className="bulk-reject-button" onClick={rejectItem} disabled={savingIdentification}>Reject from bulk upload</button>
             </div>
           </section>
         </div>
