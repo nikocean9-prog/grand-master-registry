@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { safeSubmissionMessage } from "../lib/userMessages";
 import { tcgs as tcgCatalog } from "../lib/catalog";
@@ -69,6 +69,7 @@ export default function SubmitPage() {
   const [submitterEmail, setSubmitterEmail] = useState("");
   const [cardsError, setCardsError] = useState(false);
   const [clientRequestId, setClientRequestId] = useState("");
+  const submissionLockRef = useRef(false);
 
   useEffect(() => {
     async function loadCatalog() {
@@ -142,6 +143,11 @@ export default function SubmitPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    // React state updates after the event finishes. Keep a synchronous lock as
+    // well so several rapid taps cannot start overlapping submissions.
+    if (submissionLockRef.current) return;
+
     const form = event.currentTarget;
     const honeypotValue = form.elements.website?.value || "";
     setMessage("");
@@ -163,8 +169,9 @@ export default function SubmitPage() {
       return;
     }
 
+    submissionLockRef.current = true;
     setSubmitting(true);
-    setMessage("Submission received and is being reviewed…");
+    setMessage("Submitting your photo — please wait. Do not close or refresh this page.");
 
     try {
       const preparedPhoto = await preparePhotoForUpload(photo);
@@ -280,6 +287,7 @@ export default function SubmitPage() {
     } catch (error) {
       setMessage(safeSubmissionMessage("", error));
     } finally {
+      submissionLockRef.current = false;
       setSubmitting(false);
     }
   }
@@ -496,8 +504,14 @@ export default function SubmitPage() {
           )}
         </div>
 
-        <button type="submit" disabled={submitting} className="submission-button submission-field-wide">
-          {submitting ? "Submitting..." : "Submit for Verification"}
+        <button
+          type="submit"
+          disabled={submitting}
+          aria-disabled={submitting}
+          aria-busy={submitting}
+          className="submission-button submission-field-wide"
+        >
+          {submitting ? "Submitting — please wait" : "Submit for Verification"}
         </button>
         </div>
         </section>
