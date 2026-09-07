@@ -376,31 +376,114 @@ button {
 
 
 .public-nav {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: 46px minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
+  gap: 12px;
   margin-bottom: 32px;
-  border: 1px solid #dfdfdf;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.88);
-  padding: 10px 12px;
-  box-shadow: 0 4px 18px rgba(17, 24, 39, 0.06);
+  border: 0;
+  border-bottom: 1px solid #d9ddda;
+  border-radius: 0;
+  background: white;
+  padding: 16px 14px 15px;
+  box-shadow: 0 5px 18px rgba(17, 24, 39, 0.05);
+}
+
+.public-nav::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #183d29 0 68%, #d3aa4a 68% 100%);
+}
+
+.public-menu {
+  position: relative;
+  z-index: 3;
+}
+
+.public-menu summary {
+  list-style: none;
+}
+
+.public-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.public-menu-trigger {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  cursor: pointer;
+  place-items: center;
+  border-radius: 10px;
+  color: #172019;
+}
+
+.public-menu-trigger:hover,
+.public-menu-trigger:focus-visible {
+  background: #eef5f0;
+  outline: none;
+}
+
+.public-menu-trigger svg {
+  width: 27px;
+  height: 27px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.public-menu-panel {
+  position: absolute;
+  top: calc(100% + 14px);
+  left: 0;
+  display: grid;
+  width: min(250px, calc(100vw - 44px));
+  overflow: hidden;
+  border: 1px solid #d9dfdb;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 14px 38px rgba(12, 35, 22, 0.18);
+}
+
+.public-menu-panel a {
+  color: #18201a;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.public-menu-panel a + a {
+  border-top: 1px solid #edf0ee;
+}
+
+.public-menu-panel a:hover,
+.public-menu-panel a:focus-visible {
+  background: #eef5f0;
+  outline: none;
 }
 
 .site-name {
   display: inline-flex;
+  min-width: 0;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
   color: #171717;
   text-decoration: none;
 }
 
 .brand-mark {
   display: block;
+  width: 46px;
+  height: 46px;
   flex: 0 0 auto;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(17, 24, 39, 0.18);
+  object-fit: contain;
 }
 
 .brand-copy {
@@ -411,16 +494,19 @@ button {
 }
 
 .brand-copy strong {
-  font-size: 23px;
-  font-weight: 850;
-  letter-spacing: -0.015em;
+  margin-top: 3px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.045em;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
 .brand-copy small {
-  color: #5f6b63;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  color: #35704b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
@@ -432,8 +518,8 @@ button {
 
 .nav-link {
   display: inline-block;
-  border-radius: 7px;
-  padding: 9px 14px;
+  border-radius: 999px;
+  padding: 12px 16px;
   font-size: 14px;
   font-weight: 700;
   text-decoration: none;
@@ -819,12 +905,12 @@ button {
 }
 
 @media (max-width:700px) {
-  .public-nav { align-items:center; flex-direction:row; }
+  .public-nav { grid-template-columns:40px minmax(0,1fr) auto; gap:8px; padding:14px 11px 13px; }
   .nav-actions { width:auto; flex-wrap:nowrap; }
-  .nav-link { padding:8px 10px; font-size:13px; }
-  .brand-copy strong { font-size:19px; }
-  .brand-copy small { display:none; }
-  .brand-mark { width:42px; height:42px; }
+  .nav-link { padding:10px 12px; font-size:12px; }
+  .brand-copy strong { font-size:18px; }
+  .brand-copy small { display:block; font-size:9px; }
+  .brand-mark { width:40px; height:40px; }
   .compact-home-intro { padding:26px 24px; }
   .compact-home-intro h1 { font-size:34px; }
   .compact-home-intro > p:last-child { font-size:16px; }
@@ -928,10 +1014,10 @@ button {
 
 @media (max-width: 700px) {
   .public-nav {
-    align-items: center;
-    gap: 12px;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 8px;
     margin-bottom: 22px;
-    padding: 10px;
+    padding: 14px 11px 13px;
   }
 
   .site-name {
@@ -944,20 +1030,21 @@ button {
   }
 
   .brand-copy strong {
-    font-size: 15px;
+    font-size: 18px;
   }
 
   .brand-copy small {
-    display: none;
+    display: block;
+    font-size: 9px;
   }
 
   .nav-actions {
-    align-items: stretch;
-    flex-direction: column;
+    align-items: center;
+    flex-direction: row;
   }
 
   .nav-link {
-    padding: 7px 10px;
+    padding: 10px 12px;
     font-size: 12px;
     text-align: center;
   }
