@@ -51,8 +51,6 @@ export default async function Home() {
       imageAlt: "The serialized The One Ring 001/001 Magic card",
       href: oneRing ? `/card/${oneRing.id}` : "/sets/lotr-original",
       linkLabel: "Open registry",
-      sourceUrl: "https://icv2.com/articles/news/view/54758/post-malone-buys-magic-the-gatherings-the-one-ring-001-001",
-      sourceLabel: "Ownership source",
     },
     {
       label: "Yu-Gi-Oh! · Iconic card",

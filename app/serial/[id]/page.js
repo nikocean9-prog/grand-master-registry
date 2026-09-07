@@ -61,6 +61,7 @@ export default async function SerialPage({ params }) {
   const regionLabel = serial.region === "GLOBAL"
     ? "Worldwide"
     : serial.region === "E" ? "Europe-distributed" : "Americas";
+  const isOneRing001 = card?.name === "The One Ring" && Number(serial.serial_number) === 1;
 
   return (
     <main>
@@ -105,6 +106,16 @@ export default async function SerialPage({ params }) {
               className="source-link"
             >
               View original source ↗
+            </a>
+          )}
+          {isOneRing001 && (
+            <a
+              href="https://icv2.com/articles/news/view/54758/post-malone-buys-magic-the-gatherings-the-one-ring-001-001"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="source-link"
+            >
+              Ownership source ↗
             </a>
           )}
         </section>

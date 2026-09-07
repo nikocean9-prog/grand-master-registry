@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function FeaturedGallery({ features }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
+  const touchStartX = useRef(null);
   const activeFeature = features[activeIndex];
+
+  const showFeature = (direction) => {
+    setActiveIndex((current) => (
+      current + direction + features.length
+    ) % features.length);
+  };
 
   useEffect(() => {
     if (paused || features.length < 2) return undefined;
@@ -31,12 +38,24 @@ export default function FeaturedGallery({ features }) {
       </div>
 
       <article
+        key={activeIndex}
         className="featured-story"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
         onFocus={() => setPaused(true)}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setPaused(false);
+        }}
+        onTouchStart={(event) => {
+          touchStartX.current = event.touches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={(event) => {
+          if (touchStartX.current === null) return;
+          const endX = event.changedTouches[0]?.clientX ?? touchStartX.current;
+          const distance = endX - touchStartX.current;
+          touchStartX.current = null;
+          if (Math.abs(distance) < 45) return;
+          showFeature(distance < 0 ? 1 : -1);
         }}
       >
         <div className={`featured-story-image ${activeFeature.imageClass || ""}`}>
@@ -53,7 +72,7 @@ export default function FeaturedGallery({ features }) {
             {activeFeature.facts.map((fact) => <li key={fact}>{fact}</li>)}
           </ul>
           <div className="featured-story-links">
-            {activeFeature.href && <Link href={activeFeature.href}>{activeFeature.linkLabel} →</Link>}
+            {activeFeature.href && <Link href={activeFeature.href} className="featured-registry-button">{activeFeature.linkLabel}</Link>}
             {activeFeature.sourceUrl && (
               <a href={activeFeature.sourceUrl} target="_blank" rel="noreferrer">
                 {activeFeature.sourceLabel || "View source"} ↗
@@ -62,6 +81,21 @@ export default function FeaturedGallery({ features }) {
           </div>
         </div>
       </article>
+
+      {features.length > 1 && (
+        <div className="featured-story-dots" aria-label="Choose featured story">
+          {features.map((feature, index) => (
+            <button
+              key={feature.title}
+              type="button"
+              className={index === activeIndex ? "active" : ""}
+              aria-label={`Show ${feature.shortTitle || feature.title}`}
+              aria-current={index === activeIndex ? "true" : undefined}
+              onClick={() => setActiveIndex(index)}
+            />
+          ))}
+        </div>
+      )}
 
     </section>
   );

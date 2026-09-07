@@ -66,6 +66,8 @@ export default function SerialDetailModal({ serial, card, onClose }) {
 
   const displayedCard = details?.card || card;
   const displayedSerial = details?.serial || serial;
+  const isOneRing001 = displayedCard?.name === "The One Ring"
+    && ["1", "01", "001", "001/001"].includes(displayedSerial.label);
 
   return (
     <div className="serial-modal-backdrop" role="presentation" onMouseDown={onClose}>
@@ -98,6 +100,11 @@ export default function SerialDetailModal({ serial, card, onClose }) {
                 {details?.serial.confirmed_at && <div><dt>Confirmed</dt><dd>{new Date(details.serial.confirmed_at).toLocaleDateString()}</dd></div>}
               </dl>
               {details?.submission?.source_url && <a href={details.submission.source_url} target="_blank" rel="noopener noreferrer" className="source-link">View original source ↗</a>}
+              {isOneRing001 && (
+                <a href="https://icv2.com/articles/news/view/54758/post-malone-buys-magic-the-gatherings-the-one-ring-001-001" target="_blank" rel="noopener noreferrer" className="source-link">
+                  Ownership source ↗
+                </a>
+              )}
             </section>
 
             <section className="evidence-panel">
