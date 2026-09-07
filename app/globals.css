@@ -1626,7 +1626,8 @@ button {
 
 .approval-serial-correction { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 8px; margin: 4px 0 18px; }
 .approval-serial-correction label { flex-basis: 100%; font-size: 13px; font-weight: 800; }
-.approval-serial-correction input { width: 140px; border: 1px solid #cbd5ce; border-radius: 8px; padding: 10px 12px; font: inherit; }
+.approval-serial-correction input,
+.approval-serial-correction select { width: 140px; border: 1px solid #cbd5ce; border-radius: 8px; padding: 10px 12px; background: #fff; font: inherit; }
 
 .approval-photo-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; background: rgba(4, 14, 9, .82); padding: 24px; }
 .approval-photo-modal { position: relative; display: grid; max-width: min(1000px, 94vw); max-height: 92vh; place-items: center; }
@@ -1727,7 +1728,8 @@ button {
   .approval-comparison-card img { height: auto; max-height: 520px; }
   .approval-photo-modal-backdrop { padding: 12px; }
   .approval-photo-modal-close { top: 8px; right: 8px; }
-  .approval-serial-correction input { width: 100%; }
+  .approval-serial-correction input,
+  .approval-serial-correction select { width: 100%; }
 
   .approval-check-row {
     grid-template-columns: 28px minmax(0, 1fr);
