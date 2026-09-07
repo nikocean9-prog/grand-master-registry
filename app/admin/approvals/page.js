@@ -172,12 +172,38 @@ export default function AdminApprovals() {
       );
     }
 
+    const confirmedSerialIds = [...new Set(
+      (submissionData || [])
+        .filter((submission) => submission.serial?.status === "confirmed")
+        .map((submission) => submission.serial_id)
+    )];
+    let confirmedBySerial = {};
+
+    if (confirmedSerialIds.length > 0) {
+      const { data: confirmedData, error: confirmedError } = await supabase
+        .from("submissions")
+        .select("*")
+        .in("serial_id", confirmedSerialIds)
+        .eq("status", "approved")
+        .order("reviewed_at", { ascending: false });
+
+      if (confirmedError) {
+        console.error("Could not load confirmed records:", confirmedError);
+      } else {
+        confirmedBySerial = (confirmedData || []).reduce((records, item) => {
+          if (!records[item.serial_id]) records[item.serial_id] = item;
+          return records;
+        }, {});
+      }
+    }
+
     const rows = (submissionData || []).map((submission) => ({
       ...submission,
       serial: submission.serial || null,
       card: submission.serial?.card || null,
       exact_duplicate_status:
         duplicateStatuses[submission.exact_duplicate_of] || null,
+      existing_submission: confirmedBySerial[submission.serial_id] || null,
     }));
 
     if (rows.length === 0 && pageNumber > 0) {
@@ -197,34 +223,48 @@ export default function AdminApprovals() {
     }
 
     setExpandedId(submission.id);
-    if (evidenceUrls[submission.id] || !submission.photo_url) return;
+    const records = [submission, submission.existing_submission]
+      .filter(Boolean)
+      .filter((record) => record.photo_url && !evidenceUrls[record.id]);
 
-    const evidencePath = getEvidencePath(submission.photo_url);
-    if (!evidencePath) return;
+    if (records.length === 0) return;
 
     setEvidenceLoadingId(submission.id);
-    const { data, error } = await supabase.storage
-      .from("submission-evidence")
-      .createSignedUrl(evidencePath, 3600);
+    const signedResults = await Promise.all(records.map(async (record) => {
+      const evidencePath = getEvidencePath(record.photo_url);
+      if (!evidencePath) return { id: record.id, signedUrl: null };
 
-    if (error) {
-      console.error("Could not create evidence URL:", error);
-      setMessage("The evidence photo could not be loaded.");
-    } else if (data?.signedUrl) {
-      setEvidenceUrls((current) => ({
-        ...current,
-        [submission.id]: data.signedUrl,
-      }));
+      const { data, error } = await supabase.storage
+        .from("submission-evidence")
+        .createSignedUrl(evidencePath, 3600);
+
+      if (error) console.error("Could not create evidence URL:", error);
+      return { id: record.id, signedUrl: data?.signedUrl || null };
+    }));
+
+    const loadedUrls = Object.fromEntries(
+      signedResults.filter((item) => item.signedUrl).map((item) => [item.id, item.signedUrl])
+    );
+    setEvidenceUrls((current) => ({ ...current, ...loadedUrls }));
+    if (signedResults.some((item) => !item.signedUrl)) {
+      setMessage("One of the evidence photos could not be loaded.");
     }
     setEvidenceLoadingId(null);
   }
 
-  async function handleApprove(submissionId) {
-    setBusyId(submissionId);
+  async function handleApprove(submission) {
+    if (submission.existing_submission) {
+      const confirmed = window.confirm(
+        "Replace the existing confirmed record with this new submission? The earlier record will remain in Admin History."
+      );
+      if (!confirmed) return;
+    }
+
+    setBusyId(submission.id);
     setMessage("");
 
     const { error } = await supabase.rpc("approve_submission", {
-      p_submission_id: submissionId,
+      p_submission_id: submission.id,
     });
 
     if (error) {
@@ -243,20 +283,22 @@ export default function AdminApprovals() {
     setBusyId(null);
   }
 
-  async function handleReject(submissionId) {
+  async function handleReject(submission) {
     const confirmed = window.confirm(
-      "Are you sure you want to reject this submission?"
+      submission.existing_submission
+        ? "Keep the existing confirmed record and reject this new submission?"
+        : "Are you sure you want to reject this submission?"
     );
 
     if (!confirmed) {
       return;
     }
 
-    setBusyId(submissionId);
+    setBusyId(submission.id);
     setMessage("");
 
     const { error } = await supabase.rpc("reject_submission", {
-      p_submission_id: submissionId,
+      p_submission_id: submission.id,
     });
 
     if (error) {
@@ -341,9 +383,16 @@ export default function AdminApprovals() {
       ) : (
         <div className="approval-list">
           {submissions.map((submission) => {
-            const risk = riskDisplay(submission);
+            const photoRisk = riskDisplay(submission);
+            const hasConfirmedConflict = Boolean(submission.existing_submission);
+            const risk = hasConfirmedConflict
+              ? { label: "Medium risk", tone: "review" }
+              : photoRisk;
             const isExpanded = expandedId === submission.id;
             const evidenceUrl = evidenceUrls[submission.id] || null;
+            const existingEvidenceUrl = submission.existing_submission
+              ? evidenceUrls[submission.existing_submission.id] || null
+              : null;
 
             return (
               <article
@@ -380,14 +429,14 @@ export default function AdminApprovals() {
 
                 {isExpanded && (
                   <div className="approval-details">
-                    {submission.serial?.status === "confirmed" && (
+                    {hasConfirmedConflict && (
                       <div className="approval-warning">
                         <strong>
-                          Warning: This serial has already been confirmed.
+                          Confirmed serial conflict
                         </strong>
                         <p>
-                          Approving this submission may replace the existing
-                          public record. Check the current evidence first.
+                          This serial already has a confirmed record. Compare the
+                          existing evidence with the new submission before deciding.
                         </p>
                       </div>
                     )}
@@ -444,6 +493,49 @@ export default function AdminApprovals() {
                       </p>
                     )}
 
+                    {hasConfirmedConflict ? (
+                      <div className="approval-comparison-grid">
+                        <section className="approval-comparison-card">
+                          <div className="approval-comparison-heading">
+                            <h3>Existing confirmed record</h3>
+                            <span>Confirmed</span>
+                          </div>
+                          {evidenceLoadingId === submission.id && !existingEvidenceUrl && <p>Loading photo...</p>}
+                          {existingEvidenceUrl && (
+                            <a href={existingEvidenceUrl} target="_blank" rel="noopener noreferrer">
+                              <img src={existingEvidenceUrl} alt="Existing confirmed evidence" loading="lazy" />
+                              <small>Tap photo to enlarge</small>
+                            </a>
+                          )}
+                          <dl>
+                            <div><dt>Confirmed</dt><dd>{submission.existing_submission.reviewed_at ? new Date(submission.existing_submission.reviewed_at).toLocaleString() : "Unknown"}</dd></div>
+                            <div><dt>Country</dt><dd>{submission.existing_submission.country || "Not provided"}</dd></div>
+                            <div><dt>Source</dt><dd>{submission.existing_submission.source_url ? <a href={submission.existing_submission.source_url} target="_blank" rel="noopener noreferrer">View source</a> : "Not provided"}</dd></div>
+                            <div><dt>Notes</dt><dd>{submission.existing_submission.notes || "None"}</dd></div>
+                          </dl>
+                        </section>
+
+                        <section className="approval-comparison-card">
+                          <div className="approval-comparison-heading">
+                            <h3>New submission</h3>
+                            <span>Pending</span>
+                          </div>
+                          {evidenceLoadingId === submission.id && !evidenceUrl && <p>Loading photo...</p>}
+                          {evidenceUrl && (
+                            <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">
+                              <img src={evidenceUrl} alt="New submission evidence" loading="lazy" />
+                              <small>Tap photo to enlarge</small>
+                            </a>
+                          )}
+                          <dl>
+                            <div><dt>Submitted</dt><dd>{submission.created_at ? new Date(submission.created_at).toLocaleString() : "Unknown"}</dd></div>
+                            <div><dt>Country</dt><dd>{submission.country || "Not provided"}</dd></div>
+                            <div><dt>Source</dt><dd>{submission.source_url ? <a href={submission.source_url} target="_blank" rel="noopener noreferrer">View source</a> : "Not provided"}</dd></div>
+                            <div><dt>Photo check</dt><dd>{photoRisk.label}</dd></div>
+                          </dl>
+                        </section>
+                      </div>
+                    ) : (
                     <div className="approval-review-grid">
                       <div className="approval-evidence">
                         <h3>Photo evidence</h3>
@@ -455,10 +547,10 @@ export default function AdminApprovals() {
                         )}
                       </div>
 
-                      <section className={`approval-report photo-check-${risk.tone}`}>
+                      <section className={`approval-report photo-check-${photoRisk.tone}`}>
                         <div className="photo-check-heading">
                           <h3>Submission check</h3>
-                          <span className="photo-check-badge">{risk.label}</span>
+                          <span className="photo-check-badge">{photoRisk.label}</span>
                         </div>
                         <dl className="approval-check-list">
                           <CheckRow
@@ -513,24 +605,46 @@ export default function AdminApprovals() {
                         </p>
                       </section>
                     </div>
+                    )}
+
+                    {hasConfirmedConflict && (
+                      <section className={`approval-report approval-conflict-report photo-check-${photoRisk.tone}`}>
+                        <div className="photo-check-heading">
+                          <h3>New submission check</h3>
+                          <span className="photo-check-badge">{photoRisk.label}</span>
+                        </div>
+                        <dl className="approval-check-list">
+                          <CheckRow label="Card name" expected={submission.card?.name || "Unknown"} observed={submission.ai_card_name_read || "Unable to determine"} value={submission.ai_name_match} confidence={submission.ai_name_confidence} />
+                          <CheckRow label="Serial number" expected={formatSerial(submission.serial)} observed={submission.ai_serial_read || "Unable to determine"} value={submission.ai_serial_match} confidence={submission.ai_serial_confidence} />
+                          <CheckRow label="Reference thumbnail" value={submission.ai_thumbnail_match} confidence={submission.ai_thumbnail_confidence} />
+                          <CheckRow label="Visible editing indicators" value={submission.ai_possible_edit} confidence={submission.ai_edit_confidence} positiveWhenTrue={false} />
+                        </dl>
+                        <p className="photo-check-disclaimer">Photo assessment only. The confirmed-record conflict sets the overall submission to Medium risk.</p>
+                      </section>
+                    )}
 
                     <div className="approval-actions">
                       <button
                         type="button"
-                        onClick={() => handleApprove(submission.id)}
+                        onClick={() => handleApprove(submission)}
                         disabled={busyId === submission.id}
                       >
                         {busyId === submission.id
                           ? "Processing..."
-                          : "Approve"}
+                          : hasConfirmedConflict ? "Replace confirmed record" : "Approve"}
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleReject(submission.id)}
+                        onClick={() => handleReject(submission)}
                         disabled={busyId === submission.id}
                       >
-                        Reject
+                        {hasConfirmedConflict ? "Keep existing record" : "Reject"}
                       </button>
+                      {hasConfirmedConflict && (
+                        <button type="button" onClick={() => setExpandedId(null)} disabled={busyId === submission.id}>
+                          Leave pending
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
