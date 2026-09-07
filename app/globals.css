@@ -378,7 +378,7 @@ button {
 .public-nav {
   position: relative;
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) auto;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   margin-bottom: 32px;
@@ -415,23 +415,35 @@ button {
 
 .public-menu-trigger {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
   place-items: center;
-  border-radius: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
   color: #172019;
 }
 
-.public-menu-trigger:hover,
+.public-menu-trigger:hover {
+  background: transparent;
+}
+
 .public-menu-trigger:focus-visible {
-  background: #eef5f0;
+  border-radius: 3px;
+  background: transparent;
+  outline: 2px solid #35704b;
+  outline-offset: 3px;
+}
+
+.public-menu-trigger:not(:focus-visible) {
   outline: none;
 }
 
 .public-menu-trigger svg {
-  width: 27px;
-  height: 27px;
+  width: 22px;
+  height: 22px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -480,8 +492,8 @@ button {
 
 .brand-mark {
   display: block;
-  width: 46px;
-  height: 46px;
+  width: 52px;
+  height: 52px;
   flex: 0 0 auto;
   object-fit: contain;
 }
@@ -905,12 +917,12 @@ button {
 }
 
 @media (max-width:700px) {
-  .public-nav { grid-template-columns:40px minmax(0,1fr) auto; gap:8px; padding:14px 11px 13px; }
+  .public-nav { grid-template-columns:36px minmax(0,1fr) auto; gap:8px; padding:14px 11px 13px; }
   .nav-actions { width:auto; flex-wrap:nowrap; }
   .nav-link { padding:10px 12px; font-size:12px; }
   .brand-copy strong { font-size:18px; }
   .brand-copy small { display:block; font-size:9px; }
-  .brand-mark { width:40px; height:40px; }
+  .brand-mark { width:46px; height:46px; }
   .compact-home-intro { padding:26px 24px; }
   .compact-home-intro h1 { font-size:34px; }
   .compact-home-intro > p:last-child { font-size:16px; }
@@ -1014,7 +1026,7 @@ button {
 
 @media (max-width: 700px) {
   .public-nav {
-    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-columns: 36px minmax(0, 1fr) auto;
     gap: 8px;
     margin-bottom: 22px;
     padding: 14px 11px 13px;
@@ -1025,8 +1037,8 @@ button {
   }
 
   .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 46px;
+    height: 46px;
   }
 
   .brand-copy strong {
