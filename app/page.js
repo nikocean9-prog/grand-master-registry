@@ -87,6 +87,21 @@ export default async function Home() {
       sourceUrl: "https://www.yugioh-card.com/eu/product/magnificent-monsters/",
       sourceLabel: "Official set details",
     },
+    {
+      label: "Yu-Gi-Oh! · Sneak peek",
+      title: "Magnificent Maestros",
+      shortTitle: "Magnificent Maestros",
+      summary: "The next Grand Master Rare set is prepared ahead of its November 2026 release.",
+      facts: [
+        "The set is scheduled for release on 12 November 2026.",
+        "The preview includes all 18 Grand Master Rare cards.",
+        "Its full registry will cover 3,600 serial numbers across Americas and E-region copies.",
+      ],
+      imageAlt: "Magnificent Maestros sneak peek",
+      imageClass: "yugioh-feature-background",
+      href: "/sets/magnificent-maestros",
+      linkLabel: "View sneak peek",
+    },
   ];
 
   return (
