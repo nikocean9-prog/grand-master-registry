@@ -622,11 +622,13 @@ button {
   position: sticky;
   z-index: 100;
   top: 0;
+  box-sizing: border-box;
+  width: 100vw;
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  margin-bottom: 32px;
+  margin: -60px calc(50% - 50vw) 32px;
   border: 0;
   border-bottom: 1px solid #d9ddda;
   border-radius: 0;
@@ -1383,6 +1385,7 @@ button {
   .public-nav {
     grid-template-columns: 36px minmax(0, 1fr) auto;
     gap: 8px;
+    margin-top: -35px;
     margin-bottom: 22px;
     padding: 14px 11px 13px;
   }
