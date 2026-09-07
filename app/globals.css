@@ -1126,6 +1126,7 @@ button {
 .status-badge { position:absolute; top:22px; right:22px; border-radius:999px; padding:5px 9px; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
 .status-badge.live { background:#d9f7df; color:#226335; }
 .status-badge.planned { background:#ecefee; color:#68716b; }
+.status-badge.preview { background:#fff0bd; color:#715300; }
 .home-links { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:58px; }
 .home-links.single { grid-template-columns:1fr; }
 .feature-link { display:flex; align-items:center; gap:18px; border:1px solid #d8ded9; border-radius:14px; background:white; color:inherit; padding:22px; text-decoration:none; }
