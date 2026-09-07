@@ -368,28 +368,6 @@ export default function AdminApprovals() {
     setBusyId(null);
   }
 
-  async function rerunManualPhotoCheck(submission) {
-    setBusyId(submission.id);
-    setMessage("");
-    const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
-      body: {
-        action: "manual_identify",
-        item_id: submission.client_request_id,
-        card_id: submission.serial?.card_id,
-        serial_number: submission.serial?.serial_number,
-        region: submission.serial?.region,
-      },
-    });
-    if (error || data?.error) {
-      setMessage(data?.error || "The detailed photo check could not be started.");
-      setBusyId(null);
-      return;
-    }
-    await loadApprovals(page);
-    setMessage("Detailed photo check started. Refresh shortly to see the results.");
-    setBusyId(null);
-  }
-
   async function handleSignOut() {
     await supabase.auth.signOut();
     window.location.href = "/admin";
@@ -740,12 +718,6 @@ export default function AdminApprovals() {
                     )}
 
                     <div className="approval-actions">
-                      {submission.client_request_id && submission.notes?.includes("identified manually") &&
-                        (submission.ai_thumbnail_match == null || submission.ai_possible_edit == null) && (
-                          <button type="button" onClick={() => rerunManualPhotoCheck(submission)} disabled={busyId === submission.id}>
-                            {busyId === submission.id ? "Starting check…" : "Run detailed photo check"}
-                          </button>
-                        )}
                       <button
                         type="button"
                         onClick={() => handleApprove(submission)}
