@@ -315,12 +315,16 @@ Deno.serve(async (req: Request) => {
     const { data: item } = await supabase.from("bulk_upload_items")
       .select("id,batch_id,storage_path,original_filename,mime_type,status,submission_id,assessment,confidence")
       .eq("id", itemId).maybeSingle();
-    if (!item || !["needs_review", "error"].includes(item.status) || item.submission_id) {
+    const isNewManualIdentification = Boolean(item && ["needs_review", "error"].includes(item.status) && !item.submission_id);
+    const isManualRecheck = Boolean(item && item.status === "ready" && item.submission_id);
+    if (!item || (!isNewManualIdentification && !isManualRecheck)) {
       return json({ error: "This bulk item is no longer waiting for identification" }, 409);
     }
     const { data: serial } = await supabase.from("serials").select("id,status")
       .eq("card_id", cardId).eq("serial_number", serialNumber).eq("region", region).maybeSingle();
     if (!serial) return json({ error: "That serial is not available for the selected card and region" }, 400);
+    const { data: selectedCard } = await supabase.from("cards").select("id,name,image_url").eq("id", cardId).maybeSingle();
+    if (!selectedCard) return json({ error: "The selected card is no longer available" }, 400);
 
     const { data: blob, error: downloadError } = await supabase.storage.from("bulk-submission-evidence").download(item.storage_path);
     if (downloadError || !blob) return json({ error: "The original photo could not be loaded" }, 500);
@@ -331,24 +335,30 @@ Deno.serve(async (req: Request) => {
 
     const digest = await sha256(blob);
     const serialLabel = `${String(serialNumber).padStart(3, "0")}${region === "E" ? "E" : ""}`;
-    const { data: submission, error: submissionError } = await supabase.from("submissions").insert({
+    const submissionValues = {
       serial_id: serial.id, photo_url: evidencePath, status: "pending",
       notes: "Bulk upload. Card, serial number and region identified manually by the owner.",
-      ai_check_status: "manual", ai_risk_level: "review",
-      ai_reasons: ["The automatic reading was incomplete. The owner supplied the registry details."],
-      ai_summary: `Manually identified bulk image as serial ${serialLabel}. Review the original evidence before approval.`,
+      ai_check_status: "screened", ai_risk_level: "review",
+      ai_reasons: ["The owner supplied the registry details. A detailed photo check is running."],
+      ai_summary: `Manually identified bulk image as serial ${serialLabel}. Detailed photo check running.`,
       ai_card_name_read: item.assessment?.first?.title || item.assessment?.second?.title || null,
       ai_serial_read: item.assessment?.first?.serialText || item.assessment?.second?.serialText || null,
       ai_confidence: item.confidence || 0, ai_checked_at: new Date().toISOString(), photo_sha256: digest,
       client_request_id: item.id,
-    }).select("id").single();
+    };
+    const submissionRequest = isManualRecheck
+      ? supabase.from("submissions").update(submissionValues).eq("id", item.submission_id).eq("status", "pending").select("id").single()
+      : supabase.from("submissions").insert(submissionValues).select("id").single();
+    const { data: submission, error: submissionError } = await submissionRequest;
     if (submissionError || !submission) return json({ error: "The pending approval could not be created" }, 500);
 
     if (serial.status === "unreported") await supabase.from("serials").update({ status: "reported" }).eq("id", serial.id);
-    await supabase.from("bulk_upload_items").update({
-      status: "ready", detected_card_id: cardId, detected_serial_number: serialNumber, detected_region: region,
-      submission_id: submission.id, error_message: null, processed_at: new Date().toISOString(),
-    }).eq("id", item.id);
+    if (isNewManualIdentification) {
+      await supabase.from("bulk_upload_items").update({
+        status: "ready", detected_card_id: cardId, detected_serial_number: serialNumber, detected_region: region,
+        submission_id: submission.id, error_message: null, processed_at: new Date().toISOString(),
+      }).eq("id", item.id);
+    }
 
     const { data: items } = await supabase.from("bulk_upload_items").select("status").eq("batch_id", item.batch_id);
     const total = items?.length || 0;
@@ -360,6 +370,70 @@ Deno.serve(async (req: Request) => {
       processed_items: processed, ready_items: ready, review_items: review,
       updated_at: new Date().toISOString(), completed_at: processed >= total ? new Date().toISOString() : null,
     }).eq("id", item.batch_id);
+
+    const backgroundCheck = (async () => {
+      try {
+        const image = await toDataUrl(blob);
+        const endpoint = `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
+        const first = await analyseImage(image, endpoint, cloudflareToken, 1);
+        const second = await analyseImage(image, endpoint, cloudflareToken, 2);
+        const readings = [first, second].filter(Boolean) as Array<NonNullable<typeof first>>;
+        const bestReading = readings.sort((a, b) => similarity(b.title, selectedCard.name) - similarity(a.title, selectedCard.name))[0] || null;
+        const nameScore = bestReading ? similarity(bestReading.title, selectedCard.name) : 0;
+        const nameMatch = bestReading ? nameScore >= 68 : null;
+        const serialMatch = bestReading?.serialNumber && bestReading.region
+          ? bestReading.serialNumber === serialNumber && bestReading.region === region
+          : null;
+
+        let referenceDescription = "";
+        if (selectedCard.image_url) {
+          try {
+            const referenceResponse = await fetch(selectedCard.image_url);
+            if (referenceResponse.ok) referenceDescription = await describeReference(await toDataUrl(await referenceResponse.blob()), endpoint, cloudflareToken);
+          } catch (referenceError) {
+            console.warn("manual reference unavailable", referenceError);
+          }
+        }
+        const details = await analyseDetails(image, referenceDescription, endpoint, cloudflareToken);
+        const risk = nameMatch === false || serialMatch === false || details.thumbnailMatch === false || details.possibleEdit === true
+          ? "high"
+          : nameMatch === null || serialMatch === null || details.thumbnailMatch === null || details.possibleEdit === null
+            ? "review"
+            : "low";
+        await supabase.from("submissions").update({
+          ai_check_status: risk === "review" ? "manual" : "complete",
+          ai_risk_level: risk,
+          ai_reasons: [
+            "The owner supplied the registry details.",
+            details.notes,
+            serialMatch === null ? "The serial remains unreadable in the photograph." : "The serial was checked again against the photograph.",
+          ].filter(Boolean),
+          ai_summary: `Manual identification checked against the photo for ${selectedCard.name}, serial ${serialLabel}.`,
+          ai_card_name_read: bestReading?.title || item.assessment?.first?.title || item.assessment?.second?.title || null,
+          ai_name_match: nameMatch,
+          ai_name_confidence: nameMatch === null ? 0 : nameScore,
+          ai_serial_read: bestReading?.serialText || item.assessment?.first?.serialText || item.assessment?.second?.serialText || null,
+          ai_serial_match: serialMatch,
+          ai_serial_confidence: serialMatch === null ? 0 : 90,
+          ai_card_match: nameMatch,
+          ai_thumbnail_match: details.thumbnailMatch,
+          ai_thumbnail_confidence: details.thumbnailConfidence,
+          ai_possible_edit: details.possibleEdit,
+          ai_edit_confidence: details.editConfidence,
+          ai_edit_indicators: details.editIndicators,
+          ai_confidence: Math.round((Math.max(nameScore, 0) + (serialMatch === null ? 0 : 90) + details.thumbnailConfidence + details.editConfidence) / 4),
+          ai_checked_at: new Date().toISOString(),
+        }).eq("id", submission.id);
+      } catch (backgroundError) {
+        console.error("manual bulk detailed check failed", backgroundError);
+        await supabase.from("submissions").update({
+          ai_check_status: "unavailable", ai_risk_level: "unavailable",
+          ai_summary: "The detailed photo check could not be completed. Review the original evidence manually.",
+          ai_checked_at: new Date().toISOString(),
+        }).eq("id", submission.id);
+      }
+    })();
+    EdgeRuntime.waitUntil(backgroundCheck);
     return json({ processed: true, submission_id: submission.id });
   }
 
