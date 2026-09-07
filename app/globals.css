@@ -1118,6 +1118,14 @@ button {
 
 .serial-modal-loading p { margin: 8px 0 0; }
 
+.serial-modal-photo-loading {
+  display: grid;
+  place-items: center;
+  min-height: 260px;
+  color: #607067;
+  font-size: 16px;
+}
+
 @media (max-width: 700px) {
   .public-nav {
     grid-template-columns: 36px minmax(0, 1fr) auto;

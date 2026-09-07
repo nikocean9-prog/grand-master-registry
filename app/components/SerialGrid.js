@@ -2,25 +2,37 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import SerialDetailModal from "./SerialDetailModal";
+import SerialDetailModal, { preloadSerialDetails } from "./SerialDetailModal";
 
-export default function SerialGrid({ serials, total = 100 }) {
-  const [selectedSerialId, setSelectedSerialId] = useState(null);
+const formatSerial = (serial, total) => {
+  const formatted = String(serial.serial_number).padStart(total < 100 ? 2 : 3, "0");
+  return serial.region === "E" ? `${formatted}E` : formatted;
+};
+
+const getRegionLabel = (region) => region === "GLOBAL"
+  ? "Worldwide"
+  : region === "E" ? "Europe-distributed" : "Americas";
+
+export default function SerialGrid({ serials, total = 100, cardSummary }) {
+  const [selectedSerial, setSelectedSerial] = useState(null);
   const gridUrlRef = useRef(null);
 
   useEffect(() => {
     const handlePopState = (event) => {
       const modalId = event.state?.serialModalId;
-      setSelectedSerialId(
-        modalId && serials.some((serial) => serial.id === modalId) ? modalId : null
-      );
+      const serial = modalId ? serials.find((item) => item.id === modalId) : null;
+      setSelectedSerial(serial ? {
+        id: serial.id,
+        label: formatSerial(serial, total),
+        region_label: getRegionLabel(serial.region),
+      } : null);
     };
 
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [serials]);
+  }, [serials, total]);
 
-  const openSerial = (event, serialId) => {
+  const openSerial = (event, serial) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
       return;
     }
@@ -28,11 +40,15 @@ export default function SerialGrid({ serials, total = 100 }) {
     event.preventDefault();
     gridUrlRef.current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     window.history.pushState(
-      { ...window.history.state, serialModalId: serialId },
+      { ...window.history.state, serialModalId: serial.id },
       "",
-      `/serial/${serialId}`
+      `/serial/${serial.id}`
     );
-    setSelectedSerialId(serialId);
+    setSelectedSerial({
+      id: serial.id,
+      label: formatSerial(serial, total),
+      region_label: getRegionLabel(serial.region),
+    });
   };
 
   const closeSerial = useCallback(() => {
@@ -41,24 +57,16 @@ export default function SerialGrid({ serials, total = 100 }) {
       return;
     }
 
-    setSelectedSerialId(null);
+    setSelectedSerial(null);
     if (gridUrlRef.current) {
       window.history.replaceState(window.history.state, "", gridUrlRef.current);
     }
   }, []);
 
-  const formatNumber = (number, region) => {
-    const formatted = String(number).padStart(total < 100 ? 2 : 3, "0");
-    return region === "E" ? `${formatted}E` : formatted;
-  };
-
   return (
     <div className="serial-grid">
       {serials.map((serial) => {
-        const serialLabel = formatNumber(
-          serial.serial_number,
-          serial.region
-        );
+        const serialLabel = formatSerial(serial, total);
         const key = `${serial.region}-${serial.serial_number}`;
 
         if (serial.status === "confirmed") {
@@ -68,7 +76,10 @@ export default function SerialGrid({ serials, total = 100 }) {
               href={`/serial/${serial.id}`}
               className="serial-box confirmed"
               title="Confirmed — view details"
-              onClick={(event) => openSerial(event, serial.id)}
+              onPointerEnter={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
+              onFocus={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
+              onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
+              onClick={(event) => openSerial(event, serial)}
             >
               {serialLabel}
             </Link>
@@ -85,7 +96,7 @@ export default function SerialGrid({ serials, total = 100 }) {
           </div>
         );
       })}
-      <SerialDetailModal serialId={selectedSerialId} onClose={closeSerial} />
+      <SerialDetailModal serial={selectedSerial} card={cardSummary} onClose={closeSerial} />
     </div>
   );
 }
