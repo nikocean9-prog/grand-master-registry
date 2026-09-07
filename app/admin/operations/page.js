@@ -10,42 +10,6 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const discoveries = [
-  {
-    id: 1,
-    card: "Dark Magical Curtain",
-    serial: "007/100",
-    source: "Reddit",
-    confidence: 94,
-    status: "Strong candidate",
-    tone: "low",
-    found: "Today, 12:02 pm",
-    reason: "Card name and serial are visible. Artwork matches the registry reference.",
-  },
-  {
-    id: 2,
-    card: "Dark Magician the Pharaoh's Servant",
-    serial: "032/100",
-    source: "Instagram",
-    confidence: 72,
-    status: "Needs review",
-    tone: "review",
-    found: "Today, 12:03 pm",
-    reason: "Card appears correct, but glare partially obscures the printed serial.",
-  },
-  {
-    id: 3,
-    card: "Dark Magical Curtain",
-    serial: "007/100",
-    source: "eBay",
-    confidence: 100,
-    status: "Duplicate",
-    tone: "high",
-    found: "Today, 12:05 pm",
-    reason: "The image matches an existing discovery already awaiting review.",
-  },
-];
-
 const drafts = [
   {
     id: 1,
@@ -70,10 +34,10 @@ const drafts = [
 const jobs = [
   {
     name: "Magnificent Monsters discovery search",
-    schedule: "Daily at 12:00 pm",
-    lastRun: "Today, 12:00 pm",
-    result: "18 sources checked · 2 candidates",
-    status: "Ready for connection",
+    schedule: "Every 4 hours · 6 batches daily",
+    lastRun: "Starts after deployment",
+    result: "3 cards per batch · all 18 cards daily",
+    status: "Scheduled",
   },
   {
     name: "Daily social post",
@@ -107,6 +71,13 @@ export default function OwnerOperations() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedDiscovery, setExpandedDiscovery] = useState(null);
+  const [discoveries, setDiscoveries] = useState([]);
+  const [sets, setSets] = useState([]);
+  const [selectedSet, setSelectedSet] = useState("");
+  const [runningDiscovery, setRunningDiscovery] = useState(false);
+  const [discoveryProgress, setDiscoveryProgress] = useState("");
+  const [discoverySearch, setDiscoverySearch] = useState("");
+  const [discoveryFilter, setDiscoveryFilter] = useState("active");
   const [draftPrompt, setDraftPrompt] = useState("");
   const [draftPlatform, setDraftPlatform] = useState("Instagram + Facebook");
   const [conceptMessage, setConceptMessage] = useState("");
@@ -137,6 +108,7 @@ export default function OwnerOperations() {
         return;
       }
 
+      await Promise.all([loadDiscoveries(), loadSets()]);
       setLoading(false);
     }
 
@@ -144,9 +116,99 @@ export default function OwnerOperations() {
   }, []);
 
   const strongCount = useMemo(
-    () => discoveries.filter((item) => item.tone === "low").length,
-    []
+    () => discoveries.filter((item) => item.confidence >= 80 && item.status === "candidate").length,
+    [discoveries]
   );
+
+  const visibleDiscoveries = useMemo(() => discoveries.filter((item) => {
+    const haystack = `${item.card?.name || ""} ${item.detected_serial || ""} ${item.source_domain || ""} ${item.source_title || ""}`.toLowerCase();
+    const matchesSearch = haystack.includes(discoverySearch.trim().toLowerCase());
+    const matchesFilter = discoveryFilter === "all" ||
+      (discoveryFilter === "active" && ["candidate", "investigating"].includes(item.status)) ||
+      item.status === discoveryFilter;
+    return matchesSearch && matchesFilter;
+  }), [discoveries, discoverySearch, discoveryFilter]);
+
+  async function loadDiscoveries() {
+    const { data, error } = await supabase
+      .from("pull_discoveries")
+      .select("id, source_url, source_domain, source_title, search_summary, detected_serial, confidence, status, found_at, card:cards(id, name, serial_total)")
+      .order("found_at", { ascending: false })
+      .limit(100);
+    if (!error) setDiscoveries(data || []);
+  }
+
+  async function loadSets() {
+    const { data, error } = await supabase
+      .from("card_sets")
+      .select("slug, name")
+      .eq("status", "live")
+      .order("name");
+    if (!error) setSets(data || []);
+  }
+
+  async function runDiscoverySearch() {
+    setRunningDiscovery(true);
+    setDiscoveryProgress("");
+    setConceptMessage("Preparing the discovery search…");
+
+    let cardIds = [];
+    if (selectedSet) {
+      const { data: setCards, error: cardError } = await supabase
+        .from("cards")
+        .select("id, card_sets!inner(slug)")
+        .eq("card_sets.slug", selectedSet)
+        .order("id");
+      if (cardError || !setCards?.length) {
+        setConceptMessage("The selected set could not be loaded.");
+        setRunningDiscovery(false);
+        return;
+      }
+      cardIds = setCards.map((card) => card.id);
+    }
+
+    const batches = cardIds.length
+      ? Array.from({ length: Math.ceil(cardIds.length / 3) }, (_, index) => cardIds.slice(index * 3, index * 3 + 3))
+      : [null];
+    let searched = 0;
+    let found = 0;
+
+    for (let index = 0; index < batches.length; index += 1) {
+      setDiscoveryProgress(`Batch ${index + 1} of ${batches.length} · ${searched} of ${cardIds.length || 3} cards checked`);
+      const { data, error } = await supabase.functions.invoke("discover-pulls", {
+        body: {
+          set_slug: selectedSet || undefined,
+          card_ids: batches[index] || undefined,
+          max_cards: 3,
+        },
+      });
+      if (error) {
+        setConceptMessage(`Search paused after ${searched} cards: ${error.message || "a batch failed"}`);
+        setRunningDiscovery(false);
+        return;
+      }
+      searched += data.cards_searched || 0;
+      found += data.results_found || 0;
+    }
+
+    await loadDiscoveries();
+    setDiscoveryProgress("");
+    setConceptMessage(`Search complete: ${searched} cards checked · ${found} new candidates saved.`);
+    setRunningDiscovery(false);
+  }
+
+  async function updateDiscovery(id, status) {
+    const { error } = await supabase
+      .from("pull_discoveries")
+      .update({ status, reviewed_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) {
+      setConceptMessage("That discovery could not be updated.");
+      return;
+    }
+    await loadDiscoveries();
+    setConceptMessage(status === "rejected" ? "Discovery rejected." : "Discovery saved for investigation.");
+  }
 
   function demonstrateAction(message) {
     setConceptMessage(message);
@@ -187,7 +249,7 @@ export default function OwnerOperations() {
             one place.
           </p>
         </div>
-        <StatusPill tone="review">Concept mode · No accounts connected</StatusPill>
+        <StatusPill tone="low">Pull discovery beta</StatusPill>
       </div>
 
       <nav className="ops-tabs" aria-label="Operations sections">
@@ -249,14 +311,16 @@ export default function OwnerOperations() {
                 </button>
               </div>
               <div className="ops-decision-list">
-                <button type="button" onClick={() => setActiveTab("discoveries")}>
-                  <StatusPill tone="low">Strong candidate</StatusPill>
-                  <span>
-                    <strong>Dark Magical Curtain · 007/100</strong>
-                    <small>Reddit evidence · 94% confidence</small>
-                  </span>
-                  <b aria-hidden="true">›</b>
-                </button>
+                {discoveries.filter((item) => item.status === "candidate").slice(0, 1).map((item) => (
+                  <button type="button" onClick={() => setActiveTab("discoveries")} key={item.id}>
+                    <StatusPill tone={item.confidence >= 80 ? "low" : "review"}>{item.confidence >= 80 ? "Strong candidate" : "Needs review"}</StatusPill>
+                    <span>
+                      <strong>{item.card?.name}{item.detected_serial ? ` · ${item.detected_serial}` : ""}</strong>
+                      <small>{item.source_domain} · {item.confidence}% confidence</small>
+                    </span>
+                    <b aria-hidden="true">›</b>
+                  </button>
+                ))}
                 <button type="button" onClick={() => setActiveTab("content")}>
                   <StatusPill tone="review">Draft</StatusPill>
                   <span>
@@ -271,20 +335,16 @@ export default function OwnerOperations() {
             <article className="ops-panel">
               <p className="eyebrow">Next run</p>
               <h2>Daily discovery search</h2>
-              <p className="ops-run-time">Tomorrow at 12:00 pm</p>
+              <p className="ops-run-time">Every four hours</p>
               <p>
-                Ten saved card searches will run in order and produce one
-                consolidated evidence report.
+                Six fixed three-card batches cover all 18 Magnificent Monsters
+                cards every day and save candidates for private owner review.
               </p>
               <button
                 type="button"
-                onClick={() =>
-                  demonstrateAction(
-                    "Concept only: this would start the saved discovery search now."
-                  )
-                }
+                onClick={() => setActiveTab("discoveries")}
               >
-                Run now
+                Open discovery search
               </button>
             </article>
           </div>
@@ -299,34 +359,38 @@ export default function OwnerOperations() {
               <h2>Card Discoveries</h2>
               <p>Results remain private until you approve them.</p>
             </div>
-            <button
-              type="button"
-              onClick={() =>
-                demonstrateAction(
-                  "Concept only: the daily discovery search would start now."
-                )
-              }
-            >
-              Run discovery search
-            </button>
+            <div className="ops-run-controls">
+              <select aria-label="Set to search" value={selectedSet} onChange={(event) => setSelectedSet(event.target.value)}>
+                <option value="">All live sets</option>
+                {sets.map((set) => <option value={set.slug} key={set.slug}>{set.name}</option>)}
+              </select>
+              <button type="button" onClick={runDiscoverySearch} disabled={runningDiscovery}>
+                {runningDiscovery ? "Searching…" : selectedSet ? "Search complete set" : "Search 3 cards"}
+              </button>
+              {discoveryProgress && <small className="ops-progress-label">{discoveryProgress}</small>}
+            </div>
           </div>
 
           <div className="ops-filter-row">
-            <input aria-label="Search discoveries" placeholder="Search card, serial or source" />
-            <select aria-label="Filter discoveries">
-              <option>All results</option>
-              <option>Strong candidates</option>
-              <option>Needs review</option>
-              <option>Duplicates</option>
+            <input aria-label="Search discoveries" placeholder="Search card, serial or source" value={discoverySearch} onChange={(event) => setDiscoverySearch(event.target.value)} />
+            <select aria-label="Filter discoveries" value={discoveryFilter} onChange={(event) => setDiscoveryFilter(event.target.value)}>
+              <option value="active">Needs attention</option>
+              <option value="all">All results</option>
+              <option value="candidate">Candidates</option>
+              <option value="investigating">Investigating</option>
+              <option value="rejected">Rejected</option>
             </select>
-            <span>3 results · Page 1 of 1</span>
+            <span>{visibleDiscoveries.length} results</span>
           </div>
 
           <div className="ops-discovery-list">
-            {discoveries.map((item) => {
+            {visibleDiscoveries.length === 0 && <div className="ops-empty-results"><strong>No discoveries in this view</strong><span>Run a search or change the filters.</span></div>}
+            {visibleDiscoveries.map((item) => {
               const expanded = expandedDiscovery === item.id;
+              const tone = item.status === "rejected" ? "high" : item.confidence >= 80 ? "low" : "review";
+              const label = item.status === "investigating" ? "Investigating" : item.status === "rejected" ? "Rejected" : item.confidence >= 80 ? "Strong candidate" : "Needs review";
               return (
-                <article key={item.id} className={`ops-discovery ops-tone-${item.tone}`}>
+                <article key={item.id} className={`ops-discovery ops-tone-${tone}`}>
                   <button
                     type="button"
                     className="ops-discovery-summary"
@@ -334,11 +398,11 @@ export default function OwnerOperations() {
                     onClick={() => setExpandedDiscovery(expanded ? null : item.id)}
                   >
                     <span>
-                      <strong>{item.card}</strong>
-                      <small>{item.serial} · {item.source} · {item.found}</small>
+                      <strong>{item.card?.name || "Unknown card"}</strong>
+                      <small>{item.detected_serial || `Serial not read /${item.card?.serial_total || "?"}`} · {item.source_domain} · {new Date(item.found_at).toLocaleString()}</small>
                     </span>
                     <span>
-                      <StatusPill tone={item.tone}>{item.status}</StatusPill>
+                      <StatusPill tone={tone}>{label}</StatusPill>
                       <b>{item.confidence}%</b>
                       <i aria-hidden="true">{expanded ? "▲" : "▼"}</i>
                     </span>
@@ -346,47 +410,30 @@ export default function OwnerOperations() {
                   {expanded && (
                     <div className="ops-discovery-detail">
                       <div className="ops-evidence-placeholder">
-                        <span>Evidence preview</span>
-                        <small>Source image would load only when expanded</small>
+                        <span>{item.source_domain}</span>
+                        <small>{item.source_title}</small>
                       </div>
                       <div>
-                        <h3>Automated assessment</h3>
-                        <p>{item.reason}</p>
+                        <h3>Candidate source</h3>
+                        <p>{item.search_summary || "The web search cited this page as a possible serialized-card sighting."}</p>
                         <dl>
-                          <div><dt>Source</dt><dd>{item.source}</dd></div>
+                          <div><dt>Source</dt><dd>{item.source_domain}</dd></div>
                           <div><dt>Card match</dt><dd>{item.confidence}%</dd></div>
-                          <div><dt>Existing duplicate</dt><dd>{item.tone === "high" ? "Yes" : "No"}</dd></div>
+                          <div><dt>Serial detected</dt><dd>{item.detected_serial || "Not readable in search result"}</dd></div>
                         </dl>
                         <div className="ops-actions">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              demonstrateAction(
-                                "Concept only: this discovery would move into Pending Approvals."
-                              )
-                            }
-                          >
-                            Add to Pending Approvals
-                          </button>
+                          <a href={item.source_url} target="_blank" rel="noreferrer" className="ops-source-button">Open source</a>
                           <button
                             type="button"
                             className="button-secondary"
-                            onClick={() =>
-                              demonstrateAction(
-                                "Concept only: this discovery would be saved for investigation."
-                              )
-                            }
+                            onClick={() => updateDiscovery(item.id, "investigating")}
                           >
                             Investigate
                           </button>
                           <button
                             type="button"
                             className="button-danger"
-                            onClick={() =>
-                              demonstrateAction(
-                                "Concept only: this discovery would be rejected."
-                              )
-                            }
+                            onClick={() => updateDiscovery(item.id, "rejected")}
                           >
                             Reject
                           </button>
@@ -531,7 +578,7 @@ export default function OwnerOperations() {
             {jobs.map((job) => (
               <article key={job.name}>
                 <div>
-                  <StatusPill tone={job.status === "Ready for connection" ? "review" : "neutral"}>
+                  <StatusPill tone={job.status === "Scheduled" ? "low" : job.status === "Ready for connection" ? "review" : "neutral"}>
                     {job.status}
                   </StatusPill>
                   <h3>{job.name}</h3>
