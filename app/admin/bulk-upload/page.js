@@ -42,6 +42,11 @@ export default function BulkUploadPage() {
   const [openItem, setOpenItem] = useState(null);
   const [openPhotoUrl, setOpenPhotoUrl] = useState("");
   const [openingPhoto, setOpeningPhoto] = useState(false);
+  const [cards, setCards] = useState([]);
+  const [manualCardId, setManualCardId] = useState("");
+  const [manualSerial, setManualSerial] = useState("");
+  const [manualRegion, setManualRegion] = useState("AMERICAS");
+  const [savingIdentification, setSavingIdentification] = useState(false);
 
   const loadBatches = useCallback(async () => {
     const { data, error } = await supabase
@@ -50,7 +55,7 @@ export default function BulkUploadPage() {
         id, status, total_items, processed_items, ready_items, review_items,
         created_at, updated_at,
         items:bulk_upload_items (
-          id, storage_path, original_filename, status, confidence, detected_serial_number,
+          id, storage_path, original_filename, status, confidence, detected_card_id, detected_serial_number,
           detected_region, error_message, submission_id,
           card:cards ( name )
         )
@@ -74,6 +79,9 @@ export default function BulkUploadPage() {
     setOpenItem(item);
     setOpenPhotoUrl("");
     setOpeningPhoto(true);
+    setManualCardId(item.detected_card_id ? String(item.detected_card_id) : "");
+    setManualSerial(item.detected_serial_number ? String(item.detected_serial_number) : "");
+    setManualRegion(item.detected_region || "AMERICAS");
     const { data, error } = await supabase.storage
       .from("bulk-submission-evidence")
       .createSignedUrl(item.storage_path, 3600);
@@ -89,6 +97,29 @@ export default function BulkUploadPage() {
     setOpenItem(null);
     setOpenPhotoUrl("");
     setOpeningPhoto(false);
+  }
+
+  async function sendToApprovals() {
+    const cardId = Number(manualCardId);
+    const serialNumber = Number(manualSerial);
+    if (!Number.isInteger(cardId) || !Number.isInteger(serialNumber) || serialNumber < 1) {
+      setMessage("Choose the card and enter a valid serial number.");
+      return;
+    }
+    setSavingIdentification(true);
+    setMessage("");
+    const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
+      body: { action: "manual_identify", item_id: openItem.id, card_id: cardId, serial_number: serialNumber, region: manualRegion },
+    });
+    if (error || data?.error) {
+      setMessage(data?.error || "This item could not be sent to Pending Approvals.");
+      setSavingIdentification(false);
+      return;
+    }
+    closeItem();
+    await loadBatches();
+    setMessage("The identified card was sent to Pending Approvals.");
+    setSavingIdentification(false);
   }
 
   useEffect(() => {
@@ -107,6 +138,11 @@ export default function BulkUploadPage() {
       }
 
       await loadBatches();
+      const { data: cardData } = await supabase
+        .from("cards")
+        .select("id,name,set_id,serial_total,set:card_sets(name,tcg_slug,serial_scheme)")
+        .order("name");
+      setCards(cardData || []);
       setLoading(false);
     }
     initialise();
@@ -358,7 +394,33 @@ export default function BulkUploadPage() {
                 <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
                 <div><dt>AI confidence</dt><dd>{Number.isInteger(openItem.confidence) ? `${openItem.confidence}%` : "Not available"}</dd></div>
               </dl>
-              <button type="button" onClick={closeItem}>Close</button>
+              <div className="bulk-identify-form">
+                <label>Card
+                  <select value={manualCardId} onChange={(event) => {
+                    const value = event.target.value;
+                    setManualCardId(value);
+                    const selected = cards.find((card) => String(card.id) === value);
+                    setManualRegion(selected?.set?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
+                  }}>
+                    <option value="">Choose card</option>
+                    {cards.map((card) => <option key={card.id} value={card.id}>{card.name} — {card.set?.name}</option>)}
+                  </select>
+                </label>
+                <label>Serial number
+                  <input type="number" min="1" inputMode="numeric" value={manualSerial} onChange={(event) => setManualSerial(event.target.value)} />
+                </label>
+                <label>Region
+                  <select value={manualRegion} onChange={(event) => setManualRegion(event.target.value)}>
+                    {cards.find((card) => String(card.id) === manualCardId)?.set?.serial_scheme === "global" ? (
+                      <option value="GLOBAL">Global</option>
+                    ) : <><option value="AMERICAS">Americas</option><option value="E">E-Region</option></>}
+                  </select>
+                </label>
+                <button type="button" onClick={sendToApprovals} disabled={savingIdentification}>
+                  {savingIdentification ? "Sending…" : "Send to Pending Approvals"}
+                </button>
+              </div>
+              <button type="button" className="secondary-button" onClick={closeItem} disabled={savingIdentification}>Close</button>
             </div>
           </section>
         </div>
