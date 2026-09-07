@@ -99,14 +99,14 @@ function readResult(raw: unknown) {
   if (!parsed) return null;
   const title = clean(parsed.title, 140);
   const serialText = clean(parsed.serial, 40).toUpperCase();
-  const match = serialText.match(/(?:^|\D)(\d{1,3})\s*(E)?\s*(?:\/|OF)\s*(?:100|200|500)(?:\D|$)/i);
+  const match = serialText.match(/(?:^|\D)(\d{1,3})\s*(E)?\s*(?:\/|OF)\s*(?:100|200|500)\s*(E)?(?:\D|$)/i);
   if (!title || !match) return { title, serialText, serialNumber: null, region: null };
   const serialNumber = Number(match[1]);
   return {
     title,
     serialText,
     serialNumber: Number.isInteger(serialNumber) && serialNumber > 0 ? serialNumber : null,
-    region: match[2] ? "E" : "AMERICAS",
+    region: match[2] || match[3] ? "E" : "AMERICAS",
   };
 }
 
