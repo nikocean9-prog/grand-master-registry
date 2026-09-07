@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { safeSubmissionMessage } from "../lib/userMessages";
 import { tcgs as tcgCatalog } from "../lib/catalog";
@@ -296,8 +295,7 @@ export default function SubmitPage() {
 
   return (
     <main className="submission-page">
-      <PublicHeader />
-      <Link href="/" className="submission-back-link">← Back to Home</Link>
+      <PublicHeader showSubmit={false} />
 
       <div className="submission-heading">
         <p className="eyebrow">Document a card</p>

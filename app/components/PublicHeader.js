@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function PublicHeader() {
+export default function PublicHeader({ showSubmit = true }) {
   return (
     <nav className="public-nav" aria-label="Main navigation">
       <details className="public-menu">
@@ -20,9 +20,11 @@ export default function PublicHeader() {
         <img src="/tst-card-check-logo.png" alt="" width="46" height="46" className="brand-mark" />
         <span className="brand-copy"><small>TCG Serial</small><strong>Tracker</strong></span>
       </Link>
-      <div className="nav-actions">
-        <Link href="/submit" className="nav-link nav-link-primary">Submit a Pull</Link>
-      </div>
+      {showSubmit && (
+        <div className="nav-actions">
+          <Link href="/submit" className="nav-link nav-link-primary">Submit a Pull</Link>
+        </div>
+      )}
     </nav>
   );
 }
