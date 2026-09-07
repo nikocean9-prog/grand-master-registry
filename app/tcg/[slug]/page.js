@@ -19,7 +19,7 @@ export default async function TcgPage({ params }) {
   const hasLiveSet = tcg.sets.some((set) => set.status === "live");
   if (!hasLiveSet) {
     return (
-      <main><PublicHeader /><Link href="/#tcgs" className="back-link">← All TCGs</Link>
+      <main><PublicHeader /><Link href="/tcgs" className="back-link">← All TCGs</Link>
         <section className="catalog-heading planned-tcg-heading">
           <span className="planned-tcg-wordmark" aria-hidden="true"><img src={tcg.logo} alt="" /></span>
           <div><p className="eyebrow">Coming soon</p><h1>{tcg.name}</h1><p>{tcg.description}</p></div>
@@ -31,7 +31,7 @@ export default async function TcgPage({ params }) {
     );
   }
   return (
-    <main><PublicHeader /><Link href="/#tcgs" className="back-link">← All TCGs</Link>
+    <main><PublicHeader /><Link href="/tcgs" className="back-link">← All TCGs</Link>
       <section className={`catalog-heading tcg-heading-${tcg.slug}`}><div><p className="eyebrow">Trading card game</p><h1>{tcg.slug === "yugioh" ? <img className="tcg-official-logo" src="/graphics/yugioh-official-logo.svg" alt="Yu-Gi-Oh! Trading Card Game" /> : tcg.name}</h1><p>{tcg.description}</p></div></section>
       <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">Set directory</p><h2>Choose a set</h2></div></div>
         <TcgSetDirectory sets={tcg.sets} />

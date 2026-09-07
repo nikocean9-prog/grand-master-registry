@@ -1,6 +1,5 @@
 import Link from "next/link";
 import PublicHeader from "./components/PublicHeader";
-import TcgCatalog from "./components/TcgCatalog";
 import FeaturedGallery from "./components/FeaturedGallery";
 import { createClient } from "@supabase/supabase-js";
 import { tcgs } from "./lib/catalog";
@@ -105,12 +104,6 @@ export default async function Home() {
       </section>
       <section className="compact-stats" aria-label="Registry overview"><div><strong>{liveTcgCount}</strong><span>Live TCGs</span></div><div><strong>{liveSets.length}</strong><span>Live sets</span></div><div><strong>{serialCount.toLocaleString()}</strong><span>Serials found</span></div></section>
       <FeaturedGallery features={features} />
-      <section className="registry-section" id="tcgs">
-        <div className="section-heading">
-          <div><p className="eyebrow">Available now</p><h2>Live registries</h2></div>
-        </div>
-        <TcgCatalog tcgs={tcgs} />
-      </section>
       <section className="home-links single"><Link href="/help" className="feature-link"><span>?</span><div><h2>Help &amp; Contact</h2><p>Get help, report a problem, or suggest a TCG or set.</p></div></Link></section>
     </main>
   );

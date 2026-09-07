@@ -11,6 +11,7 @@ export default function PublicHeader({ showSubmit = true }) {
         </summary>
         <div className="public-menu-panel">
           <Link href="/">Home</Link>
+          <Link href="/tcgs">TCGs</Link>
           <Link href="/submit">Submit a Pull</Link>
           <Link href="/help">Help</Link>
           <Link href="/disclaimer">Legal &amp; disclaimer</Link>
