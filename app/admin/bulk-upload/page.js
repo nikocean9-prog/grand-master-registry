@@ -39,6 +39,9 @@ export default function BulkUploadPage() {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [message, setMessage] = useState("");
+  const [openItem, setOpenItem] = useState(null);
+  const [openPhotoUrl, setOpenPhotoUrl] = useState("");
+  const [openingPhoto, setOpeningPhoto] = useState(false);
 
   const loadBatches = useCallback(async () => {
     const { data, error } = await supabase
@@ -47,7 +50,7 @@ export default function BulkUploadPage() {
         id, status, total_items, processed_items, ready_items, review_items,
         created_at, updated_at,
         items:bulk_upload_items (
-          id, original_filename, status, confidence, detected_serial_number,
+          id, storage_path, original_filename, status, confidence, detected_serial_number,
           detected_region, error_message, submission_id,
           card:cards ( name )
         )
@@ -57,6 +60,36 @@ export default function BulkUploadPage() {
 
     if (!error) setBatches(data || []);
   }, []);
+
+  useEffect(() => {
+    if (!openItem) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") closeItem();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [openItem]);
+
+  async function viewItem(item) {
+    setOpenItem(item);
+    setOpenPhotoUrl("");
+    setOpeningPhoto(true);
+    const { data, error } = await supabase.storage
+      .from("bulk-submission-evidence")
+      .createSignedUrl(item.storage_path, 3600);
+    if (error || !data?.signedUrl) {
+      setMessage("The original bulk-upload photo could not be opened.");
+    } else {
+      setOpenPhotoUrl(data.signedUrl);
+    }
+    setOpeningPhoto(false);
+  }
+
+  function closeItem() {
+    setOpenItem(null);
+    setOpenPhotoUrl("");
+    setOpeningPhoto(false);
+  }
 
   useEffect(() => {
     async function initialise() {
@@ -294,6 +327,10 @@ export default function BulkUploadPage() {
                         {Number.isInteger(item.confidence) && <small>{item.confidence}%</small>}
                         {item.submission_id ? (
                           <a href="/admin/approvals">Review</a>
+                        ) : ["needs_review", "error"].includes(item.status) ? (
+                          <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
+                            Open
+                          </button>
                         ) : <span>{statusLabel(item.status)}</span>}
                       </div>
                     </div>
@@ -304,6 +341,28 @@ export default function BulkUploadPage() {
           </article>
         ))}
       </section>
+
+      {openItem && (
+        <div className="bulk-photo-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeItem(); }}>
+          <section className="bulk-photo-modal" role="dialog" aria-modal="true" aria-labelledby="bulk-photo-title">
+            <button type="button" className="bulk-photo-modal-close" onClick={closeItem} aria-label="Close photo">×</button>
+            <div className="bulk-photo-modal-image">
+              {openingPhoto && <p>Opening photo…</p>}
+              {openPhotoUrl && <img src={openPhotoUrl} alt={openItem.original_filename} />}
+            </div>
+            <div className="bulk-photo-modal-details">
+              <p className="eyebrow">Needs identification</p>
+              <h2 id="bulk-photo-title">{openItem.card?.name || openItem.original_filename}</h2>
+              <p>{openItem.error_message || "The card or serial could not be identified confidently."}</p>
+              <dl>
+                <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
+                <div><dt>AI confidence</dt><dd>{Number.isInteger(openItem.confidence) ? `${openItem.confidence}%` : "Not available"}</dd></div>
+              </dl>
+              <button type="button" onClick={closeItem}>Close</button>
+            </div>
+          </section>
+        </div>
+      )}
     </main>
   );
 }
