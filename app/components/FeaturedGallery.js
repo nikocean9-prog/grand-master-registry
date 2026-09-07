@@ -73,11 +73,6 @@ export default function FeaturedGallery({ features }) {
           </ul>
           <div className="featured-story-links">
             {activeFeature.href && <Link href={activeFeature.href} className="featured-registry-button">{activeFeature.linkLabel}</Link>}
-            {activeFeature.sourceUrl && (
-              <a href={activeFeature.sourceUrl} target="_blank" rel="noreferrer">
-                {activeFeature.sourceLabel || "View source"} ↗
-              </a>
-            )}
           </div>
         </div>
       </article>

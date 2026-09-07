@@ -801,7 +801,7 @@ button {
 .featured-story-copy ul { margin:0 0 22px; padding-left:20px; color:#d8e3dc; font-size:14px; line-height:1.55; }
 .featured-story-links { display:flex; flex-wrap:wrap; gap:12px 20px; }
 .featured-story-links a { color:#f0d37d; font-size:14px; font-weight:800; text-decoration:none; }
-.featured-story-links .featured-registry-button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; border:1px solid #f0d37d; border-radius:9px; background:#f0d37d; color:#09271c; padding:10px 18px; box-shadow:0 5px 14px rgba(0,0,0,.2); transition:transform .16s ease,background .16s ease; }
+.featured-story-links .featured-registry-button { display:inline-flex; width:auto; align-items:center; justify-content:center; min-height:38px; border:1px solid #f0d37d; border-radius:8px; background:#f0d37d; color:#09271c; padding:8px 15px; box-shadow:0 4px 12px rgba(0,0,0,.18); font-size:13px; transition:transform .16s ease,background .16s ease; }
 .featured-story-links .featured-registry-button:hover { background:#ffe39a; transform:translateY(-1px); }
 .featured-story-dots { display:flex; justify-content:center; gap:9px; margin-top:15px; }
 .featured-story-dots button { width:10px; height:10px; min-width:0; min-height:0; margin:0; border:0; border-radius:50%; background:#b9c3bd; padding:0; transition:width .2s ease,background .2s ease; }
