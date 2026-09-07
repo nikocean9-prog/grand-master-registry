@@ -300,6 +300,69 @@ Deno.serve(async (req: Request) => {
   }
   if (!authorised) return json({ error: "Owner access required" }, 403);
 
+  let requestBody: Record<string, unknown> = {};
+  try { requestBody = await req.json(); } catch { requestBody = {}; }
+
+  if (requestBody.action === "manual_identify") {
+    const itemId = clean(requestBody.item_id, 80);
+    const cardId = Number(requestBody.card_id);
+    const serialNumber = Number(requestBody.serial_number);
+    const region = clean(requestBody.region, 20).toUpperCase();
+    if (!itemId || !Number.isInteger(cardId) || !Number.isInteger(serialNumber) || serialNumber < 1 || !["AMERICAS", "E", "GLOBAL"].includes(region)) {
+      return json({ error: "Choose a valid card, serial number and region" }, 400);
+    }
+
+    const { data: item } = await supabase.from("bulk_upload_items")
+      .select("id,batch_id,storage_path,original_filename,mime_type,status,submission_id,assessment,confidence")
+      .eq("id", itemId).maybeSingle();
+    if (!item || !["needs_review", "error"].includes(item.status) || item.submission_id) {
+      return json({ error: "This bulk item is no longer waiting for identification" }, 409);
+    }
+    const { data: serial } = await supabase.from("serials").select("id,status")
+      .eq("card_id", cardId).eq("serial_number", serialNumber).eq("region", region).maybeSingle();
+    if (!serial) return json({ error: "That serial is not available for the selected card and region" }, 400);
+
+    const { data: blob, error: downloadError } = await supabase.storage.from("bulk-submission-evidence").download(item.storage_path);
+    if (downloadError || !blob) return json({ error: "The original photo could not be loaded" }, 500);
+    const extension = (item.original_filename.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 8) || "jpg";
+    const evidencePath = `bulk/${item.id}.${extension}`;
+    const { error: evidenceError } = await supabase.storage.from("submission-evidence").upload(evidencePath, blob, { contentType: item.mime_type, cacheControl: "3600", upsert: false });
+    if (evidenceError && !String(evidenceError.message).toLowerCase().includes("already exists")) return json({ error: "The photo could not be prepared for approval" }, 500);
+
+    const digest = await sha256(blob);
+    const serialLabel = `${String(serialNumber).padStart(3, "0")}${region === "E" ? "E" : ""}`;
+    const { data: submission, error: submissionError } = await supabase.from("submissions").insert({
+      serial_id: serial.id, photo_url: evidencePath, status: "pending",
+      notes: "Bulk upload. Card, serial number and region identified manually by the owner.",
+      ai_check_status: "manual", ai_risk_level: "review",
+      ai_reasons: ["The automatic reading was incomplete. The owner supplied the registry details."],
+      ai_summary: `Manually identified bulk image as serial ${serialLabel}. Review the original evidence before approval.`,
+      ai_card_name_read: item.assessment?.first?.title || item.assessment?.second?.title || null,
+      ai_serial_read: item.assessment?.first?.serialText || item.assessment?.second?.serialText || null,
+      ai_confidence: item.confidence || 0, ai_checked_at: new Date().toISOString(), photo_sha256: digest,
+      client_request_id: item.id,
+    }).select("id").single();
+    if (submissionError || !submission) return json({ error: "The pending approval could not be created" }, 500);
+
+    if (serial.status === "unreported") await supabase.from("serials").update({ status: "reported" }).eq("id", serial.id);
+    await supabase.from("bulk_upload_items").update({
+      status: "ready", detected_card_id: cardId, detected_serial_number: serialNumber, detected_region: region,
+      submission_id: submission.id, error_message: null, processed_at: new Date().toISOString(),
+    }).eq("id", item.id);
+
+    const { data: items } = await supabase.from("bulk_upload_items").select("status").eq("batch_id", item.batch_id);
+    const total = items?.length || 0;
+    const processed = items?.filter((entry) => ["ready", "needs_review", "error"].includes(entry.status)).length || 0;
+    const ready = items?.filter((entry) => entry.status === "ready").length || 0;
+    const review = items?.filter((entry) => ["needs_review", "error"].includes(entry.status)).length || 0;
+    await supabase.from("bulk_upload_batches").update({
+      status: processed >= total ? (review ? "completed_with_issues" : "completed") : "processing",
+      processed_items: processed, ready_items: ready, review_items: review,
+      updated_at: new Date().toISOString(), completed_at: processed >= total ? new Date().toISOString() : null,
+    }).eq("id", item.batch_id);
+    return json({ processed: true, submission_id: submission.id });
+  }
+
   const { data: queued } = await supabase
     .from("bulk_upload_items")
     .select("id,batch_id,storage_path,original_filename,mime_type,attempts")
