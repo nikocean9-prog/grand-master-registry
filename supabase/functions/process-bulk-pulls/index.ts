@@ -303,6 +303,29 @@ Deno.serve(async (req: Request) => {
   let requestBody: Record<string, unknown> = {};
   try { requestBody = await req.json(); } catch { requestBody = {}; }
 
+  if (requestBody.action === "dismiss_item") {
+    const itemId = clean(requestBody.item_id, 80);
+    const { data: item } = await supabase.from("bulk_upload_items")
+      .select("id,batch_id,status,submission_id").eq("id", itemId).maybeSingle();
+    if (!item || !["needs_review", "error"].includes(item.status) || item.submission_id) {
+      return json({ error: "This item can no longer be rejected from bulk review" }, 409);
+    }
+    await supabase.from("bulk_upload_items").update({
+      status: "dismissed", error_message: "Rejected by owner", processed_at: new Date().toISOString(),
+    }).eq("id", item.id);
+    const { data: items } = await supabase.from("bulk_upload_items").select("status").eq("batch_id", item.batch_id);
+    const total = items?.length || 0;
+    const processed = items?.filter((entry) => ["ready", "needs_review", "error", "dismissed"].includes(entry.status)).length || 0;
+    const ready = items?.filter((entry) => entry.status === "ready").length || 0;
+    const review = items?.filter((entry) => ["needs_review", "error"].includes(entry.status)).length || 0;
+    await supabase.from("bulk_upload_batches").update({
+      status: processed >= total ? (review ? "completed_with_issues" : "completed") : "processing",
+      processed_items: processed, ready_items: ready, review_items: review,
+      updated_at: new Date().toISOString(), completed_at: processed >= total ? new Date().toISOString() : null,
+    }).eq("id", item.batch_id);
+    return json({ dismissed: true });
+  }
+
   if (requestBody.action === "manual_identify") {
     const itemId = clean(requestBody.item_id, 80);
     const cardId = Number(requestBody.card_id);
@@ -607,7 +630,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: items } = await supabase.from("bulk_upload_items").select("status").eq("batch_id", queued.batch_id);
     const total = items?.length || 0;
-    const processed = items?.filter((item) => ["ready", "needs_review", "error"].includes(item.status)).length || 0;
+    const processed = items?.filter((item) => ["ready", "needs_review", "error", "dismissed"].includes(item.status)).length || 0;
     const ready = items?.filter((item) => item.status === "ready").length || 0;
     const review = items?.filter((item) => ["needs_review", "error"].includes(item.status)).length || 0;
     await supabase.from("bulk_upload_batches").update({
