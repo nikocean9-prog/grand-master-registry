@@ -82,10 +82,17 @@ export default function AdminHome() {
         </Link>
 
         {isOwner && (
-          <Link href="/admin/operations" style={linkStyle}>
-            <strong>Owner Operations</strong>
-            <div>Manage discoveries, content drafts and automated work.</div>
-          </Link>
+          <>
+            <Link href="/admin/bulk-upload" style={linkStyle}>
+              <strong>Bulk Upload</strong>
+              <div>Upload multiple pull photos for background assessment.</div>
+            </Link>
+
+            <Link href="/admin/operations" style={linkStyle}>
+              <strong>Owner Operations</strong>
+              <div>Manage discoveries, content drafts and automated work.</div>
+            </Link>
+          </>
         )}
 
         <Link href="/admin/security" style={linkStyle}>
