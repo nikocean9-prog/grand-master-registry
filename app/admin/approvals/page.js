@@ -101,10 +101,22 @@ export default function AdminApprovals() {
   const [expandedId, setExpandedId] = useState(null);
   const [evidenceUrls, setEvidenceUrls] = useState({});
   const [evidenceLoadingId, setEvidenceLoadingId] = useState(null);
+  const [photoViewer, setPhotoViewer] = useState(null);
+  const [editingSerialId, setEditingSerialId] = useState(null);
+  const [correctedSerialNumber, setCorrectedSerialNumber] = useState("");
 
   useEffect(() => {
     loadApprovals(page);
   }, [page]);
+
+  useEffect(() => {
+    if (!photoViewer) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setPhotoViewer(null);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [photoViewer]);
 
   async function loadApprovals(pageNumber = page) {
     setLoading(true);
@@ -317,6 +329,41 @@ export default function AdminApprovals() {
     setBusyId(null);
   }
 
+  async function handleSerialCorrection(submission) {
+    const nextNumber = Number(correctedSerialNumber);
+    if (!Number.isInteger(nextNumber) || nextNumber < 1) {
+      setMessage("Enter a valid serial number.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Change this pending submission from Serial ${formatSerial(submission.serial)} to ${String(nextNumber).padStart(3, "0")}${submission.serial?.region === "E" ? "E" : ""}?`
+    );
+    if (!confirmed) return;
+
+    setBusyId(submission.id);
+    setMessage("");
+    const { error } = await supabase.rpc("change_pending_submission_serial", {
+      p_submission_id: submission.id,
+      p_serial_number: nextNumber,
+    });
+
+    if (error) {
+      setMessage(safeAdminActionMessage(error, "change the serial number"));
+      setBusyId(null);
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
+      }
+      return;
+    }
+
+    setEditingSerialId(null);
+    setCorrectedSerialNumber("");
+    await loadApprovals(page);
+    setMessage("Serial number corrected.");
+    setBusyId(null);
+  }
+
   async function handleSignOut() {
     await supabase.auth.signOut();
     window.location.href = "/admin";
@@ -454,6 +501,34 @@ export default function AdminApprovals() {
                       </p>
                     </div>
 
+                    <div className="approval-serial-correction">
+                      {editingSerialId === submission.id ? (
+                        <>
+                          <label htmlFor={`correct-serial-${submission.id}`}>
+                            Correct serial number
+                          </label>
+                          <input
+                            id={`correct-serial-${submission.id}`}
+                            type="number"
+                            min="1"
+                            inputMode="numeric"
+                            value={correctedSerialNumber}
+                            onChange={(event) => setCorrectedSerialNumber(event.target.value)}
+                          />
+                          <button type="button" onClick={() => handleSerialCorrection(submission)} disabled={busyId === submission.id}>
+                            Save correction
+                          </button>
+                          <button type="button" onClick={() => { setEditingSerialId(null); setCorrectedSerialNumber(""); }} disabled={busyId === submission.id}>
+                            Cancel
+                          </button>
+                        </>
+                      ) : (
+                        <button type="button" onClick={() => { setEditingSerialId(submission.id); setCorrectedSerialNumber(String(submission.serial?.serial_number || "")); }}>
+                          Change serial number
+                        </button>
+                      )}
+                    </div>
+
                     {submission.notes && (
                       <div>
                         <p>
@@ -502,10 +577,10 @@ export default function AdminApprovals() {
                           </div>
                           {evidenceLoadingId === submission.id && !existingEvidenceUrl && <p>Loading photo...</p>}
                           {existingEvidenceUrl && (
-                            <a href={existingEvidenceUrl} target="_blank" rel="noopener noreferrer">
+                            <button type="button" className="approval-photo-button" onClick={() => setPhotoViewer({ url: existingEvidenceUrl, alt: "Existing confirmed evidence" })}>
                               <img src={existingEvidenceUrl} alt="Existing confirmed evidence" loading="lazy" />
                               <small>Tap photo to enlarge</small>
-                            </a>
+                            </button>
                           )}
                           <dl>
                             <div><dt>Confirmed</dt><dd>{submission.existing_submission.reviewed_at ? new Date(submission.existing_submission.reviewed_at).toLocaleString() : "Unknown"}</dd></div>
@@ -522,10 +597,10 @@ export default function AdminApprovals() {
                           </div>
                           {evidenceLoadingId === submission.id && !evidenceUrl && <p>Loading photo...</p>}
                           {evidenceUrl && (
-                            <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">
+                            <button type="button" className="approval-photo-button" onClick={() => setPhotoViewer({ url: evidenceUrl, alt: "New submission evidence" })}>
                               <img src={evidenceUrl} alt="New submission evidence" loading="lazy" />
                               <small>Tap photo to enlarge</small>
-                            </a>
+                            </button>
                           )}
                           <dl>
                             <div><dt>Submitted</dt><dd>{submission.created_at ? new Date(submission.created_at).toLocaleString() : "Unknown"}</dd></div>
@@ -541,9 +616,10 @@ export default function AdminApprovals() {
                         <h3>Photo evidence</h3>
                         {evidenceLoadingId === submission.id && <p>Loading photo...</p>}
                         {!evidenceLoadingId && evidenceUrl && (
-                          <a href={evidenceUrl} target="_blank" rel="noopener noreferrer">
+                          <button type="button" className="approval-photo-button" onClick={() => setPhotoViewer({ url: evidenceUrl, alt: "Submission evidence" })}>
                             <img src={evidenceUrl} alt="Submission evidence" loading="lazy" />
-                          </a>
+                            <small>Tap photo to enlarge</small>
+                          </button>
                         )}
                       </div>
 
@@ -674,6 +750,15 @@ export default function AdminApprovals() {
             Next
           </button>
         </nav>
+      )}
+
+      {photoViewer && (
+        <div className="approval-photo-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setPhotoViewer(null); }}>
+          <div className="approval-photo-modal" role="dialog" aria-modal="true" aria-label="Evidence photo">
+            <button type="button" className="approval-photo-modal-close" onClick={() => setPhotoViewer(null)} aria-label="Close photo viewer">×</button>
+            <img src={photoViewer.url} alt={photoViewer.alt} />
+          </div>
+        </div>
       )}
     </main>
   );
