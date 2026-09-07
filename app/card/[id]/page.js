@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
+import PublicHeader from "../../components/PublicHeader";
 
 export default async function CardPage({ params }) {
   const { id } = await params;
@@ -27,6 +28,7 @@ export default async function CardPage({ params }) {
   if (cardError && cardError.code !== "PGRST116") {
     return (
       <main>
+        <PublicHeader />
         <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Card unavailable</h1>
         <p>This card could not be loaded. Check your connection and try again.</p>
@@ -37,6 +39,7 @@ export default async function CardPage({ params }) {
   if (!card) {
     return (
       <main>
+        <PublicHeader />
         <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Card not found</h1>
       </main>
@@ -46,6 +49,7 @@ export default async function CardPage({ params }) {
   if (serialsError) {
     return (
       <main>
+        <PublicHeader />
         <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
         <h1>{card.name}</h1>
         <p>Could not load serial numbers.</p>
@@ -70,6 +74,7 @@ export default async function CardPage({ params }) {
 
   return (
     <main>
+      <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { safeSubmissionMessage } from "../lib/userMessages";
 import { tcgs as tcgCatalog } from "../lib/catalog";
+import PublicHeader from "../components/PublicHeader";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -295,6 +296,7 @@ export default function SubmitPage() {
 
   return (
     <main className="submission-page">
+      <PublicHeader />
       <Link href="/" className="submission-back-link">← Back to Home</Link>
 
       <div className="submission-heading">

@@ -3,6 +3,7 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import { getEvidenceUrl } from "../../lib/evidenceUrl";
+import PublicHeader from "../../components/PublicHeader";
 
 export default async function SerialPage({ params }) {
   const { id } = await params;
@@ -21,6 +22,7 @@ export default async function SerialPage({ params }) {
   if (serialError && serialError.code !== "PGRST116") {
     return (
       <main>
+        <PublicHeader />
         <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Serial unavailable</h1>
         <p>This serial could not be loaded. Check your connection and try again.</p>
@@ -31,6 +33,7 @@ export default async function SerialPage({ params }) {
   if (!serial || serial.status !== "confirmed") {
     return (
       <main>
+        <PublicHeader />
         <Link href="/" className="back-link">← Back to Registry</Link>
         <h1>Serial not found</h1>
       </main>
@@ -61,6 +64,7 @@ export default async function SerialPage({ params }) {
 
   return (
     <main>
+      <PublicHeader />
       <Link href={`/card/${serial.card_id}`} className="back-link">
         ← Back to {card?.name || "Card"}
       </Link>
