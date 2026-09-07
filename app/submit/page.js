@@ -61,6 +61,7 @@ export default function SubmitPage() {
   const [country, setCountry] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [photo, setPhoto] = useState(null);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState("");
   const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [serialStatus, setSerialStatus] = useState(null);
@@ -70,6 +71,18 @@ export default function SubmitPage() {
   const [cardsError, setCardsError] = useState(false);
   const [clientRequestId, setClientRequestId] = useState("");
   const submissionLockRef = useRef(false);
+
+  useEffect(() => {
+    if (!photo) {
+      setPhotoPreviewUrl("");
+      return undefined;
+    }
+
+    const previewUrl = URL.createObjectURL(photo);
+    setPhotoPreviewUrl(previewUrl);
+
+    return () => URL.revokeObjectURL(previewUrl);
+  }, [photo]);
 
   useEffect(() => {
     async function loadCatalog() {
@@ -339,6 +352,31 @@ export default function SubmitPage() {
         </div>
         <section className="submission-form-card">
         <div className="submission-fields">
+        <div className="submission-field submission-field-wide">
+          <label htmlFor="submission-photo">Photo evidence</label>
+          <div className="submission-upload">
+            <input
+              id="submission-photo"
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPhoto(e.target.files?.[0] || null)}
+              required
+            />
+            <span>{photo ? photo.name : "Choose a clear photo showing the full card"}</span>
+          </div>
+          {photoPreviewUrl && (
+            <div className="submission-photo-reference">
+              <img src={photoPreviewUrl} alt="Uploaded card for reference" />
+              <p>Use this photo to check the card name, region and serial number below.</p>
+            </div>
+          )}
+          <p className="photo-processing-notice">
+            Submitted photos are checked automatically to help identify unreadable
+            details, mismatches, possible editing, and duplicate evidence. Unclear
+            results are sent to an administrator for review.
+          </p>
+        </div>
+
         {sets.length > 0 && <div className="submission-field">
           <label htmlFor="submission-tcg">TCG</label>
           <select value={tcgSlug} onChange={(event) => {
@@ -422,28 +460,6 @@ export default function SubmitPage() {
         </div>
       )}
 
-      <div className="submission-field submission-field-wide">
-        <label htmlFor="submission-photo">Photo evidence</label>
-          <div className="submission-upload">
-          <input
-            id="submission-photo"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setPhoto(e.target.files?.[0] || null)}
-            required
-          />
-          <span>{photo ? photo.name : "Choose a clear photo showing the full card"}</span>
-          </div>
-          <p className="photo-processing-notice">
-            Submitted photos are checked automatically to help
-            identify unreadable details, mismatches, possible editing, and
-            duplicate evidence. Images that clearly do not show the selected
-            database card may be rejected before submission. Unclear results
-            are sent to an administrator for review. Contact details are not
-            included in the automated check.
-          </p>
-        </div>
-
         <div className="submission-field">
           <label htmlFor="submission-country">Country <small>Optional</small></label>
           <input
@@ -518,13 +534,16 @@ export default function SubmitPage() {
 
         <aside className="submission-preview">
           <div className="submission-preview-image">
-            {selectedCard?.image_url ? (
-              <img src={selectedCard.image_url} alt={selectedCard.name} />
+            {photoPreviewUrl || selectedCard?.image_url ? (
+              <img
+                src={photoPreviewUrl || selectedCard.image_url}
+                alt={photoPreviewUrl ? "Uploaded card for reference" : selectedCard.name}
+              />
             ) : (
               <span>Select a card to preview it here</span>
             )}
           </div>
-          <p className="eyebrow">Selected card</p>
+          <p className="eyebrow">{photoPreviewUrl ? "Uploaded evidence" : "Selected card"}</p>
           <h2>{selectedCard?.name || "No card selected"}</h2>
           <dl>
             <div><dt>TCG</dt><dd>{selectedTcgName || "—"}</dd></div>
