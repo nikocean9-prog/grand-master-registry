@@ -104,6 +104,7 @@ export default function AdminApprovals() {
   const [photoViewer, setPhotoViewer] = useState(null);
   const [editingSerialId, setEditingSerialId] = useState(null);
   const [correctedSerialNumber, setCorrectedSerialNumber] = useState("");
+  const [correctedRegion, setCorrectedRegion] = useState("AMERICAS");
 
   useEffect(() => {
     loadApprovals(page);
@@ -336,8 +337,9 @@ export default function AdminApprovals() {
       return;
     }
 
+    const nextLabel = `${String(nextNumber).padStart(3, "0")}${correctedRegion === "E" ? "E" : ""}`;
     const confirmed = window.confirm(
-      `Change this pending submission from Serial ${formatSerial(submission.serial)} to ${String(nextNumber).padStart(3, "0")}${submission.serial?.region === "E" ? "E" : ""}?`
+      `Change this pending submission from Serial ${formatSerial(submission.serial)} (${formatRegion(submission.serial)}) to ${nextLabel} (${correctedRegion === "E" ? "E-Region" : correctedRegion === "GLOBAL" ? "Global" : "Americas"})?`
     );
     if (!confirmed) return;
 
@@ -346,6 +348,7 @@ export default function AdminApprovals() {
     const { error } = await supabase.rpc("change_pending_submission_serial", {
       p_submission_id: submission.id,
       p_serial_number: nextNumber,
+      p_region: correctedRegion,
     });
 
     if (error) {
@@ -359,8 +362,9 @@ export default function AdminApprovals() {
 
     setEditingSerialId(null);
     setCorrectedSerialNumber("");
+    setCorrectedRegion("AMERICAS");
     await loadApprovals(page);
-    setMessage("Serial number corrected.");
+    setMessage("Serial number and region corrected.");
     setBusyId(null);
   }
 
@@ -505,7 +509,7 @@ export default function AdminApprovals() {
                       {editingSerialId === submission.id ? (
                         <>
                           <label htmlFor={`correct-serial-${submission.id}`}>
-                            Correct serial number
+                            Correct serial number and region
                           </label>
                           <input
                             id={`correct-serial-${submission.id}`}
@@ -515,16 +519,30 @@ export default function AdminApprovals() {
                             value={correctedSerialNumber}
                             onChange={(event) => setCorrectedSerialNumber(event.target.value)}
                           />
+                          <select
+                            aria-label="Correct region"
+                            value={correctedRegion}
+                            onChange={(event) => setCorrectedRegion(event.target.value)}
+                          >
+                            {submission.serial?.region === "GLOBAL" ? (
+                              <option value="GLOBAL">Global</option>
+                            ) : (
+                              <>
+                                <option value="AMERICAS">Americas</option>
+                                <option value="E">E-Region</option>
+                              </>
+                            )}
+                          </select>
                           <button type="button" onClick={() => handleSerialCorrection(submission)} disabled={busyId === submission.id}>
                             Save correction
                           </button>
-                          <button type="button" onClick={() => { setEditingSerialId(null); setCorrectedSerialNumber(""); }} disabled={busyId === submission.id}>
+                          <button type="button" onClick={() => { setEditingSerialId(null); setCorrectedSerialNumber(""); setCorrectedRegion("AMERICAS"); }} disabled={busyId === submission.id}>
                             Cancel
                           </button>
                         </>
                       ) : (
-                        <button type="button" onClick={() => { setEditingSerialId(submission.id); setCorrectedSerialNumber(String(submission.serial?.serial_number || "")); }}>
-                          Change serial number
+                        <button type="button" onClick={() => { setEditingSerialId(submission.id); setCorrectedSerialNumber(String(submission.serial?.serial_number || "")); setCorrectedRegion(submission.serial?.region || "AMERICAS"); }}>
+                          Change serial / region
                         </button>
                       )}
                     </div>
