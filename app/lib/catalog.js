@@ -8,6 +8,20 @@ export const tcgs = [
     { slug: "lotr-original", name: "The Lord of the Rings · Original Release", status: "live", serials: 1901, summary: "4 serialized cards · 1,901 serial numbers", href: "/sets/lotr-original" },
     { slug: "lotr-special-edition", name: "The Lord of the Rings · Special Edition", status: "live", serials: 5000, summary: "50 serialized cards · 5,000 serial numbers", href: "/sets/lotr-special-edition" },
     { slug: "mtg-final-fantasy", name: "FINAL FANTASY", status: "live", serials: 77, summary: "Golden Traveling Chocobo · 77 serial numbers", href: "/sets/mtg-final-fantasy" },
+    { slug: "secret-lair-serialized-promos", name: "Secret Lair Serialized Promos", status: "live", serials: 1575, summary: "6 serialized cards · 1,575 serial numbers", description: "Track the original Viscera Seer /100 and the five Secret Lair 295 convention promos.", href: "/sets/secret-lair-serialized-promos" },
+    { slug: "the-brothers-war", name: "The Brothers’ War", status: "live", serials: 31500, summary: "63 serialized cards · 31,500 serial numbers", description: "Track all 63 serialized retro-frame artifacts, each individually numbered to 500.", href: "/sets/the-brothers-war" },
+    { slug: "march-of-the-machine", name: "March of the Machine", status: "live", serials: 35000, summary: "70 serialized cards · 35,000 serial numbers", description: "Track the 65 Multiverse Legends and five Praetors, each individually numbered to 500.", href: "/sets/march-of-the-machine" },
+    { slug: "doctor-who", name: "Doctor Who", status: "live", serials: 6591, summary: "13 serialized Doctors · 6,591 serial numbers", description: "Track all thirteen serialized Doctor cards, numbered from /501 through /513.", href: "/sets/doctor-who" },
+    { slug: "ravnica-remastered", name: "Ravnica Remastered", status: "live", serials: 32000, summary: "64 serialized cards · 32,000 serial numbers", description: "Track all 64 serialized retro-frame cards, each individually numbered to 500.", href: "/sets/ravnica-remastered" },
+    { slug: "murders-at-karlov-manor", name: "Murders at Karlov Manor", status: "live", serials: 1750, summary: "7 serialized cards · 1,750 serial numbers", description: "Track the seven serialized showcase cards, each individually numbered to 250.", href: "/sets/murders-at-karlov-manor" },
+    { slug: "fallout", name: "Fallout", status: "live", serials: 3500, summary: "7 serialized Bobbleheads · 3,500 serial numbers", description: "Track the seven serialized Vault Boy Bobbleheads, each individually numbered to 500.", href: "/sets/fallout" },
+    { slug: "modern-horizons-3", name: "Modern Horizons 3", status: "live", serials: 750, summary: "3 serialized Eldrazi · 750 serial numbers", description: "Track Emrakul, Kozilek and Ulamog, each individually numbered to 250.", href: "/sets/modern-horizons-3" },
+    { slug: "assassins-creed", name: "Assassin’s Creed", status: "live", serials: 2000, summary: "4 serialized cards · 2,000 serial numbers", description: "Track the complete four-card serialized release, including the Italian and Ancient Greek printings.", href: "/sets/assassins-creed" },
+    { slug: "innistrad-remastered", name: "Innistrad Remastered", status: "live", serials: 500, summary: "Edgar Markov · 500 serial numbers", description: "Track the 500 individually numbered Edgar Markov cards.", href: "/sets/innistrad-remastered" },
+    { slug: "aetherdrift", name: "Aetherdrift", status: "live", serials: 500, summary: "The Aetherspark · 500 serial numbers", description: "Track the 500 individually numbered Aetherspark cards.", href: "/sets/aetherdrift" },
+    { slug: "tarkir-dragonstorm", name: "Tarkir: Dragonstorm", status: "live", serials: 500, summary: "Mox Jasper · 500 serial numbers", description: "Track the 500 individually numbered Mox Jasper cards.", href: "/sets/tarkir-dragonstorm" },
+    { slug: "lorwyn-eclipsed", name: "Lorwyn Eclipsed", status: "live", serials: 500, summary: "Bitterbloom Bearer · 500 serial numbers", description: "Track the 500 individually numbered Bitterbloom Bearer cards.", href: "/sets/lorwyn-eclipsed" },
+    { slug: "secrets-of-strixhaven", name: "Secrets of Strixhaven", status: "live", serials: 500, summary: "Emeritus of Ideation · 500 serial numbers", description: "Track the 500 individually numbered Emeritus of Ideation cards.", href: "/sets/secrets-of-strixhaven" },
   ] },
   { slug: "one-piece", name: "One Piece Card Game", initials: "OP", logo: "/graphics/one-piece-logo.webp", status: "planned", description: "A planned registry for numbered One Piece cards.", sets: [] },
   { slug: "dragon-ball-super", name: "Dragon Ball Super Card Game", initials: "DBS", logo: "/graphics/dragon-ball-super-logo.webp", status: "planned", description: "A planned registry for serial-numbered Dragon Ball cards.", sets: [] },
@@ -20,4 +34,8 @@ export const tcgs = [
 
 export function getTcg(slug) {
   return tcgs.find((tcg) => tcg.slug === slug);
+}
+
+export function getSet(slug) {
+  return tcgs.flatMap((tcg) => tcg.sets.map((set) => ({ ...set, tcg }))).find((set) => set.slug === slug);
 }
