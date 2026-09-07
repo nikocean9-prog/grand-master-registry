@@ -568,6 +568,7 @@ button {
 .bulk-identify-form label { display: grid; gap: 6px; color: #24382c; font-weight: 800; }
 .bulk-identify-form input,
 .bulk-identify-form select { width: 100%; min-width: 0; border: 1px solid #cbd5ce; border-radius: 8px; padding: 11px 12px; background: #fff; font: inherit; }
+.bulk-reject-button { margin-top: 10px; border-color: #a33a31; background: #fff; color: #922d25; }
 
 @media (max-width: 700px) {
   .bulk-upload-header,
