@@ -2,16 +2,15 @@
   <title id="title">TCG Serial Tracker mark</title>
   <defs>
     <linearGradient id="bg" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0b2f21"/>
-      <stop offset="1" stop-color="#041a12"/>
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#1f2937"/>
     </linearGradient>
     <linearGradient id="line" x1="17" y1="14" x2="48" y2="51" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffe9a6"/>
-      <stop offset="1" stop-color="#b98128"/>
+      <stop stop-color="#86efac"/>
+      <stop offset="1" stop-color="#35a65f"/>
     </linearGradient>
   </defs>
   <rect width="64" height="64" rx="16" fill="url(#bg)"/>
-  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#d2a64a" stroke-opacity=".62"/>
   <path d="M21 13h22a5 5 0 0 1 5 5v28a5 5 0 0 1-5 5H21a5 5 0 0 1-5-5V18a5 5 0 0 1 5-5Z" fill="none" stroke="url(#line)" stroke-width="3"/>
   <path d="M22 22h20M22 29h12M22 42h20" fill="none" stroke="#f8fafc" stroke-linecap="round" stroke-width="3"/>
   <circle cx="41" cy="31" r="7" fill="#f5c451"/>
