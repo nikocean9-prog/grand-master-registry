@@ -9,7 +9,15 @@ export function generateStaticParams() { return tcgs.map((tcg) => ({ slug: tcg.s
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const tcg = getTcg(slug);
-  return tcg ? { title: `${tcg.name} | TCG Serial Tracker`, description: tcg.description } : {};
+  if (!tcg) return {};
+  const title = `${tcg.name} Serialized Card Registry`;
+  const description = `Browse serialized ${tcg.name} card sets, card lists and confirmed serial-numbered pulls in the TCG Serial Tracker registry.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/tcg/${tcg.slug}` },
+    openGraph: { title, description, url: `/tcg/${tcg.slug}` },
+  };
 }
 
 export default async function TcgPage({ params }) {
