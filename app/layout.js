@@ -4,12 +4,9 @@ import AdminRegistryLink from "./components/AdminRegistryLink";
 
 export const metadata = {
   metadataBase: new URL("https://www.tcgserialtracker.com"),
-  title: "TCG Serial Tracker",
+  title: "Serialized Card Registry | TCG Serial Tracker",
   description:
     "A global community registry for tracking and preserving serial-numbered trading cards.",
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title: "TCG Serial Tracker",
     description:
