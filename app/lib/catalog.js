@@ -26,10 +26,20 @@ export const tcgs = [
   { slug: "one-piece", name: "One Piece Card Game", initials: "OP", logo: "/graphics/one-piece-logo.webp", status: "planned", description: "A planned registry for numbered One Piece cards.", sets: [] },
   { slug: "dragon-ball-super", name: "Dragon Ball Super Card Game", initials: "DBS", logo: "/graphics/dragon-ball-super-logo.webp", status: "planned", description: "A planned registry for serial-numbered Dragon Ball cards.", sets: [] },
   { slug: "disney-lorcana", name: "Disney Lorcana", initials: "DLC", logo: "/graphics/disney-lorcana-logo.webp", status: "planned", description: "A planned registry for rare and numbered Lorcana releases.", sets: [] },
-  { slug: "flesh-and-blood", name: "Flesh and Blood", initials: "FAB", logo: "/graphics/flesh-and-blood-logo.webp", status: "planned", description: "A planned registry for limited and numbered Flesh and Blood cards.", sets: [] },
-  { slug: "digimon", name: "Digimon Card Game", initials: "DGM", logo: "/graphics/digimon-logo.webp", status: "planned", description: "A planned registry for limited Digimon releases.", sets: [] },
+  { slug: "flesh-and-blood", name: "Flesh and Blood", initials: "FAB", logo: "/graphics/flesh-and-blood-logo.webp", status: "live", description: "Track individually numbered Flesh and Blood cards.", sets: [
+    { slug: "dusk-till-dawn", name: "Dusk Till Dawn", status: "live", serials: 20, summary: "Prism and Chane artist-sketch cards · 20 serial numbers", description: "Track the ten signed and serialized artist-sketch versions each of Prism and Chane.", href: "/sets/dusk-till-dawn" },
+  ] },
+  { slug: "digimon", name: "Digimon Card Game", initials: "DGM", logo: "/graphics/digimon-logo.webp", status: "live", description: "Track individually numbered Digimon cards.", sets: [
+    { slug: "world-convergence", name: "World Convergence", status: "live", serials: 350, summary: "Serialized Omnimon · 350 serial numbers", description: "Track all 350 individually numbered Omnimon cards from Special Booster Ver. 2.0.", href: "/sets/world-convergence" },
+  ] },
   { slug: "final-fantasy", name: "Final Fantasy TCG", initials: "FF", logo: "/graphics/final-fantasy-logo.webp", status: "planned", description: "A planned registry for special Final Fantasy TCG releases.", sets: [] },
-  { slug: "star-wars-unlimited", name: "Star Wars: Unlimited", initials: "SWU", logo: "/graphics/star-wars-unlimited-logo.webp", status: "planned", description: "A planned registry for serialized Star Wars: Unlimited cards.", sets: [] },
+  { slug: "star-wars-unlimited", name: "Star Wars: Unlimited", initials: "SWU", logo: "/graphics/star-wars-unlimited-logo.webp", status: "live", description: "Track serialized Prestige cards across Star Wars: Unlimited releases.", sets: [
+    { slug: "jump-to-lightspeed", name: "Jump to Lightspeed", status: "live", serials: 9000, summary: "36 serialized Prestige cards · 9,000 serial numbers", href: "/sets/jump-to-lightspeed" },
+    { slug: "legends-of-the-force", name: "Legends of the Force", status: "live", serials: 11500, summary: "46 serialized Prestige cards · 11,500 serial numbers", href: "/sets/legends-of-the-force" },
+    { slug: "secrets-of-power", name: "Secrets of Power", status: "live", serials: 10750, summary: "43 serialized Prestige cards · 10,750 serial numbers", href: "/sets/secrets-of-power" },
+    { slug: "a-lawless-time", name: "A Lawless Time", status: "live", serials: 9750, summary: "39 serialized Prestige cards · 9,750 serial numbers", href: "/sets/a-lawless-time" },
+    { slug: "ashes-of-the-empire", name: "Ashes of the Empire", status: "live", serials: 11750, summary: "47 serialized Prestige cards · 11,750 serial numbers", href: "/sets/ashes-of-the-empire" },
+  ] },
 ];
 
 export function getTcg(slug) {
