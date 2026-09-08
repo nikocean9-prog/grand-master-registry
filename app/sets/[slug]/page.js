@@ -8,7 +8,14 @@ export async function generateMetadata({ params }) {
   const { slug } = await params;
   const set = getSet(slug);
   if (!set || set.status !== "live") return {};
-  return { title: `${set.name} Serialized Registry | TCG Serial Tracker` };
+  const title = `${set.name} Serialized Card List & Registry`;
+  const description = `${set.description || set.summary} Browse every serialized ${set.name} card and track confirmed pulls.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/sets/${set.slug}` },
+    openGraph: { title, description, url: `/sets/${set.slug}` },
+  };
 }
 
 export default async function SerializedRegistryPage({ params }) {
