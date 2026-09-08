@@ -7,23 +7,23 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const set = getSet(slug);
-  if (!set || set.tcg.slug !== "magic-the-gathering") return {};
+  if (!set || set.status !== "live") return {};
   return { title: `${set.name} Serialized Registry | TCG Serial Tracker` };
 }
 
 export default async function SerializedRegistryPage({ params }) {
   const { slug } = await params;
   const set = getSet(slug);
-  if (!set || set.tcg.slug !== "magic-the-gathering") notFound();
+  if (!set || set.status !== "live") notFound();
 
   return (
     <SerializedSetPage
       slug={set.slug}
       tcgName={set.tcg.name}
-      eyebrow={`Magic: The Gathering · ${set.name}`}
+      eyebrow={`${set.tcg.name} · ${set.name}`}
       title={set.name}
       description={set.description || set.summary}
-      backHref="/tcg/magic-the-gathering"
+      backHref={`/tcg/${set.tcg.slug}`}
     />
   );
 }
