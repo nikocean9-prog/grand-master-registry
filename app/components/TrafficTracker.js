@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { getCurrentAdmin } from "../lib/adminAuth";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -22,6 +23,9 @@ export default function TrafficTracker() {
 
     async function recordView() {
       try {
+        const admin = await getCurrentAdmin(supabase);
+        if (admin?.isOwner) return;
+
         let referrerHost = null;
         if (document.referrer) {
           try {
