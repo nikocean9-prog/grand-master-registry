@@ -58,7 +58,6 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const openAiKey = Deno.env.get("OPENAI_API_KEY");
-  if (!openAiKey) return json({ error: "Web discovery is not configured" }, 503);
 
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -96,14 +95,64 @@ Deno.serve(async (request) => {
   }
 
   const body = await request.json().catch(() => ({}));
+  const action = typeof body?.action === "string" ? body.action : "run";
   const maxCards = Math.min(Math.max(Number(body?.max_cards) || 3, 1), 5);
   const setSlug = typeof body?.set_slug === "string" ? body.set_slug.trim() : "";
-  const requestedCardIds = Array.isArray(body?.card_ids)
+  let requestedCardIds = Array.isArray(body?.card_ids)
     ? body.card_ids.map(Number).filter(Number.isInteger).slice(0, 5)
     : [];
   const batchIndex = Number.isInteger(Number(body?.batch_index))
     ? Math.min(Math.max(Number(body.batch_index), 0), 5)
     : null;
+
+  if (action === "enqueue") {
+    let enqueueQuery = admin
+      .from("cards")
+      .select("id, card_sets!inner(slug, status)")
+      .eq("card_sets.status", "live")
+      .order("id");
+    if (setSlug) enqueueQuery = enqueueQuery.eq("card_sets.slug", setSlug);
+    const { data: queuedCards, error: queueError } = await enqueueQuery;
+    if (queueError || !queuedCards?.length) return json({ error: queueError?.message || "No cards found for that set" }, 400);
+    const allCardIds = queuedCards.map((card) => card.id);
+    const cardIds = setSlug
+      ? allCardIds
+      : [...allCardIds].sort(() => Math.random() - 0.5).slice(0, maxCards);
+    const { data: job, error: jobError } = await admin.from("discovery_runs").insert({
+      started_by: ownerId,
+      status: "queued",
+      set_slug: setSlug || null,
+      card_ids: cardIds,
+      total_cards: cardIds.length,
+      cards_searched: 0,
+      next_card_index: 0,
+    }).select("id,total_cards,status").single();
+    if (jobError || !job) return json({ error: "Could not queue the discovery search" }, 500);
+    return json({ queued: true, run_id: job.id, total_cards: job.total_cards, status: job.status }, 202);
+  }
+
+  let backgroundRun: Record<string, any> | null = null;
+  if (action === "process_queue") {
+    const { data: pendingRun } = await admin.from("discovery_runs")
+      .select("id,started_by,set_slug,card_ids,next_card_index,total_cards,cards_searched,results_found")
+      .eq("status", "queued").order("started_at", { ascending: true }).limit(1).maybeSingle();
+    if (!pendingRun) return json({ processed: false, reason: "queue_empty" });
+    const start = pendingRun.next_card_index || 0;
+    requestedCardIds = (pendingRun.card_ids || []).slice(start, start + 3);
+    if (!requestedCardIds.length) {
+      await admin.from("discovery_runs").update({ status: "completed", completed_at: new Date().toISOString() }).eq("id", pendingRun.id);
+      return json({ processed: true, run_id: pendingRun.id, completed: true });
+    }
+    const { data: claimed } = await admin.from("discovery_runs").update({ status: "processing" })
+      .eq("id", pendingRun.id).eq("status", "queued").select("id").maybeSingle();
+    if (!claimed) return json({ processed: false, reason: "already_claimed" });
+    backgroundRun = pendingRun;
+  }
+
+  if (!openAiKey) {
+    if (backgroundRun) await admin.from("discovery_runs").update({ status: "failed", error_message: "Web discovery is not configured", completed_at: new Date().toISOString() }).eq("id", backgroundRun.id);
+    return json({ error: "Web discovery is not configured" }, 503);
+  }
 
   let cardQuery = admin
     .from("cards")
@@ -124,12 +173,16 @@ Deno.serve(async (request) => {
       : [...cards].sort(() => Math.random() - 0.5).slice(0, maxCards);
   if (!selectedCards.length) return json({ error: "This scheduled batch has no cards" }, 400);
 
-  const { data: run, error: runError } = await admin
-    .from("discovery_runs")
-    .insert({ started_by: ownerId, status: "running" })
-    .select("id")
-    .single();
-  if (runError || !run) return json({ error: "Could not create discovery run" }, 500);
+  let run = backgroundRun ? { id: backgroundRun.id } : null;
+  if (!run) {
+    const { data: createdRun, error: runError } = await admin
+      .from("discovery_runs")
+      .insert({ started_by: ownerId, status: "running" })
+      .select("id")
+      .single();
+    if (runError || !createdRun) return json({ error: "Could not create discovery run" }, 500);
+    run = createdRun;
+  }
 
   let saved = 0;
   try {
@@ -180,19 +233,29 @@ Deno.serve(async (request) => {
       }
     }
 
-    await admin.from("discovery_runs").update({
-      status: "completed",
-      cards_searched: selectedCards.length,
-      results_found: saved,
-      completed_at: new Date().toISOString(),
-    }).eq("id", run.id);
+    if (backgroundRun) {
+      const nextIndex = backgroundRun.next_card_index + selectedCards.length;
+      const completed = nextIndex >= backgroundRun.total_cards;
+      await admin.from("discovery_runs").update({
+        status: completed ? "completed" : "queued",
+        next_card_index: nextIndex,
+        cards_searched: nextIndex,
+        results_found: (backgroundRun.results_found || 0) + saved,
+        completed_at: completed ? new Date().toISOString() : null,
+      }).eq("id", run.id);
+    } else {
+      await admin.from("discovery_runs").update({
+        status: "completed", cards_searched: selectedCards.length,
+        results_found: saved, completed_at: new Date().toISOString(),
+      }).eq("id", run.id);
+    }
     return json({ run_id: run.id, cards_searched: selectedCards.length, results_found: saved });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Discovery search failed";
     await admin.from("discovery_runs").update({
       status: "failed",
-      cards_searched: selectedCards.length,
-      results_found: saved,
+      cards_searched: backgroundRun ? backgroundRun.next_card_index : selectedCards.length,
+      results_found: backgroundRun ? (backgroundRun.results_found || 0) + saved : saved,
       error_message: message.slice(0, 1000),
       completed_at: new Date().toISOString(),
     }).eq("id", run.id);
