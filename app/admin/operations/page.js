@@ -57,6 +57,7 @@ const jobs = [
 
 const tabs = [
   ["overview", "Overview"],
+  ["traffic", "Visitor Overview"],
   ["discoveries", "Card Discoveries"],
   ["content", "Content Studio"],
   ["jobs", "Automated Jobs"],
@@ -81,6 +82,22 @@ export default function OwnerOperations() {
   const [draftPrompt, setDraftPrompt] = useState("");
   const [draftPlatform, setDraftPlatform] = useState("Instagram + Facebook");
   const [conceptMessage, setConceptMessage] = useState("");
+  const [traffic, setTraffic] = useState(null);
+  const [trafficLoading, setTrafficLoading] = useState(false);
+  const [trafficError, setTrafficError] = useState("");
+
+  async function loadTraffic() {
+    setTrafficLoading(true);
+    setTrafficError("");
+    const { data, error } = await supabase.rpc("get_owner_traffic_summary", { p_days: 30 });
+    if (error) {
+      console.error("Traffic summary failed:", error);
+      setTrafficError("Traffic figures could not be loaded. Please try again.");
+    } else {
+      setTraffic(data);
+    }
+    setTrafficLoading(false);
+  }
 
   useEffect(() => {
     async function checkOwner() {
@@ -108,7 +125,7 @@ export default function OwnerOperations() {
         return;
       }
 
-      await Promise.all([loadDiscoveries(), loadSets()]);
+      await Promise.all([loadDiscoveries(), loadSets(), loadTraffic()]);
       setLoading(false);
     }
 
@@ -229,7 +246,7 @@ export default function OwnerOperations() {
   if (loading) {
     return (
       <main>
-        <h1>Owner Operations</h1>
+        <h1>Owner Dashboard</h1>
         <p>Checking owner access...</p>
       </main>
     );
@@ -243,7 +260,7 @@ export default function OwnerOperations() {
             ← Admin Home
           </Link>
           <p className="eyebrow">Owner only</p>
-          <h1>Operations Centre</h1>
+          <h1>Owner Dashboard</h1>
           <p className="ops-intro">
             Review discoveries, prepare content and control automated work from
             one place.
@@ -272,6 +289,75 @@ export default function OwnerOperations() {
         <div className="ops-message" role="status">
           {conceptMessage}
         </div>
+      )}
+
+      {activeTab === "traffic" && (
+        <section className="traffic-panel" aria-labelledby="traffic-heading">
+          <div className="traffic-heading">
+            <div>
+              <p className="traffic-eyebrow">SITE TRAFFIC</p>
+              <h2 id="traffic-heading">Visitor overview</h2>
+              <p>Anonymous counts update as people browse. Your signed-in owner visits are excluded. Reporting timezone: UTC.</p>
+            </div>
+            <button type="button" onClick={loadTraffic} disabled={trafficLoading}>
+              {trafficLoading ? "Refreshing…" : "Refresh"}
+            </button>
+          </div>
+
+          {trafficError && <p className="traffic-error">{trafficError}</p>}
+          {traffic ? (
+            <>
+              <div className="traffic-stats">
+                <div><span>Today</span><strong>{traffic.today_visitors ?? 0}</strong><small>unique visitors</small></div>
+                <div><span>Last 7 days</span><strong>{traffic.week_visitors ?? 0}</strong><small>unique visitors</small></div>
+                <div><span>Today</span><strong>{traffic.today_views ?? 0}</strong><small>page views</small></div>
+                <div><span>Last 7 days</span><strong>{traffic.week_views ?? 0}</strong><small>page views</small></div>
+              </div>
+
+              <div className="traffic-details">
+                <div>
+                  <h3>Last 14 days</h3>
+                  <div className="traffic-table-wrap">
+                    <table className="traffic-table">
+                      <thead><tr><th>Date</th><th>Visitors</th><th>Views</th></tr></thead>
+                      <tbody>
+                        {(traffic.daily || []).slice(-14).reverse().map((day) => (
+                          <tr key={day.day}><td>{day.day}</td><td>{day.visitors}</td><td>{day.views}</td></tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <h3>Top pages · 7 days</h3>
+                  {(traffic.top_pages || []).length ? (
+                    <ol className="traffic-pages">
+                      {traffic.top_pages.map((page) => <li key={page.path}><span>{page.path}</span><strong>{page.views} views</strong></li>)}
+                    </ol>
+                  ) : <p>No public page views have been recorded yet.</p>}
+
+                  <h3 className="traffic-subheading">Traffic sources · 7 days</h3>
+                  {(traffic.top_referrers || []).length ? (
+                    <ol className="traffic-pages">
+                      {traffic.top_referrers.map((source) => <li key={source.source}><span>{source.source}</span><strong>{source.visitors} visitors</strong></li>)}
+                    </ol>
+                  ) : <p>No referral information has been recorded yet.</p>}
+                </div>
+              </div>
+
+              <div className="submission-attribution">
+                <h3>Submission sources</h3>
+                <div>
+                  <span><strong>{traffic.submissions?.public_submissions ?? 0}</strong> public uploads</span>
+                  <span><strong>{traffic.submissions?.public_submitters ?? 0}</strong> anonymous public submitters</span>
+                  <span><strong>{traffic.submissions?.owner_submissions ?? 0}</strong> owner uploads</span>
+                  <span><strong>{traffic.submissions?.codex_submissions ?? 0}</strong> Codex-assisted</span>
+                  {(traffic.submissions?.unknown_submissions ?? 0) > 0 && <span><strong>{traffic.submissions.unknown_submissions}</strong> older unclassified</span>}
+                </div>
+              </div>
+            </>
+          ) : trafficLoading ? <p>Loading traffic figures…</p> : null}
+        </section>
       )}
 
       {activeTab === "overview" && (
