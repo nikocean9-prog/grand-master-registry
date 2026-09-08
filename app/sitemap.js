@@ -9,6 +9,7 @@ export default async function sitemap() {
   const staticPages = [
     ["", "daily", 1],
     ["/tcgs", "weekly", 0.9],
+    ["/serialized-cards", "weekly", 0.9],
     ["/help", "monthly", 0.4],
     ["/disclaimer", "yearly", 0.2],
   ].map(([path, changeFrequency, priority]) => ({
