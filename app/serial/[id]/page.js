@@ -5,6 +5,34 @@ import Link from "next/link";
 import { getEvidenceUrl } from "../../lib/evidenceUrl";
 import PublicHeader from "../../components/PublicHeader";
 
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+  const { data: serial } = await supabase
+    .from("serials")
+    .select("id, card_id, serial_number, region, status, cards(name, serial_total)")
+    .eq("id", id)
+    .maybeSingle();
+  if (!serial || serial.status !== "confirmed") {
+    return { title: "Serial Not Confirmed", robots: { index: false, follow: false } };
+  }
+  const width = (serial.cards?.serial_total || 100) < 100 ? 2 : 3;
+  const number = String(serial.serial_number).padStart(width, "0");
+  const label = serial.region === "E" ? `${number}E` : number;
+  const title = `${serial.cards?.name || "Serialized Card"} ${label} — Confirmed Serial`;
+  const description = `Confirmed registry record for ${serial.cards?.name || "serialized card"} serial ${label}, with evidence and pull information when available.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/serial/${serial.id}` },
+    openGraph: { title, description, url: `/serial/${serial.id}` },
+  };
+}
+
 export default async function SerialPage({ params }) {
   const { id } = await params;
 
