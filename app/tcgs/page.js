@@ -3,8 +3,9 @@ import TcgCatalog from "../components/TcgCatalog";
 import { tcgs } from "../lib/catalog";
 
 export const metadata = {
-  title: "Trading Card Games | TCG Serial Tracker",
-  description: "Browse live and upcoming serialised trading card registries.",
+  title: "Serialized Trading Card Games | TCG Serial Tracker",
+  description: "Browse verified serialized-card registries for Yu-Gi-Oh!, Magic: The Gathering, Star Wars: Unlimited, Flesh and Blood and Digimon.",
+  alternates: { canonical: "/tcgs" },
 };
 
 export default function TcgsPage() {
