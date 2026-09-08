@@ -89,7 +89,7 @@ export default function AdminHome() {
 
   return (
     <main>
-      <h1>Admin Home</h1>
+      <h1>{isOwner ? "Owner Dashboard" : "Admin Home"}</h1>
       <p>Manage registry submissions and review previous decisions.</p>
 
       {isOwner && (
@@ -98,7 +98,7 @@ export default function AdminHome() {
             <div>
               <p className="traffic-eyebrow">SITE TRAFFIC</p>
               <h2 id="traffic-heading">Visitor overview</h2>
-              <p>Anonymous counts update as people browse. Reporting timezone: UTC.</p>
+              <p>Anonymous counts update as people browse. Your signed-in owner visits are excluded. Reporting timezone: UTC.</p>
             </div>
             <button type="button" onClick={loadTraffic} disabled={trafficLoading}>
               {trafficLoading ? "Refreshing…" : "Refresh"}
