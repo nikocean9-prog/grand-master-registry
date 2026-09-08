@@ -418,7 +418,9 @@ export default function BulkUploadPage() {
                     const value = event.target.value;
                     setManualCardId(value);
                     const selected = cards.find((card) => String(card.id) === value);
-                    setManualRegion(selected?.set?.serial_scheme === "global" ? "GLOBAL" : "AMERICAS");
+                    setManualRegion((current) => selected?.set?.serial_scheme === "global"
+                      ? "GLOBAL"
+                      : current === "GLOBAL" ? "AMERICAS" : current);
                   }}>
                     <option value="">Choose card</option>
                     {cards.map((card) => <option key={card.id} value={card.id}>{card.name} — {card.set?.name}</option>)}
