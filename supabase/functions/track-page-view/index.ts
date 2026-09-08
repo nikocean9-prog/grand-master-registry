@@ -79,6 +79,21 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
+  const authorization = req.headers.get("authorization");
+  const token = authorization?.replace(/^Bearer\s+/i, "");
+  if (token) {
+    const { data: userData } = await supabase.auth.getUser(token);
+    if (userData.user) {
+      const { data: owner } = await supabase
+        .from("admins")
+        .select("user_id")
+        .eq("user_id", userData.user.id)
+        .eq("is_owner", true)
+        .maybeSingle();
+      if (owner) return response(204, origin);
+    }
+  }
+
   const { error } = await supabase.rpc("record_page_view", {
     p_visitor_hash: visitorHash,
     p_path: path,
