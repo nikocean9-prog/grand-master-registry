@@ -45,6 +45,18 @@ export default function DisclaimerPage() {
           financial advice. Users should verify important information independently.
         </p>
 
+        <h2>Anonymous usage information</h2>
+        <p>
+          The site records anonymous page-view totals, approximate unique visitor counts and the
+          pages visited so the registry can understand which areas are useful. It also assigns a
+          private, one-way tracking code to submissions so the owner can distinguish public,
+          owner and assisted uploads even when optional contact details are not provided. The
+          submission identifier uses first-party browser storage; traffic counts use a one-way
+          connection fingerprint. Raw IP addresses are not saved, no tracking code is placed
+          visibly inside submitted photos, and these private identifiers are not displayed on the
+          public registry.
+        </p>
+
         <Link href="/" className="back-link">← Back to registry</Link>
       </section>
     </main>

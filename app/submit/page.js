@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { safeSubmissionMessage } from "../lib/userMessages";
 import { tcgs as tcgCatalog } from "../lib/catalog";
 import PublicHeader from "../components/PublicHeader";
+import { getAnonymousVisitorHash } from "../lib/visitorIdentity";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -238,6 +239,21 @@ export default function SubmitPage() {
 
         setMessage(safeSubmissionMessage(serverMessage, error));
         return;
+      }
+
+      if (data?.submission_id && data?.receipt) {
+        try {
+          const visitorHash = await getAnonymousVisitorHash();
+          if (visitorHash) {
+            await supabase.rpc("attach_submission_attribution", {
+              p_submission_id: data.submission_id,
+              p_receipt: data.receipt,
+              p_uploader_hash: visitorHash,
+            });
+          }
+        } catch {
+          // Attribution is private analytics and must never block a submission.
+        }
       }
 
       setMessage("Submission received and is being reviewed…");

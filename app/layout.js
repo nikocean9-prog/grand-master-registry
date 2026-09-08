@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import AdminRegistryLink from "./components/AdminRegistryLink";
+import TrafficTracker from "./components/TrafficTracker";
 
 export const metadata = {
   metadataBase: new URL("https://www.tcgserialtracker.com"),
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <TrafficTracker />
         <div className="site-shell">
           <div className="site-content">{children}</div>
           <footer className="site-footer">
