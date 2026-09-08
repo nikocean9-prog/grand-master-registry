@@ -5,6 +5,34 @@ import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
 import PublicHeader from "../../components/PublicHeader";
 
+async function getCard(id) {
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+  const { data } = await supabase
+    .from("cards")
+    .select("id, name, image_url, serial_total, card_sets(name, slug, tcg_slug, serial_scheme)")
+    .eq("id", id)
+    .maybeSingle();
+  return data;
+}
+
+export async function generateMetadata({ params }) {
+  const { id } = await params;
+  const card = await getCard(id);
+  if (!card) return { title: "Card Not Found", robots: { index: false, follow: false } };
+  const title = `${card.name} Serialized Card Registry`;
+  const description = `Track all ${Number(card.serial_total || 0).toLocaleString()} serial numbers for ${card.name} from ${card.card_sets?.name || "this serialized card release"}, including confirmed pulls and regional variants.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/card/${card.id}` },
+    openGraph: { title, description, url: `/card/${card.id}`, images: card.image_url ? [card.image_url] : [] },
+  };
+}
+
 export default async function CardPage({ params }) {
   const { id } = await params;
 
@@ -15,7 +43,7 @@ export default async function CardPage({ params }) {
 
   const { data: card, error: cardError } = await supabase
     .from("cards")
-    .select("id, name, image_url, serial_total, card_sets(name, slug, serial_scheme)")
+    .select("id, name, image_url, serial_total, card_sets(name, slug, tcg_slug, serial_scheme)")
     .eq("id", id)
     .single();
 
