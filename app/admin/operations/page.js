@@ -73,6 +73,7 @@ export default function OwnerOperations() {
   const [activeTab, setActiveTab] = useState("overview");
   const [expandedDiscovery, setExpandedDiscovery] = useState(null);
   const [discoveries, setDiscoveries] = useState([]);
+  const [discoveryJobs, setDiscoveryJobs] = useState([]);
   const [sets, setSets] = useState([]);
   const [selectedSet, setSelectedSet] = useState("");
   const [runningDiscovery, setRunningDiscovery] = useState(false);
@@ -125,12 +126,21 @@ export default function OwnerOperations() {
         return;
       }
 
-      await Promise.all([loadDiscoveries(), loadSets(), loadTraffic()]);
+      await Promise.all([loadDiscoveries(), loadDiscoveryJobs(), loadSets(), loadTraffic()]);
       setLoading(false);
     }
 
     checkOwner();
   }, []);
+
+  useEffect(() => {
+    const hasActiveJob = discoveryJobs.some((job) => ["queued", "processing", "running"].includes(job.status));
+    if (!hasActiveJob) return undefined;
+    const timer = window.setInterval(async () => {
+      await Promise.all([loadDiscoveryJobs(), loadDiscoveries()]);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [discoveryJobs]);
 
   const strongCount = useMemo(
     () => discoveries.filter((item) => item.confidence >= 80 && item.status === "candidate").length,
@@ -155,6 +165,15 @@ export default function OwnerOperations() {
     if (!error) setDiscoveries(data || []);
   }
 
+  async function loadDiscoveryJobs() {
+    const { data, error } = await supabase
+      .from("discovery_runs")
+      .select("id, status, set_slug, total_cards, cards_searched, results_found, error_message, started_at, completed_at")
+      .order("started_at", { ascending: false })
+      .limit(8);
+    if (!error) setDiscoveryJobs(data || []);
+  }
+
   async function loadSets() {
     const { data, error } = await supabase
       .from("card_sets")
@@ -167,50 +186,18 @@ export default function OwnerOperations() {
   async function runDiscoverySearch() {
     setRunningDiscovery(true);
     setDiscoveryProgress("");
-    setConceptMessage("Preparing the discovery search…");
-
-    let cardIds = [];
-    if (selectedSet) {
-      const { data: setCards, error: cardError } = await supabase
-        .from("cards")
-        .select("id, card_sets!inner(slug)")
-        .eq("card_sets.slug", selectedSet)
-        .order("id");
-      if (cardError || !setCards?.length) {
-        setConceptMessage("The selected set could not be loaded.");
-        setRunningDiscovery(false);
-        return;
-      }
-      cardIds = setCards.map((card) => card.id);
+    setConceptMessage("Adding the discovery search to the background queue…");
+    const { data, error } = await supabase.functions.invoke("discover-pulls", {
+      body: { action: "enqueue", set_slug: selectedSet || undefined, max_cards: 3 },
+    });
+    if (error || data?.error) {
+      setConceptMessage(data?.error || error?.message || "The search could not be queued.");
+      setRunningDiscovery(false);
+      return;
     }
-
-    const batches = cardIds.length
-      ? Array.from({ length: Math.ceil(cardIds.length / 3) }, (_, index) => cardIds.slice(index * 3, index * 3 + 3))
-      : [null];
-    let searched = 0;
-    let found = 0;
-
-    for (let index = 0; index < batches.length; index += 1) {
-      setDiscoveryProgress(`Batch ${index + 1} of ${batches.length} · ${searched} of ${cardIds.length || 3} cards checked`);
-      const { data, error } = await supabase.functions.invoke("discover-pulls", {
-        body: {
-          set_slug: selectedSet || undefined,
-          card_ids: batches[index] || undefined,
-          max_cards: 3,
-        },
-      });
-      if (error) {
-        setConceptMessage(`Search paused after ${searched} cards: ${error.message || "a batch failed"}`);
-        setRunningDiscovery(false);
-        return;
-      }
-      searched += data.cards_searched || 0;
-      found += data.results_found || 0;
-    }
-
-    await loadDiscoveries();
-    setDiscoveryProgress("");
-    setConceptMessage(`Search complete: ${searched} cards checked · ${found} new candidates saved.`);
+    await loadDiscoveryJobs();
+    setDiscoveryProgress(`Queued · 0 of ${data.total_cards} cards checked`);
+    setConceptMessage("Search queued. It will keep running if you leave or close this page.");
     setRunningDiscovery(false);
   }
 
@@ -451,9 +438,16 @@ export default function OwnerOperations() {
                 {sets.map((set) => <option value={set.slug} key={set.slug}>{set.name}</option>)}
               </select>
               <button type="button" onClick={runDiscoverySearch} disabled={runningDiscovery}>
-                {runningDiscovery ? "Searching…" : selectedSet ? "Search complete set" : "Search 3 cards"}
+                {runningDiscovery ? "Queueing…" : selectedSet ? "Search complete set in background" : "Search 3 cards in background"}
               </button>
               {discoveryProgress && <small className="ops-progress-label">{discoveryProgress}</small>}
+              {discoveryJobs[0] && (
+                <small className="ops-progress-label">
+                  Latest: {discoveryJobs[0].status === "completed" ? "Complete" : discoveryJobs[0].status === "failed" ? "Failed" : "Running in background"}
+                  {` · ${discoveryJobs[0].cards_searched || 0} of ${discoveryJobs[0].total_cards || 0} cards · ${discoveryJobs[0].results_found || 0} candidates`}
+                  {discoveryJobs[0].error_message ? ` · ${discoveryJobs[0].error_message}` : ""}
+                </small>
+              )}
             </div>
           </div>
 
