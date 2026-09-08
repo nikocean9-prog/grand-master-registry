@@ -13,9 +13,6 @@ export default function PublicHeader({ showSubmit = true }) {
           <Link href="/">Home</Link>
           <Link href="/tcgs">TCGs</Link>
           <Link href="/serialized-cards">Serialized Card Guide</Link>
-          <Link href="/submit">Submit a Pull</Link>
-          <Link href="/help">Help</Link>
-          <Link href="/disclaimer">Legal &amp; disclaimer</Link>
         </div>
       </details>
       <Link href="/" className="site-name" aria-label="TCG Serial Tracker home">
