@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import PublicHeader from "./components/PublicHeader";
+import FeaturedPullCarousel from "./components/FeaturedPullCarousel";
 import HomeStoryCarousel from "./components/HomeStoryCarousel";
 import { getPublicPulls } from "./lib/publicPulls";
 import { tcgs } from "./lib/catalog";
@@ -78,6 +79,7 @@ export default async function Home() {
     .map((slug) => tcgs.find((tcg) => tcg.slug === slug))
     .filter(Boolean);
   const photoPulls = pulls.filter((pull) => pull.imageUrl);
+  const featuredYugiohPulls = photoPulls.filter((pull) => pull.tcgSlug === "yugioh").slice(0, 8);
   const recentPulls = photoPulls.slice(0, 4);
   const galleryPulls = photoPulls.slice(0, 4);
 
@@ -88,6 +90,8 @@ export default async function Home() {
         <p className="home-section-eyebrow">The global serialised card registry</p>
         <h1>Find and track serialised cards</h1>
       </section>
+
+      <FeaturedPullCarousel pulls={featuredYugiohPulls} />
 
       <section className="home-discoveries" aria-labelledby="recent-discoveries-title">
         <div className="home-section-heading">
