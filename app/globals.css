@@ -2192,6 +2192,7 @@ button {
   justify-content: center;
   overflow: hidden;
   background: #ecefea;
+  padding: 8px;
 }
 
 .home-tcg-cardback {
@@ -2199,6 +2200,8 @@ button {
   height: 100%;
   display: block;
   overflow: hidden;
+  border-radius: 6px;
+  background: #cfd3d0;
 }
 
 .home-tcg-cardback img {
@@ -2210,15 +2213,16 @@ button {
 }
 
 .home-tcg-art-yugioh .home-tcg-cardback img {
-  transform: rotate(5deg) scale(1.16);
+  transform: rotate(7deg) scale(1.08);
 }
 
 .home-tcg-art-magic-the-gathering .home-tcg-cardback img {
-  transform: rotate(-4deg) scale(1.18);
+  object-position: center 36%;
+  transform: rotate(-6deg) scale(1.08);
 }
 
 .home-tcg-art-flesh-and-blood .home-tcg-cardback img {
-  transform: rotate(2deg) scale(1.16);
+  transform: rotate(4deg) scale(1.07);
 }
 
 .home-tcg-copy {
