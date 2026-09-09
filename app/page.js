@@ -113,7 +113,20 @@ export default async function Home() {
     .map((slug) => tcgs.find((tcg) => tcg.slug === slug))
     .filter(Boolean);
   const photoPulls = pulls.filter((pull) => pull.imageUrl);
-  const featuredYugiohPulls = photoPulls.filter((pull) => pull.tcgSlug === "yugioh").slice(0, 8);
+  const featuredYugiohPulls = photoPulls
+    .filter((pull) => pull.tcgSlug === "yugioh")
+    .slice(0, 8)
+    .map((pull) => {
+      const confirmedCount = discoveriesByCard[pull.cardId]?.count || 0;
+      return {
+        ...pull,
+        confirmedCount,
+        discoveredPercent: Math.min(
+          100,
+          Math.round((confirmedCount / pull.serialTotal) * 100)
+        ),
+      };
+    });
   const recentPulls = photoPulls.slice(0, 4);
 
   return (

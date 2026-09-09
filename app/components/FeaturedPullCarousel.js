@@ -86,6 +86,15 @@ export default function FeaturedPullCarousel({ pulls }) {
           <h3>{activePull.cardName}</h3>
           <p className="featured-pull-serial">{activePull.serialLabel}</p>
           <p>{activePull.setName}</p>
+          <div className="featured-pull-discovery" aria-label={`${activePull.confirmedCount} of ${activePull.serialTotal} copies confirmed`}>
+            <div className="featured-pull-discovery-label">
+              <span>{activePull.confirmedCount} of {activePull.serialTotal} confirmed</span>
+              <strong>{activePull.discoveredPercent}% discovered</strong>
+            </div>
+            <span className="featured-pull-progress" aria-hidden="true">
+              <span style={{ width: `${activePull.discoveredPercent}%` }} />
+            </span>
+          </div>
           <Link href={`/serial/${activePull.serialId}`} className="featured-pull-link">
             View registry entry
           </Link>

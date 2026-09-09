@@ -84,6 +84,7 @@ export async function getPublicPulls(supabase, limit = 24) {
       serialId: submission.serial.id,
       cardId: card.id,
       cardName: card.name,
+      serialTotal: Number(card.serial_total || 100),
       serialLabel: formatSerialLabel(submission.serial),
       region: submission.serial.region,
       setName: cardSet?.name || "Serialised card",

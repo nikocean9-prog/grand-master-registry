@@ -2312,6 +2312,40 @@ button {
   font-weight: 700;
 }
 
+.featured-pull-discovery {
+  width: min(100%, 430px);
+  margin-top: 24px;
+}
+
+.featured-pull-discovery-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  color: #dce7e1;
+  font-size: 14px;
+}
+
+.featured-pull-discovery-label strong {
+  color: #f2d779;
+  white-space: nowrap;
+}
+
+.featured-pull-progress {
+  display: block;
+  height: 5px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+}
+
+.featured-pull-progress > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2d8a60, #e0bf65);
+}
+
 .featured-pull-link {
   margin-top: 28px;
   border-radius: 8px;
