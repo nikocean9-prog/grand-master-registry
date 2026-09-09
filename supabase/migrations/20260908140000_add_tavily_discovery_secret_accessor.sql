@@ -12,4 +12,3 @@ $$;
 
 revoke all on function public.get_tavily_api_key() from public, anon, authenticated;
 grant execute on function public.get_tavily_api_key() to service_role;
-
