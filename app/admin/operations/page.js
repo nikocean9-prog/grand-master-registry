@@ -86,6 +86,30 @@ export default function OwnerOperations() {
   const [traffic, setTraffic] = useState(null);
   const [trafficLoading, setTrafficLoading] = useState(false);
   const [trafficError, setTrafficError] = useState("");
+  const [instagramConnection, setInstagramConnection] = useState(null);
+  const [instagramChecking, setInstagramChecking] = useState(false);
+
+  async function checkInstagramConnection() {
+    setInstagramChecking(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData.session?.access_token;
+    if (!accessToken) {
+      setInstagramConnection({ connected: false, message: "Your owner session has expired." });
+      setInstagramChecking(false);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/admin/instagram/status", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const result = await response.json();
+      setInstagramConnection(result);
+    } catch {
+      setInstagramConnection({ connected: false, message: "The Instagram connection could not be checked." });
+    }
+    setInstagramChecking(false);
+  }
 
   async function loadTraffic() {
     setTrafficLoading(true);
@@ -536,8 +560,25 @@ export default function OwnerOperations() {
               <h2>Content Studio</h2>
               <p>Request, edit and approve social posts without using the project chat.</p>
             </div>
-            <StatusPill>Publishing not connected</StatusPill>
+            <StatusPill tone={instagramConnection?.connected ? "low" : "neutral"}>
+              {instagramConnection?.connected ? "Instagram connected" : "Connection not tested"}
+            </StatusPill>
           </div>
+
+          <article className="ops-panel ops-social-connection">
+            <div>
+              <p className="eyebrow">Publishing account</p>
+              <h3>Instagram</h3>
+              {instagramConnection?.connected ? (
+                <p>Connected securely to @{instagramConnection.username || "TCG Serial Tracker"}. No post has been published.</p>
+              ) : (
+                <p>{instagramConnection?.message || "Check the Meta access token saved in Vercel before enabling publishing."}</p>
+              )}
+            </div>
+            <button type="button" onClick={checkInstagramConnection} disabled={instagramChecking}>
+              {instagramChecking ? "Checking…" : instagramConnection?.connected ? "Check again" : "Test connection"}
+            </button>
+          </article>
 
           <div className="ops-grid ops-content-grid">
             <form className="ops-panel ops-request-form" onSubmit={generateDraft}>

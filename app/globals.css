@@ -1847,6 +1847,10 @@ button {
 .ops-panel { border:1px solid #d6ded8; border-radius:13px; background:#fff; padding:22px; box-shadow:0 3px 12px rgba(17,24,39,.05); }
 .ops-panel h2,.ops-panel h3 { margin:7px 0 10px; }
 .ops-panel p { color:#606b63; line-height:1.5; }
+.ops-social-connection { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom:18px; }
+.ops-social-connection h3 { margin:5px 0; color:#183d29; }
+.ops-social-connection p { margin:0; }
+.ops-social-connection button { flex:0 0 auto; }
 .ops-panel-wide { min-width:0; }
 .ops-panel-heading,.ops-section-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; }
 .ops-panel-heading h2,.ops-section-heading h2 { margin:5px 0; }
@@ -1933,6 +1937,7 @@ button {
   .ops-discovery-summary { align-items:flex-start; }
   .ops-discovery-summary > span:last-child { align-items:flex-end; flex-direction:column; }
   .ops-discovery-detail { grid-template-columns:1fr; }
+  .ops-social-connection { align-items:flex-start; flex-direction:column; }
   .ops-evidence-placeholder { min-height:190px; }
   .ops-job-list article { grid-template-columns:1fr; }
   .ops-job-list article > div:first-child { grid-column:auto; }
