@@ -8,9 +8,9 @@ import { tcgs } from "./lib/catalog";
 export const dynamic = "force-dynamic";
 
 const cardBackImages = {
-  yugioh: "/graphics/card-backs/yugioh-card-back.webp",
-  "magic-the-gathering": "/graphics/card-backs/mtg-card-back.webp",
-  "flesh-and-blood": "/graphics/card-backs/flesh-and-blood-card-back.webp",
+  yugioh: "/graphics/card-backs/yugioh-card-back-mockup.webp",
+  "magic-the-gathering": "/graphics/card-backs/mtg-card-back-mockup.webp",
+  "flesh-and-blood": "/graphics/card-backs/flesh-and-blood-card-back-mockup.webp",
 };
 
 function createPublicClient() {
