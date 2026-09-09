@@ -2192,15 +2192,13 @@ button {
   justify-content: center;
   overflow: hidden;
   background: #ecefea;
-  padding: 10px;
 }
 
 .home-tcg-cardback {
-  width: 78px;
-  height: 78px;
+  width: 100%;
+  height: 100%;
   display: block;
   overflow: hidden;
-  border-radius: 6px;
 }
 
 .home-tcg-cardback img {
@@ -2209,6 +2207,18 @@ button {
   height: 100%;
   max-height: none;
   object-fit: cover;
+}
+
+.home-tcg-art-yugioh .home-tcg-cardback img {
+  transform: rotate(5deg) scale(1.16);
+}
+
+.home-tcg-art-magic-the-gathering .home-tcg-cardback img {
+  transform: rotate(-4deg) scale(1.18);
+}
+
+.home-tcg-art-flesh-and-blood .home-tcg-cardback img {
+  transform: rotate(2deg) scale(1.16);
 }
 
 .home-tcg-copy {
@@ -2596,10 +2606,6 @@ button {
   .home-tcg-card {
     grid-template-columns: 92px minmax(0, 1fr);
     min-height: 92px;
-  }
-  .home-tcg-cardback {
-    width: 64px;
-    height: 64px;
   }
   .home-tcg-cardback img {
     max-height: none;
