@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { tcgs } from "./lib/catalog";
+import { wikiArticles } from "./lib/wikiArticles";
 
 const origin = "https://www.tcgserialtracker.com";
 export const revalidate = 3600;
@@ -11,6 +12,7 @@ export default async function sitemap() {
     ["/tcgs", "weekly", 0.9],
     ["/gallery", "daily", 0.8],
     ["/serialized-cards", "weekly", 0.9],
+    ["/wiki", "weekly", 0.8],
     ["/help", "monthly", 0.4],
     ["/disclaimer", "yearly", 0.2],
   ].map(([path, changeFrequency, priority]) => ({
@@ -38,11 +40,17 @@ export default async function sitemap() {
       changeFrequency: "daily",
       priority: 0.8,
     }));
+  const wikiPages = wikiArticles.map((article) => ({
+    url: `${origin}/wiki/${article.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly",
+    priority: 0.7,
+  }));
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!supabaseUrl || !supabaseKey) {
-    return [...staticPages, ...tcgPages, ...setPages];
+    return [...staticPages, ...tcgPages, ...setPages, ...wikiPages];
   }
   const supabase = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -64,5 +72,5 @@ export default async function sitemap() {
     priority: 0.6,
   }));
 
-  return [...staticPages, ...tcgPages, ...setPages, ...cardPages, ...serialPages];
+  return [...staticPages, ...tcgPages, ...setPages, ...wikiPages, ...cardPages, ...serialPages];
 }

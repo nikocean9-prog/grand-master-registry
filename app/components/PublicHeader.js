@@ -12,6 +12,7 @@ export default function PublicHeader({ showSubmit = true }) {
         <div className="public-menu-panel">
           <Link href="/">Home</Link>
           <Link href="/tcgs">TCGs</Link>
+          <Link href="/wiki">Wiki &amp; Articles</Link>
           <Link href="/serialized-cards">Serialized Card Guide</Link>
         </div>
       </details>

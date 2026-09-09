@@ -34,46 +34,79 @@ export default async function Home() {
   const pulls = await getPublicPulls(supabase, 12);
   let oneRing = null;
   let darkMagician = null;
+  let confirmedSerials = [];
 
   if (supabase) {
-    const [{ data: oneRingCards }, { data: darkMagicianCards }] = await Promise.all([
+    const [{ data: oneRingCards }, { data: darkMagicianCards }, { data: confirmedData }] = await Promise.all([
       supabase.from("cards").select("id, name, image_url, card_sets!inner(slug)")
         .eq("name", "The One Ring").eq("card_sets.slug", "lotr-original").limit(1),
       supabase.from("cards").select("id, name, image_url, card_sets!inner(slug)")
         .ilike("name", "Dark Magician%").eq("card_sets.slug", "magnificent-monsters").limit(1),
+      supabase.from("serials").select("card_id, card:cards(id, name, image_url, serial_total)")
+        .eq("status", "confirmed"),
     ]);
     oneRing = oneRingCards?.[0] || null;
     darkMagician = darkMagicianCards?.[0] || null;
+    confirmedSerials = confirmedData || [];
   }
+
+  const discoveriesByCard = confirmedSerials.reduce((totals, serial) => {
+    if (!serial.card?.id) return totals;
+    if (!totals[serial.card.id]) totals[serial.card.id] = { card: serial.card, count: 0 };
+    totals[serial.card.id].count += 1;
+    return totals;
+  }, {});
+  const milestone = Object.values(discoveriesByCard)
+    .map((entry) => ({ ...entry, percent: Math.floor((entry.count / Number(entry.card.serial_total || 100)) * 100) }))
+    .filter((entry) => entry.percent >= 10)
+    .sort((a, b) => b.percent - a.percent)[0] || null;
 
   const stories = [
     {
+      kicker: "Card Wiki",
       title: "Dark Magician",
       summary: "Yugi's signature monster became one of the defining cards of the original animated series.",
       image: pulls.find((pull) => pull.cardName.startsWith("Dark Magician"))?.imageUrl || darkMagician?.image_url,
       imageAlt: darkMagician?.name || "Dark Magician",
       imageClass: "yugioh-feature-background",
-      href: darkMagician ? `/card/${darkMagician.id}` : "/sets/magnificent-monsters",
+      href: "/wiki/dark-magician",
+      actionLabel: "Read the article",
     },
     {
+      kicker: "Card Wiki",
       title: "The One Ring 001/001",
       summary: "A single serialized copy became one of the best-known modern cards in the collecting world.",
       image: oneRing?.image_url || pulls.find((pull) => pull.cardName === "The One Ring")?.imageUrl,
       imageAlt: "The One Ring 001/001",
-      href: oneRing ? `/card/${oneRing.id}` : "/sets/lotr-original",
+      href: "/wiki/the-one-ring",
+      actionLabel: "Read the article",
     },
     {
+      kicker: "Registry Guide",
       title: "The first Grand Master Rares",
       summary: "Magnificent Monsters introduced individually numbered versions of 18 reimagined Yu-Gi-Oh! cards.",
       imageClass: "yugioh-feature-background",
-      href: "/sets/magnificent-monsters",
+      href: "/wiki/grand-master-rares",
+      actionLabel: "Read the guide",
     },
     {
+      kicker: "Upcoming Release",
       title: "Magnificent Maestros",
       summary: "Preview the next Grand Master Rare registry ahead of the set's November 2026 release.",
       imageClass: "maestros-feature-background",
       href: "/sets/magnificent-maestros",
+      actionLabel: "Preview the set",
     },
+    ...(milestone ? [{
+      kicker: "Registry Milestone",
+      title: `${milestone.percent}% of ${milestone.card.name} discovered`,
+      summary: `${milestone.count} individually numbered copies have now been confirmed by the registry.`,
+      image: milestone.card.image_url,
+      imageAlt: milestone.card.name,
+      imageClass: "yugioh-feature-background",
+      href: `/card/${milestone.card.id}`,
+      actionLabel: "View the card",
+    }] : []),
   ];
 
   const featuredTcgs = ["yugioh", "magic-the-gathering", "flesh-and-blood"]

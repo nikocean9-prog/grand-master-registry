@@ -2553,6 +2553,41 @@ button {
   touch-action: pan-y;
 }
 
+.home-feature-board-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.home-feature-board-heading h2 { margin: 0; font-size: 31px; letter-spacing: -.025em; }
+.home-feature-board-heading a { color: #155a34; font-size: 14px; font-weight: 700; text-decoration: none; }
+.home-feature-board-heading a:hover { text-decoration: underline; }
+
+.wiki-page { max-width: 1180px; margin: 0 auto; padding: 60px 24px 70px; }
+.wiki-heading { max-width: 760px; margin: 48px 0 34px; }
+.wiki-heading h1, .wiki-article h1 { margin: 0 0 12px; font-size: clamp(40px, 6vw, 64px); letter-spacing: -.04em; line-height: 1; }
+.wiki-heading > p:last-child, .wiki-article header > p:last-child { color: #667069; font-size: 18px; line-height: 1.55; }
+.wiki-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.wiki-card { display: grid; overflow: hidden; border: 1px solid #d6ddd8; border-radius: 14px; background: #fff; color: #172019; text-decoration: none; box-shadow: 0 7px 20px rgba(8, 40, 29, .06); transition: transform .18s ease, box-shadow .18s ease; }
+.wiki-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(8, 40, 29, .12); }
+.wiki-card-image { display: block; height: 210px; overflow: hidden; background: #08281d; }
+.wiki-card-image img { width: 100%; height: 100%; object-fit: cover; }
+.wiki-card-copy { display: flex; align-items: flex-start; flex-direction: column; padding: 22px; }
+.wiki-card-copy small { color: #267047; font-size: 11px; font-weight: 900; letter-spacing: .09em; text-transform: uppercase; }
+.wiki-card-copy strong { margin-top: 9px; font-family: Georgia, "Times New Roman", serif; font-size: 27px; line-height: 1.08; }
+.wiki-card-copy > span { margin-top: 10px; color: #667069; font-size: 15px; line-height: 1.5; }
+.wiki-card-copy b { margin-top: 18px; color: #155a34; font-size: 14px; }
+.wiki-article { max-width: 900px; margin: 42px auto 0; }
+.wiki-article header { max-width: 760px; margin-bottom: 28px; }
+.wiki-article-hero { height: min(52vw, 500px); overflow: hidden; border: 1px solid #b18a3d; border-radius: 17px; background: #08281d; }
+.wiki-article-hero img { width: 100%; height: 100%; object-fit: cover; }
+.wiki-article-body { max-width: 720px; margin: 38px auto 0; }
+.wiki-article-body section + section { margin-top: 34px; padding-top: 30px; border-top: 1px solid #d8ded9; }
+.wiki-article-body h2 { margin: 0 0 12px; font-family: Georgia, "Times New Roman", serif; font-size: 30px; }
+.wiki-article-body p { color: #37443d; font-size: 17px; line-height: 1.72; }
+
 .home-story-copy {
   display: flex;
   justify-content: center;
@@ -2856,6 +2891,7 @@ button {
 }
 
 @media (max-width: 900px) {
+  .wiki-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .home-pull-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2868,6 +2904,12 @@ button {
 }
 
 @media (max-width: 700px) {
+  .wiki-page { padding: 60px 18px 54px; }
+  .wiki-heading { margin-top: 38px; }
+  .wiki-grid { grid-template-columns: 1fr; }
+  .home-feature-board-heading { gap: 14px; }
+  .home-feature-board-heading h2 { font-size: 27px; }
+  .home-feature-board-heading a { max-width: 150px; text-align: right; }
   .card-crop-editor-heading { display: grid; }
   .card-crop-editor-grid { grid-template-columns: 1fr; }
   .card-crop-preview { width: min(280px, 100%); justify-self: center; }
