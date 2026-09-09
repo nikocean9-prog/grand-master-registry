@@ -2196,56 +2196,21 @@ button {
 }
 
 .home-tcg-cardback {
-  position: relative;
-  display: grid;
   width: 72px;
   height: 90px;
-  place-items: center;
+  display: block;
   overflow: hidden;
   transform: rotate(-3deg);
-  border: 2px solid rgba(220, 185, 106, .82);
   border-radius: 7px;
-  background:
-    radial-gradient(circle at 50% 46%, transparent 0 19%, rgba(226, 177, 66, .48) 20% 22%, transparent 23% 32%, rgba(226, 177, 66, .28) 33% 35%, transparent 36%),
-    linear-gradient(145deg, #352111, #0d0b09 72%);
   box-shadow: 0 5px 12px rgba(18, 20, 17, .25);
 }
 
-.home-tcg-art-magic-the-gathering .home-tcg-cardback {
-  border-color: #8c613f;
-  background:
-    radial-gradient(circle at 50% 45%, #4d7590 0 4%, transparent 5%),
-    radial-gradient(circle at 35% 35%, #ca4f32 0 3%, transparent 4%),
-    radial-gradient(circle at 66% 36%, #d9b64c 0 3%, transparent 4%),
-    radial-gradient(circle at 38% 66%, #4f7d50 0 3%, transparent 4%),
-    radial-gradient(circle at 64% 67%, #262a30 0 3%, transparent 4%),
-    linear-gradient(145deg, #704524, #25170f 72%);
-}
-
-.home-tcg-art-flesh-and-blood .home-tcg-cardback {
-  border-color: #736143;
-  background:
-    radial-gradient(circle at 50% 50%, transparent 0 24%, rgba(159, 126, 67, .55) 25% 27%, transparent 28%),
-    repeating-linear-gradient(35deg, rgba(181, 147, 83, .14) 0 1px, transparent 1px 7px),
-    linear-gradient(145deg, #332d26, #11100e 72%);
-}
-
-.home-tcg-cardback::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 1px solid rgba(239, 211, 143, .38);
-  border-radius: 4px;
-}
-
-.home-tcg-art img {
-  position: relative;
-  z-index: 1;
+.home-tcg-cardback img {
   display: block;
-  width: 82%;
-  max-height: 48px;
-  object-fit: contain;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .7));
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
 }
 
 .home-tcg-copy {
@@ -2638,8 +2603,8 @@ button {
     width: 58px;
     height: 72px;
   }
-  .home-tcg-art img {
-    max-height: 38px;
+  .home-tcg-cardback img {
+    max-height: none;
   }
   .home-story-card {
     grid-template-columns: 1fr;

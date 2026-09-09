@@ -7,6 +7,12 @@ import { tcgs } from "./lib/catalog";
 
 export const dynamic = "force-dynamic";
 
+const cardBackImages = {
+  yugioh: "/graphics/card-backs/yugioh-card-back.webp",
+  "magic-the-gathering": "/graphics/card-backs/mtg-card-back.webp",
+  "flesh-and-blood": "/graphics/card-backs/flesh-and-blood-card-back.webp",
+};
+
 function createPublicClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -109,7 +115,9 @@ export default async function Home() {
           {featuredTcgs.map((tcg) => (
             <Link href={`/tcg/${tcg.slug}`} className="home-tcg-card" key={tcg.slug}>
               <span className={`home-tcg-art home-tcg-art-${tcg.slug}`}>
-                <span className="home-tcg-cardback"><img src={tcg.logo} alt="" /></span>
+                <span className="home-tcg-cardback">
+                  <img src={cardBackImages[tcg.slug]} alt={`${tcg.name} card back`} />
+                </span>
               </span>
               <span className="home-tcg-copy"><strong>{tcg.name}</strong><small>{tcg.description}</small></span>
             </Link>
