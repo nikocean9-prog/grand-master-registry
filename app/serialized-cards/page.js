@@ -85,8 +85,8 @@ export default function SerializedCardsGuide() {
           European-distributed copies carrying the E suffix.
         </p>
         <p>
-          <Link href="/sets/magnificent-monsters">
-            View the Magnificent Monsters serialized card list
+          <Link href="/yugioh/serialised-cards">
+            View the serialised Yu-Gi-Oh! card tracker
           </Link>
         </p>
 

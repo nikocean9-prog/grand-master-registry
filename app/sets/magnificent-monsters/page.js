@@ -3,7 +3,11 @@ import Link from "next/link";
 import PublicHeader from "../../components/PublicHeader";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Magnificent Monsters Registry | TCG Serial Tracker", description: "Track all 3,600 Yu-Gi-Oh! Magnificent Monsters Grand Master Rare serial numbers." };
+export const metadata = {
+  title: "Magnificent Monsters Grand Master Rare Serial Number Tracker",
+  description: "Track all 3,600 serialised Yu-Gi-Oh! Magnificent Monsters Grand Master Rare cards, confirmed pulls and Americas or European E-region serial numbers.",
+  alternates: { canonical: "/sets/magnificent-monsters" },
+};
 
 export default async function MagnificentMonstersPage() {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);

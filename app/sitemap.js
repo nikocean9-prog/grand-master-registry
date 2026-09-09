@@ -12,6 +12,7 @@ export default async function sitemap() {
     ["/tcgs", "weekly", 0.9],
     ["/gallery", "daily", 0.8],
     ["/serialized-cards", "weekly", 0.9],
+    ["/yugioh/serialised-cards", "daily", 0.9],
     ["/wiki", "weekly", 0.8],
     ["/help", "monthly", 0.4],
     ["/disclaimer", "yearly", 0.2],
