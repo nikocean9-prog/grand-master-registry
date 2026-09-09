@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import PublicHeader from "./components/PublicHeader";
 import FeaturedPullCarousel from "./components/FeaturedPullCarousel";
+import CardPhoto from "./components/CardPhoto";
 import HomeStoryCarousel from "./components/HomeStoryCarousel";
 import { getPublicPulls } from "./lib/publicPulls";
 import { tcgs } from "./lib/catalog";
@@ -103,7 +104,7 @@ export default async function Home() {
             {recentPulls.map((pull) => (
               <Link href={`/serial/${pull.serialId}`} className="home-pull-card" key={pull.id}>
                 <span className="home-pull-photo">
-                  <img src={pull.imageUrl} alt={`${pull.cardName} serial ${pull.serialLabel}`} />
+                  <CardPhoto src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} />
                 </span>
                 <strong>{pull.cardName}</strong>
                 <small>{pull.serialLabel} · {tcgLabel(pull.tcgSlug)}</small>
@@ -140,7 +141,7 @@ export default async function Home() {
           <div className="home-gallery-row">
             {galleryPulls.map((pull, index) => (
               <Link href={`/gallery?pull=${pull.id}`} className={`home-gallery-photo detail-${index + 1}`} key={pull.id}>
-                <img src={pull.imageUrl} alt={`${pull.cardName} serial ${pull.serialLabel}`} loading="lazy" />
+                <CardPhoto src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} loading="lazy" />
                 <span>{pull.cardName} · {pull.serialLabel}</span>
               </Link>
             ))}

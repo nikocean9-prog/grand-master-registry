@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import CardPhoto from "./CardPhoto";
 
 export default function PublicPullGallery({ pulls }) {
   const [activePull, setActivePull] = useState(null);
@@ -25,7 +26,7 @@ export default function PublicPullGallery({ pulls }) {
       <div className="pull-gallery-grid">
         {pulls.map((pull) => (
           <button key={pull.id} type="button" className="pull-gallery-item" onClick={() => setActivePull(pull)}>
-            <img src={pull.imageUrl} alt={`${pull.cardName} serial ${pull.serialLabel}`} loading="lazy" />
+            <CardPhoto className="pull-gallery-photo" src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} loading="lazy" />
             <span><strong>{pull.cardName}</strong><small>Serial {pull.serialLabel}</small></span>
           </button>
         ))}

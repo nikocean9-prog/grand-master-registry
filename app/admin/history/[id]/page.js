@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../../lib/adminAuth";
 import { getEvidenceUrl } from "../../../lib/evidenceUrl";
+import CardCropEditor from "../../../components/CardCropEditor";
 import {
   isMfaRequiredError,
   safeAdminActionMessage,
@@ -30,6 +31,7 @@ export default function SubmissionHistoryDetails() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [cropBusy, setCropBusy] = useState(false);
 
   useEffect(() => {
     if (submissionId) loadSubmission();
@@ -223,6 +225,25 @@ export default function SubmissionHistoryDetails() {
     setBusy(false);
   }
 
+  async function handleDisplayCrop(displayCrop) {
+    setCropBusy(true);
+    setMessage("");
+    const { error } = await supabase.rpc("save_submission_display_crop", {
+      p_submission_id: Number(submissionId),
+      p_display_crop: displayCrop,
+    });
+    if (error) {
+      setMessage(safeAdminActionMessage(error, "save this display crop"));
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
+      }
+    } else {
+      setSubmission((current) => ({ ...current, display_crop: displayCrop }));
+      setMessage("Straightened display saved. The original evidence photo is unchanged.");
+    }
+    setCropBusy(false);
+  }
+
   async function handleRestore() {
     if (!reason.trim()) {
       setMessage("Enter a reason before restoring this record.");
@@ -341,6 +362,16 @@ export default function SubmissionHistoryDetails() {
               />
             </a>
           </div>
+        )}
+
+        {isOwner && submission.evidence_url && (
+          <CardCropEditor
+            key={JSON.stringify(submission.display_crop || null)}
+            src={submission.evidence_url}
+            value={submission.display_crop}
+            busy={cropBusy}
+            onSave={handleDisplayCrop}
+          />
         )}
       </div>
 

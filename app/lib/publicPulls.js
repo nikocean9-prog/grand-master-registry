@@ -16,6 +16,7 @@ export async function getPublicPulls(supabase, limit = 24) {
     .select(`
       id,
       photo_url,
+      display_crop,
       created_at,
       serial:serials (
         id,
@@ -89,6 +90,7 @@ export async function getPublicPulls(supabase, limit = 24) {
       setSlug: cardSet?.slug || null,
       tcgSlug: cardSet?.tcg_slug || null,
       imageUrl: evidenceUrl || card.image_url || null,
+      displayCrop: submission.display_crop || null,
       confirmedAt: submission.serial.confirmed_at || submission.created_at,
     };
   });

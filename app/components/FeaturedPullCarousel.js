@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import CardPhoto from "./CardPhoto";
 
 function framingClass(cardName = "") {
   const name = cardName.toLowerCase();
@@ -65,10 +66,11 @@ export default function FeaturedPullCarousel({ pulls }) {
           aria-label={`View ${activePull.cardName}, serial ${activePull.serialLabel}`}
         >
           <span className="featured-pull-image-window">
-            <img
+            <CardPhoto
               className="featured-pull-evidence"
               src={activePull.imageUrl}
               alt={`${activePull.cardName} serial ${activePull.serialLabel}`}
+              crop={activePull.displayCrop}
             />
           </span>
           <img

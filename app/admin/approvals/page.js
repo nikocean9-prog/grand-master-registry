@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
 import { getEvidencePath } from "../../lib/evidenceUrl";
+import CardCropEditor from "../../components/CardCropEditor";
 import {
   isMfaRequiredError,
   safeAdminActionMessage,
@@ -105,6 +106,7 @@ export default function AdminApprovals() {
   const [editingSerialId, setEditingSerialId] = useState(null);
   const [correctedSerialNumber, setCorrectedSerialNumber] = useState("");
   const [correctedRegion, setCorrectedRegion] = useState("AMERICAS");
+  const [cropBusyId, setCropBusyId] = useState(null);
 
   useEffect(() => {
     loadApprovals(page);
@@ -294,6 +296,27 @@ export default function AdminApprovals() {
     await loadApprovals(page);
     setMessage("Submission approved.");
     setBusyId(null);
+  }
+
+  async function handleDisplayCrop(submission, displayCrop) {
+    setCropBusyId(submission.id);
+    setMessage("");
+    const { error } = await supabase.rpc("save_submission_display_crop", {
+      p_submission_id: submission.id,
+      p_display_crop: displayCrop,
+    });
+    if (error) {
+      setMessage(safeAdminActionMessage(error, "save this display crop"));
+      if (isMfaRequiredError(error)) {
+        window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
+      }
+    } else {
+      setSubmissions((current) => current.map((item) => item.id === submission.id
+        ? { ...item, display_crop: displayCrop }
+        : item));
+      setMessage("Straightened display saved. The original evidence photo is unchanged.");
+    }
+    setCropBusyId(null);
   }
 
   async function handleReject(submission) {
@@ -715,6 +738,16 @@ export default function AdminApprovals() {
                         </dl>
                         <p className="photo-check-disclaimer">Photo assessment only. The confirmed-record conflict sets the overall submission to Medium risk.</p>
                       </section>
+                    )}
+
+                    {evidenceUrl && (
+                      <CardCropEditor
+                        key={`${submission.id}-${JSON.stringify(submission.display_crop || null)}`}
+                        src={evidenceUrl}
+                        value={submission.display_crop}
+                        busy={cropBusyId === submission.id}
+                        onSave={(displayCrop) => handleDisplayCrop(submission, displayCrop)}
+                      />
                     )}
 
                     <div className="approval-actions">
