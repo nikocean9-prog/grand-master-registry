@@ -42,7 +42,7 @@ export default async function Home() {
     {
       title: "Dark Magician",
       summary: "Yugi's signature monster became one of the defining cards of the original animated series.",
-      image: darkMagician?.image_url || pulls.find((pull) => pull.cardName.startsWith("Dark Magician"))?.imageUrl,
+      image: pulls.find((pull) => pull.cardName.startsWith("Dark Magician"))?.imageUrl || darkMagician?.image_url,
       imageAlt: darkMagician?.name || "Dark Magician",
       imageClass: "yugioh-feature-background",
       href: darkMagician ? `/card/${darkMagician.id}` : "/sets/magnificent-monsters",
@@ -108,7 +108,9 @@ export default async function Home() {
         <div className="home-tcg-row">
           {featuredTcgs.map((tcg) => (
             <Link href={`/tcg/${tcg.slug}`} className="home-tcg-card" key={tcg.slug}>
-              <span className="home-tcg-art"><img src={tcg.logo} alt="" /></span>
+              <span className={`home-tcg-art home-tcg-art-${tcg.slug}`}>
+                <span className="home-tcg-cardback"><img src={tcg.logo} alt="" /></span>
+              </span>
               <span className="home-tcg-copy"><strong>{tcg.name}</strong><small>{tcg.description}</small></span>
             </Link>
           ))}
