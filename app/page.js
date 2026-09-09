@@ -82,7 +82,6 @@ export default async function Home() {
   const photoPulls = pulls.filter((pull) => pull.imageUrl);
   const featuredYugiohPulls = photoPulls.filter((pull) => pull.tcgSlug === "yugioh").slice(0, 8);
   const recentPulls = photoPulls.slice(0, 4);
-  const galleryPulls = photoPulls.slice(0, 4);
 
   return (
     <main className="home-page">
@@ -93,26 +92,6 @@ export default async function Home() {
       </section>
 
       <FeaturedPullCarousel pulls={featuredYugiohPulls} />
-
-      <section className="home-discoveries" aria-labelledby="recent-discoveries-title">
-        <div className="home-section-heading">
-          <h2 id="recent-discoveries-title">Recent discoveries</h2>
-          <Link href="/gallery?sort=recent">View all recent pulls</Link>
-        </div>
-        {recentPulls.length ? (
-          <div className="home-pull-row">
-            {recentPulls.map((pull) => (
-              <Link href={`/serial/${pull.serialId}`} className="home-pull-card" key={pull.id}>
-                <span className="home-pull-photo">
-                  <CardPhoto src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} />
-                </span>
-                <strong>{pull.cardName}</strong>
-                <small>{pull.serialLabel} · {tcgLabel(pull.tcgSlug)}</small>
-              </Link>
-            ))}
-          </div>
-        ) : <p className="home-empty-state">Newly confirmed pull photos will appear here.</p>}
-      </section>
 
       <section className="home-explore" aria-labelledby="explore-registry-title">
         <div className="home-section-heading"><h2 id="explore-registry-title">Explore the registry</h2></div>
@@ -132,21 +111,24 @@ export default async function Home() {
 
       <HomeStoryCarousel stories={stories} />
 
-      <section className="home-pull-gallery" aria-labelledby="pull-gallery-title">
-        <div className="home-section-heading home-gallery-heading">
-          <div><p className="home-section-eyebrow">From the registry</p><h2 id="pull-gallery-title">Pull Gallery</h2></div>
-          <Link href="/gallery">View the full gallery</Link>
+      <section className="home-discoveries" aria-labelledby="recent-discoveries-title">
+        <div className="home-section-heading">
+          <h2 id="recent-discoveries-title">Recent discoveries</h2>
+          <Link href="/gallery?sort=recent">View all recent pulls</Link>
         </div>
-        {galleryPulls.length ? (
-          <div className="home-gallery-row">
-            {galleryPulls.map((pull, index) => (
-              <Link href={`/gallery?pull=${pull.id}`} className={`home-gallery-photo detail-${index + 1}`} key={pull.id}>
-                <CardPhoto src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} loading="lazy" />
-                <span>{pull.cardName} · {pull.serialLabel}</span>
+        {recentPulls.length ? (
+          <div className="home-pull-row">
+            {recentPulls.map((pull) => (
+              <Link href={`/serial/${pull.serialId}`} className="home-pull-card" key={pull.id}>
+                <span className="home-pull-photo">
+                  <CardPhoto src={pull.imageUrl} crop={pull.displayCrop} alt={`${pull.cardName} serial ${pull.serialLabel}`} />
+                </span>
+                <strong>{pull.cardName}</strong>
+                <small>{pull.serialLabel} · {tcgLabel(pull.tcgSlug)}</small>
               </Link>
             ))}
           </div>
-        ) : <p className="home-empty-state">Confirmed pull photographs will appear here.</p>}
+        ) : <p className="home-empty-state">Newly confirmed pull photos will appear here.</p>}
       </section>
     </main>
   );
