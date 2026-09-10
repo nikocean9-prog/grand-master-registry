@@ -9,6 +9,31 @@ export const metadata = {
   alternates: { canonical: "/sets/magnificent-monsters" },
 };
 
+const catalogImageOverrides = {
+  "darkmagicianthepharaohsservant": "/catalog/magnificent-monsters/dark-magician-pharaohs-servant.webp",
+  "kuribohmultiply": "/catalog/magnificent-monsters/kuriboh-multiply.webp",
+  "darkmagicalcurtain": "/catalog/magnificent-monsters/dark-magical-curtain.webp",
+  "favoriteheroshiningflarewingman": "/catalog/magnificent-monsters/favorite-hero-shining-flare-wingman.webp",
+  "favoriteheroflamewingman": "/catalog/magnificent-monsters/favorite-hero-flame-wingman.webp",
+  "wingedkuribohsabatielv10": "/catalog/magnificent-monsters/winged-kuriboh-sabatiel-lv10.webp",
+  "stardustdragonvictimsanctuary": "/catalog/magnificent-monsters/stardust-dragon-victim-sanctuary.webp",
+  "starjunksynchron": "/catalog/magnificent-monsters/starjunk-synchron.webp",
+  "synchroemergency": "/catalog/magnificent-monsters/synchro-emergency.webp",
+  "number39utopiaemissaryoflight": "/catalog/magnificent-monsters/number-39-utopia-emissary-of-light.webp",
+  "gagagamagiciangagagamagic": "/catalog/magnificent-monsters/gagaga-magician-gagaga-magic.webp",
+  "gagagagirlcellphonesubtraction": "/catalog/magnificent-monsters/gagaga-girl-cell-phone-subtraction.webp",
+  "oddeyespendulumdragonfourheavenlydragons": "/catalog/magnificent-monsters/odd-eyes-pendulum-dragon-four-heavenly-dragons.webp",
+  "astrographsorcererthestarfrostmagician": "/catalog/magnificent-monsters/astrograph-sorcerer-starfrost-magician.webp",
+  "decodetalkerintegration": "/catalog/magnificent-monsters/decode-talker-integration.webp",
+  "cybersecodemagician": "/catalog/magnificent-monsters/cyberse-code-magician.webp",
+  "cybersecontractwitch": "/catalog/magnificent-monsters/cyberse-contract-witch.webp",
+};
+
+function getCatalogImage(card) {
+  const normalizedName = card.name.toLowerCase().replace(/[^a-z0-9]/g, "");
+  return catalogImageOverrides[normalizedName] || card.image_url;
+}
+
 export default async function MagnificentMonstersPage() {
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const { data: cardSet, error: setError } = await supabase.from("card_sets").select("id").eq("slug", "magnificent-monsters").eq("status", "live").single();
@@ -20,7 +45,7 @@ export default async function MagnificentMonstersPage() {
       {setError || cardsError ? <p>Registry totals are temporarily unavailable.</p> : <div className="overall-progress-card"><div className="overall-progress-heading"><strong>{confirmed.toLocaleString()} / 3,600 confirmed</strong><span>{percentage}% documented</span></div><div className="overall-progress" role="progressbar" aria-valuemin="0" aria-valuemax="3600" aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></div></div>}
     </section>
     <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">The complete set</p><h2>Choose a card</h2></div><p>Each card contains 200 serial numbers.</p></div>
-      {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : <div className="card-grid">{cards?.map((card) => { const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0; const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1); return <Link key={card.id} href={`/card/${card.id}`} className="registry-card">{card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}<div className="registry-card-content"><h3>{card.name}</h3><p>{cardConfirmed} / 200 confirmed · {cardPercentage}%</p><div className="card-progress" aria-hidden="true"><span style={{ width: `${cardPercentage}%` }} /></div></div></Link>; })}</div>}
+      {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : <div className="card-grid">{cards?.map((card) => { const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0; const cardPercentage = ((cardConfirmed / 200) * 100).toFixed(1); const catalogImage = getCatalogImage(card); return <Link key={card.id} href={`/card/${card.id}`} className="registry-card" aria-label={`${card.name}: ${cardConfirmed} found out of 200 total cards`}>{catalogImage && <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />}<div className="registry-card-count" style={{ "--card-found": `${cardPercentage}%` }}><strong>{cardConfirmed} found</strong><span>200 total</span></div></Link>; })}</div>}
     </section>
   </main>;
 }
