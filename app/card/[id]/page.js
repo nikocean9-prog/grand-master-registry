@@ -5,6 +5,47 @@ import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
 import PublicHeader from "../../components/PublicHeader";
 
+const catalogImageOverrides = {
+  "Dark Magical Curtain": "/catalog/dark-magical-curtain-scan.jpg",
+};
+
+function GradingMarketPanel() {
+  return (
+    <aside className="grading-market-panel" aria-labelledby="grading-market-heading">
+      <h2 id="grading-market-heading">Grading &amp; market</h2>
+      <h3>Grading population</h3>
+      <div className="grading-columns">
+        <section>
+          <h4>PSA</h4>
+          <dl>
+            <div><dt>10</dt><dd>-</dd></div>
+            <div><dt>9</dt><dd>-</dd></div>
+          </dl>
+        </section>
+        <section>
+          <h4>Beckett</h4>
+          <dl>
+            <div><dt>Black Label 10</dt><dd>-</dd></div>
+            <div><dt>Pristine 10</dt><dd>-</dd></div>
+          </dl>
+        </section>
+      </div>
+      <dl className="grading-other">
+        <div><dt>Other graded</dt><dd>-</dd></div>
+      </dl>
+      <div className="market-section">
+        <h3>Verified market</h3>
+        <dl>
+          <div><dt>Latest raw sale</dt><dd>$-</dd></div>
+          <div><dt>Latest graded sale</dt><dd>$-</dd></div>
+          <div><dt>90-day verified sales</dt><dd>-</dd></div>
+        </dl>
+      </div>
+      <p className="market-empty-note">Verified grading and sales data will appear here when available.</p>
+    </aside>
+  );
+}
+
 async function getCard(id) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -99,31 +140,42 @@ export default async function CardPage({ params }) {
   const total = card.serial_total || serials.length;
   const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
   const isGlobal = card.card_sets?.serial_scheme === "global";
+  const catalogImage = catalogImageOverrides[card.name] || card.image_url;
+  const distribution = isGlobal ? "Worldwide" : "Americas + Europe-distributed";
 
   return (
-    <main>
+    <main className="card-page">
       <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">
-        {card.image_url && (
-          <img src={card.image_url} alt={card.name} className="card-detail-image" />
+        {catalogImage && (
+          <div className="card-detail-image-frame">
+            <img src={catalogImage} alt={card.name} className="card-detail-image" />
+          </div>
         )}
 
         <div className="card-detail-copy">
-          <p className="eyebrow">{card.card_sets?.name || "Serial Registry"}</p>
+          <p className="eyebrow">{card.card_sets?.tcg_slug === "yugioh" ? "Yu-Gi-Oh! · " : ""}{card.card_sets?.name || "Serial Registry"}</p>
           <h1>{card.name}</h1>
-          <h2>{totalConfirmed} / {total.toLocaleString()} confirmed</h2>
-          <p>{percentage}% of this card documented</p>
+          <p className="card-distribution">{total.toLocaleString()} printed · {distribution}</p>
+          <h2>Discovered {totalConfirmed} of {total.toLocaleString()}</h2>
           <div className="overall-progress" aria-hidden="true">
             <span style={{ width: `${percentage}%` }} />
           </div>
+          <p>{percentage}% found</p>
+          <div className="serial-legend" aria-label="Serial status legend">
+            <span><i className="legend-dot confirmed" /> Confirmed ({totalConfirmed})</span>
+            <span><i className="legend-dot unreported" /> Not reported ({Math.max(total - totalConfirmed, 0)})</span>
+          </div>
         </div>
+
+        <GradingMarketPanel />
       </div>
 
-      <div className="serial-legend" aria-label="Serial status legend">
-        <span><i className="legend-dot confirmed" /> Confirmed</span>
-        <span><i className="legend-dot unreported" /> Not reported</span>
+      <div className="serial-registry-heading">
+        <h2>Serial number registry</h2>
+        <strong>{totalConfirmed} / {total.toLocaleString()} confirmed</strong>
       </div>
 
       {isGlobal ? <section className="serial-section">
@@ -131,13 +183,13 @@ export default async function CardPage({ params }) {
           <h2>Worldwide</h2>
           <strong>{worldwideConfirmed} / {total.toLocaleString()} confirmed</strong>
         </div>
-        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: card.image_url }} />
+        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage }} />
       </section> : <><section className="serial-section">
         <div className="serial-section-heading">
           <h2>Americas</h2>
           <strong>{standardConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: card.image_url }} />
+        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} />
       </section>
 
       <section className="serial-section">
@@ -145,7 +197,7 @@ export default async function CardPage({ params }) {
           <h2>Europe-distributed</h2>
           <strong>{eConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: card.image_url }} />
+        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} />
       </section></>}
     </main>
   );
