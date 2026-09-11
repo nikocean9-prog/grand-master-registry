@@ -4,10 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
 import PublicHeader from "../../components/PublicHeader";
-
-const catalogImageOverrides = {
-  "Dark Magical Curtain": "/catalog/dark-magical-curtain-scan.jpg",
-};
+import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonstersCatalog";
 
 function GradingMarketPanel() {
   return (
@@ -140,7 +137,9 @@ export default async function CardPage({ params }) {
   const total = card.serial_total || serials.length;
   const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
   const isGlobal = card.card_sets?.serial_scheme === "global";
-  const catalogImage = catalogImageOverrides[card.name] || card.image_url;
+  const catalogImage = card.card_sets?.slug === "magnificent-monsters"
+    ? getMagnificentMonstersCatalogImage(card)
+    : card.image_url;
   const distribution = isGlobal ? "Worldwide" : "Americas + Europe-distributed";
 
   return (
@@ -157,7 +156,7 @@ export default async function CardPage({ params }) {
 
         <div className="card-detail-copy">
           <p className="eyebrow">{card.card_sets?.tcg_slug === "yugioh" ? "Yu-Gi-Oh! · " : ""}{card.card_sets?.name || "Serial Registry"}</p>
-          <h1>{card.name}</h1>
+          <h1 className="visually-hidden">{card.name}</h1>
           <p className="card-distribution">{total.toLocaleString()} printed · {distribution}</p>
           <h2>Discovered {totalConfirmed} of {total.toLocaleString()}</h2>
           <div className="overall-progress" aria-hidden="true">

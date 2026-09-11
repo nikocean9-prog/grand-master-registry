@@ -1075,11 +1075,7 @@ button {
   place-items: center;
   box-sizing: border-box;
   width: 100%;
-  border: 1px solid #d8ddd9;
-  border-radius: 12px;
-  background: #fff;
-  padding: 12px;
-  box-shadow: 0 4px 16px rgba(18, 64, 39, 0.08);
+  background: transparent;
 }
 
 .card-page .card-detail-image {
@@ -1090,8 +1086,8 @@ button {
   max-height: 520px;
   aspect-ratio: auto;
   object-fit: contain;
-  border-radius: 4px;
-  box-shadow: none;
+  border-radius: 0;
+  box-shadow: 0 10px 24px rgba(8, 25, 16, 0.28), 0 2px 6px rgba(8, 25, 16, 0.2);
 }
 
 .card-detail-copy {
@@ -1240,7 +1236,6 @@ button {
   .card-page .card-detail-image-frame {
     width: min(100%, 420px);
     margin: 0 auto;
-    padding: 10px;
   }
 
   .card-page .card-detail-image {
