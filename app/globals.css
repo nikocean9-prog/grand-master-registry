@@ -276,11 +276,7 @@ button {
   color: inherit;
   text-decoration: none;
   box-shadow: none;
-  transition: transform 160ms ease;
-}
-
-.registry-card:hover {
-  transform: translateY(-3px);
+  transition: none;
 }
 
 .registry-card-image {
@@ -291,13 +287,12 @@ button {
   border: 1px solid #2a312c;
   object-fit: contain;
   background: #111;
-  box-shadow: 0 7px 18px rgba(10, 17, 12, 0.28);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.34), 0 3px 8px rgba(0, 0, 0, 0.24);
+  transition: border-color 160ms ease;
 }
 
 .registry-card:hover .registry-card-image {
   border-color: #b69a55;
-  box-shadow: 0 11px 26px rgba(10, 17, 12, 0.36);
 }
 
 .registry-card-count {
@@ -313,7 +308,7 @@ button {
   border: 1px solid #2a312c;
   border-top-color: #b69a55;
   background: linear-gradient(135deg, #0c110e, #1a241d);
-  padding: 2px 7px 3px;
+  padding: 0 7px 2px;
   color: #e8eee9;
   font-size: 11px;
   line-height: 1;
@@ -338,11 +333,15 @@ button {
 }
 
 .registry-card-percent {
+  box-sizing: border-box;
+  display: inline-grid;
+  height: 15px;
+  align-items: center;
   border: 1px solid rgba(90, 215, 135, 0.6);
   border-radius: 2px;
   background: rgba(38, 135, 75, 0.18);
   color: #78e6a1;
-  padding: 1px 4px;
+  padding: 0 4px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -704,12 +703,12 @@ button {
     height: 18px;
     min-height: 18px;
     gap: 4px;
-    padding: 2px 5px 3px;
+    padding: 0 5px 2px;
     font-size: 10px;
   }
 
   .registry-card-count-value strong { font-size: 11px; }
-  .registry-card-percent { padding: 1px 3px; }
+  .registry-card-percent { height: 14px; padding: 0 3px; }
 
   .card-detail-header {
     display: block;
