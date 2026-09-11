@@ -36,7 +36,7 @@ export default function AdminOnlySetPage({ slug, name, releaseDate }) {
   if (loading) return <main><PublicHeader /><p>Loading sneak peek…</p></main>;
 
   return <main><PublicHeader /><Link href="/tcg/yugioh" className="back-link">← Yu-Gi-Oh! sets</Link>
-    <section className="registry-hero compact"><p className="eyebrow">Sneak peek · Coming soon</p><h1>{name}</h1><p className="hero-copy">Explore the prepared card list ahead of its {releaseDate} release. The registry will open for submissions when the set goes live.</p>
+    <section className="registry-set-intro"><h1 className="visually-hidden">Yu-Gi-Oh! {name}</h1><img src="/magnificent-maestros-logo.png" alt={`Yu-Gi-Oh! ${name}`} className="registry-set-logo" />
       <div className="overall-progress-card"><div className="overall-progress-heading"><strong>0 / 3,600 confirmed</strong><span>0.00% documented</span></div><div className="overall-progress" role="progressbar" aria-valuemin="0" aria-valuemax="3600" aria-valuenow="0"><span style={{ width: "0%" }} /></div></div>
     </section>
     <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">Sneak peek</p><h2>18 Grand Master Rares</h2></div><p>Each card will contain 200 serial numbers.</p></div>
