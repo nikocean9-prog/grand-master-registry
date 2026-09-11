@@ -13,7 +13,7 @@ const getRegionLabel = (region) => region === "GLOBAL"
   ? "Worldwide"
   : region === "E" ? "Europe-distributed" : "Americas";
 
-export default function SerialGrid({ serials, total = 100, cardSummary }) {
+export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh = false }) {
   const [selectedSerial, setSelectedSerial] = useState(null);
   const gridUrlRef = useRef(null);
 
@@ -64,7 +64,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary }) {
   }, []);
 
   return (
-    <div className="serial-grid">
+    <div className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}`}>
       {serials.map((serial) => {
         const serialLabel = formatSerial(serial, total);
         const key = `${serial.region}-${serial.serial_number}`;
@@ -81,7 +81,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary }) {
               onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onClick={(event) => openSerial(event, serial)}
             >
-              {serialLabel}
+              <span>{serialLabel}</span>
             </Link>
           );
         }
@@ -92,7 +92,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary }) {
             className="serial-box unreported"
             title="Not yet reported"
           >
-            {serialLabel}
+            <span>{serialLabel}</span>
           </div>
         );
       })}

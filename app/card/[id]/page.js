@@ -185,13 +185,13 @@ export default async function CardPage({ params }) {
           <h2>Worldwide</h2>
           <strong>{worldwideConfirmed} / {total.toLocaleString()} confirmed</strong>
         </div>
-        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage }} />
+        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section> : <><section className="serial-section">
         <div className="serial-section-heading">
           <h2>Americas</h2>
           <strong>{standardConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} />
+        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section>
 
       <section className="serial-section">
@@ -199,7 +199,7 @@ export default async function CardPage({ params }) {
           <h2>Europe-distributed</h2>
           <strong>{eConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} />
+        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section></>}
     </main>
   );
