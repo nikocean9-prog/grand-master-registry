@@ -63,7 +63,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                   <Link
                     key={card.id}
                     href={`/card/${card.id}`}
-                    className="registry-card"
+                    className="registry-card registry-card--mtg"
                     aria-label={`${card.name}: ${cardConfirmed} found out of ${card.serial_total.toLocaleString()} total cards, ${Math.round(Number(cardPercentage))} percent documented`}
                   >
                     {card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}
