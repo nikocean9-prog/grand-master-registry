@@ -11,7 +11,6 @@ function GradingMarketPanel() {
   return (
     <aside className="grading-market-panel" aria-labelledby="grading-market-heading">
       <h2 id="grading-market-heading">Grading &amp; market</h2>
-      <h3>Grading population</h3>
       <div className="grading-columns">
         <section>
           <h4>PSA</h4>
@@ -39,7 +38,6 @@ function GradingMarketPanel() {
           <div><dt>90-day verified sales</dt><dd>-</dd></div>
         </dl>
       </div>
-      <p className="market-empty-note">Verified grading and sales data will appear here when available.</p>
     </aside>
   );
 }
@@ -143,8 +141,6 @@ export default async function CardPage({ params }) {
     : card.card_sets?.slug === "magnificent-maestros"
       ? getMagnificentMaestrosCatalogImage(card)
       : card.image_url;
-  const distribution = isGlobal ? "Worldwide" : "Americas + Europe-distributed";
-
   return (
     <main className="card-page">
       <PublicHeader />
@@ -160,15 +156,14 @@ export default async function CardPage({ params }) {
         <div className="card-detail-copy">
           <p className="eyebrow">{card.card_sets?.tcg_slug === "yugioh" ? "Yu-Gi-Oh! · " : ""}{card.card_sets?.name || "Serial Registry"}</p>
           <h1 className="visually-hidden">{card.name}</h1>
-          <p className="card-distribution">{total.toLocaleString()} printed · {distribution}</p>
-          <h2>Discovered {totalConfirmed} of {total.toLocaleString()}</h2>
-          <div className="overall-progress" aria-hidden="true">
-            <span style={{ width: `${percentage}%` }} />
-          </div>
-          <p>{percentage}% found</p>
-          <div className="serial-legend" aria-label="Serial status legend">
-            <span><i className="legend-dot confirmed" /> Confirmed ({totalConfirmed})</span>
-            <span><i className="legend-dot unreported" /> Not reported ({Math.max(total - totalConfirmed, 0)})</span>
+          <div className="card-progress-summary">
+            <div className="yugioh-set-tracker-heading">
+              <strong>{totalConfirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong>
+              <span>{percentage}% documented</span>
+            </div>
+            <div className="yugioh-set-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={totalConfirmed}>
+              <span style={{ width: `${percentage}%` }} />
+            </div>
           </div>
         </div>
 
@@ -177,7 +172,6 @@ export default async function CardPage({ params }) {
 
       <div className="serial-registry-heading">
         <h2>Serial number registry</h2>
-        <strong>{totalConfirmed} / {total.toLocaleString()} confirmed</strong>
       </div>
 
       {isGlobal ? <section className="serial-section">
