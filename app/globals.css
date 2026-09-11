@@ -2404,19 +2404,21 @@ button {
 }
 
 /* Yu-Gi-Oh set wordmarks and trackers */
-.yugioh-set-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:48px 32px; }
+.yugioh-set-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:40px 32px; }
 .yugioh-set-tile { display:flex; min-width:0; flex-direction:column; color:inherit; text-decoration:none; }
-.yugioh-set-wordmark { position:relative; display:block; aspect-ratio:2.75 / 1; overflow:hidden; }
-.yugioh-set-wordmark img { position:absolute; top:-64%; left:0; display:block; width:100%; height:auto; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease; }
+.yugioh-set-wordmark { position:relative; display:grid; aspect-ratio:3 / 1; overflow:hidden; place-items:center; }
+.yugioh-set-wordmark img { display:block; width:100%; height:auto; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease; }
+.yugioh-set-wordmark--combined img { position:absolute; top:0; left:0; transform:translateY(-44%); }
+.yugioh-set-wordmark--wordmark img { max-height:100%; object-fit:contain; }
 .yugioh-set-tile:hover .yugioh-set-wordmark img,.yugioh-set-tile:focus-visible .yugioh-set-wordmark img { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); }
 .yugioh-set-tile:focus-visible { border-radius:4px; outline:3px solid #2c7448; outline-offset:6px; }
-.yugioh-set-tracker { display:block; margin-top:10px; }
+.yugioh-set-tracker { display:block; margin-top:6px; }
 .yugioh-set-tracker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; color:#273029; font-family:Arial,Helvetica,sans-serif; font-weight:900; letter-spacing:-.035em; text-transform:uppercase; }
 .yugioh-set-tracker-heading strong { color:#111713; font-size:17px; font-weight:900; }
 .yugioh-set-tracker-heading > span { font-size:12px; }
 .yugioh-set-progress { display:block; height:7px; overflow:hidden; border-radius:999px; background:#d2d7d3; }
 .yugioh-set-progress > span { display:block; min-height:100%; border-radius:inherit; background:linear-gradient(90deg,#1e6e3d,#4cbf72); }
-@media (max-width:700px) { .yugioh-set-grid { grid-template-columns:1fr; gap:36px; } .yugioh-set-wordmark { max-width:560px; width:100%; margin:0 auto; } }
+@media (max-width:700px) { .yugioh-set-grid { grid-template-columns:1fr; gap:30px; } .yugioh-set-wordmark { max-width:560px; width:100%; margin:0 auto; } }
 @media (max-width:430px) { .yugioh-set-tracker-heading strong { font-size:15px; } .yugioh-set-tracker-heading > span { font-size:10px; } .yugioh-set-progress { height:6px; } }
 
 /* Public homepage discovery experience */

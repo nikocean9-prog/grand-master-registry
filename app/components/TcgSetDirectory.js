@@ -11,8 +11,14 @@ const supabase = createClient(
 );
 
 const YUGIOH_SET_LOGOS = {
-  "magnificent-monsters": "/magnificent-monsters-logo.png",
-  "magnificent-maestros": "/magnificent-maestros-logo.png",
+  "magnificent-monsters": {
+    src: "/magnificent-monsters-logo.png",
+    treatment: "combined",
+  },
+  "magnificent-maestros": {
+    src: "/magnificent-maestros-wordmark.webp",
+    treatment: "wordmark",
+  },
 };
 
 function YugiohSetTile({ set, logo, confirmed = 0 }) {
@@ -20,7 +26,7 @@ function YugiohSetTile({ set, logo, confirmed = 0 }) {
   const percentage = total ? (confirmed / total) * 100 : 0;
   return (
     <Link href={set.href} className="yugioh-set-tile" aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
-      <span className="yugioh-set-wordmark"><img src={logo} alt={set.name} /></span>
+      <span className={`yugioh-set-wordmark yugioh-set-wordmark--${logo.treatment}`}><img src={logo.src} alt={set.name} /></span>
       <span className="yugioh-set-tracker">
         <span className="yugioh-set-tracker-heading"><strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong><span>{percentage.toFixed(2)}% documented</span></span>
         <span className="yugioh-set-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></span>
