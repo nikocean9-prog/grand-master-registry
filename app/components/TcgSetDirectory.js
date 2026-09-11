@@ -16,7 +16,7 @@ const YUGIOH_SET_LOGOS = {
     treatment: "wordmark",
   },
   "magnificent-maestros": {
-    src: "/magnificent-maestros-wordmark.webp",
+    src: "/magnificent-maestros-wordmark-v2.webp",
     treatment: "wordmark",
   },
 };
