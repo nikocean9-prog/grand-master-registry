@@ -5,6 +5,7 @@ import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
 import PublicHeader from "../../components/PublicHeader";
 import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonstersCatalog";
+import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestrosCatalog";
 
 function GradingMarketPanel() {
   return (
@@ -139,7 +140,9 @@ export default async function CardPage({ params }) {
   const isGlobal = card.card_sets?.serial_scheme === "global";
   const catalogImage = card.card_sets?.slug === "magnificent-monsters"
     ? getMagnificentMonstersCatalogImage(card)
-    : card.image_url;
+    : card.card_sets?.slug === "magnificent-maestros"
+      ? getMagnificentMaestrosCatalogImage(card)
+      : card.image_url;
   const distribution = isGlobal ? "Worldwide" : "Americas + Europe-distributed";
 
   return (

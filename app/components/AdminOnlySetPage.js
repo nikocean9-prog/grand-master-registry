@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import PublicHeader from "./PublicHeader";
+import { getMagnificentMaestrosCatalogImage } from "../lib/magnificentMaestrosCatalog";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -39,7 +40,7 @@ export default function AdminOnlySetPage({ slug, name, releaseDate }) {
       <div className="overall-progress-card"><div className="overall-progress-heading"><strong>0 / 3,600 confirmed</strong><span>0.00% documented</span></div><div className="overall-progress" role="progressbar" aria-valuemin="0" aria-valuemax="3600" aria-valuenow="0"><span style={{ width: "0%" }} /></div></div>
     </section>
     <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">Sneak peek</p><h2>18 Grand Master Rares</h2></div><p>Each card will contain 200 serial numbers.</p></div>
-      {loadError ? <p>The set preview could not be loaded.</p> : <div className="card-grid">{cards.map((card) => <article key={card.id} className="registry-card">{card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}<div className="registry-card-content"><h3>{card.name}</h3><p>0 / 200 confirmed · 0.0%</p><div className="card-progress" aria-hidden="true"><span style={{ width: "0%" }} /></div></div></article>)}</div>}
+      {loadError ? <p>The set preview could not be loaded.</p> : <div className="card-grid">{cards.map((card) => { const catalogImage = getMagnificentMaestrosCatalogImage(card); return <article key={card.id} className="registry-card">{catalogImage && <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />}<div className="registry-card-count" style={{ "--card-found": "0%" }}><span className="registry-card-count-value"><strong>0</strong> / 200 found</span><span className="registry-card-percent">0%</span></div></article>; })}</div>}
     </section>
   </main>;
 }
