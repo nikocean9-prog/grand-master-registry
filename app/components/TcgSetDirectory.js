@@ -12,11 +12,11 @@ const supabase = createClient(
 
 const YUGIOH_SET_LOGOS = {
   "magnificent-monsters": {
-    src: "/magnificent-monsters-wordmark.webp",
+    src: "/magnificent-monsters-wordmark-v4.png",
     treatment: "wordmark",
   },
   "magnificent-maestros": {
-    src: "/magnificent-maestros-wordmark-v2.webp",
+    src: "/magnificent-maestros-wordmark-v4.png",
     treatment: "wordmark",
   },
 };
