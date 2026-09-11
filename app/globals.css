@@ -293,12 +293,12 @@ button {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  min-height: 38px;
+  min-height: 21px;
   border-top: 1px solid #b69a55;
   background: linear-gradient(135deg, #0c110e, #1a241d);
-  padding: 8px 10px 10px;
+  padding: 3px 8px 4px;
   color: #e8eee9;
-  font-size: 13px;
+  font-size: 11px;
   line-height: 1;
   white-space: nowrap;
 }
@@ -309,7 +309,7 @@ button {
   bottom: 0;
   left: 0;
   width: var(--card-found);
-  height: 3px;
+  height: 2px;
   background: linear-gradient(90deg, #c7a85d, #39b66b);
   box-shadow: 0 0 8px rgba(57, 182, 107, 0.55);
   content: "";
@@ -317,7 +317,7 @@ button {
 
 .registry-card-count-value strong {
   color: #fff;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .registry-card-percent {
@@ -325,7 +325,7 @@ button {
   border-radius: 2px;
   background: rgba(38, 135, 75, 0.18);
   color: #78e6a1;
-  padding: 4px 6px;
+  padding: 2px 4px;
   font-weight: 800;
   letter-spacing: 0.02em;
 }
@@ -682,14 +682,14 @@ button {
   }
 
   .registry-card-count {
-    min-height: 36px;
-    gap: 6px;
-    padding: 7px 7px 9px;
-    font-size: 12px;
+    min-height: 20px;
+    gap: 4px;
+    padding: 3px 6px 4px;
+    font-size: 10px;
   }
 
-  .registry-card-count-value strong { font-size: 14px; }
-  .registry-card-percent { padding: 3px 5px; }
+  .registry-card-count-value strong { font-size: 11px; }
+  .registry-card-percent { padding: 2px 4px; }
 
   .card-detail-header {
     display: block;
