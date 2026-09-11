@@ -42,7 +42,7 @@ export default async function MagnificentMonstersPage() {
   const confirmed = cards?.reduce((total, card) => total + (card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0), 0) ?? 0;
   const percentage = ((confirmed / 3600) * 100).toFixed(2);
   return <main><PublicHeader /><Link href="/tcg/yugioh" className="back-link">← Yu-Gi-Oh! sets</Link>
-    <section className="registry-hero compact"><p className="eyebrow">Yu-Gi-Oh! · Grand Master Rares</p><h1>Magnificent Monsters</h1><p className="hero-copy">A community registry documenting serial-numbered Grand Master Rares pulled around the world.</p>
+    <section className="registry-set-intro"><h1 className="visually-hidden">Yu-Gi-Oh! Magnificent Monsters</h1><img src="/magnificent-monsters-logo.png" alt="Yu-Gi-Oh! Magnificent Monsters" className="registry-set-logo" />
       {setError || cardsError ? <p>Registry totals are temporarily unavailable.</p> : <div className="overall-progress-card"><div className="overall-progress-heading"><strong>{confirmed.toLocaleString()} / 3,600 confirmed</strong><span>{percentage}% documented</span></div><div className="overall-progress" role="progressbar" aria-valuemin="0" aria-valuemax="3600" aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></div></div>}
     </section>
     <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">The complete set</p><h2>Choose a card</h2></div><p>Each card contains 200 serial numbers.</p></div>
