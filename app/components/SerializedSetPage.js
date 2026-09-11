@@ -3,6 +3,7 @@ import Link from "next/link";
 import PublicHeader from "./PublicHeader";
 
 export default async function SerializedSetPage({ slug, tcgName, eyebrow, title, description, backHref }) {
+  const usesCompactCardTiles = tcgName === "Magic: The Gathering";
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
   const { data: cardSet, error: setError } = await supabase
     .from("card_sets")
@@ -57,6 +58,22 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             {cards?.map((card) => {
               const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
               const cardPercentage = card.serial_total ? ((cardConfirmed / card.serial_total) * 100).toFixed(1) : "0.0";
+              if (usesCompactCardTiles) {
+                return (
+                  <Link
+                    key={card.id}
+                    href={`/card/${card.id}`}
+                    className="registry-card"
+                    aria-label={`${card.name}: ${cardConfirmed} found out of ${card.serial_total.toLocaleString()} total cards, ${Math.round(Number(cardPercentage))} percent documented`}
+                  >
+                    {card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}
+                    <div className="registry-card-count" style={{ "--card-found": `${cardPercentage}%` }}>
+                      <span className="registry-card-count-value"><strong>{cardConfirmed}</strong> / {card.serial_total.toLocaleString()} found</span>
+                      <span className="registry-card-percent">{Math.round(Number(cardPercentage))}%</span>
+                    </div>
+                  </Link>
+                );
+              }
               return (
                 <Link key={card.id} href={`/card/${card.id}`} className="registry-card">
                   {card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}
