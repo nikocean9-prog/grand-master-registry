@@ -90,8 +90,8 @@ export default function SerialDetailModal({ serial, card, onClose }) {
         </header>
 
         {error ? <div className="serial-modal-loading"><strong>Serial unavailable</strong><p>{error}</p></div> : (
-          <div className="serial-modal-content">
-            <section className="serial-info-card">
+          <div className="serial-modal-content serial-modal-content-compact">
+            <section className="serial-info-card serial-info-card-compact">
               <h3>Registry details</h3>
               <dl>
                 <div><dt>Serial</dt><dd>{displayedSerial.label}</dd></div>
@@ -123,6 +123,54 @@ export default function SerialDetailModal({ serial, card, onClose }) {
             </section>
           </div>
         )}
+
+        <style jsx global>{`
+          .serial-modal-content-compact {
+            gap: 14px;
+          }
+
+          .serial-info-card-compact {
+            padding: 16px 18px;
+          }
+
+          .serial-info-card-compact h3 {
+            margin-bottom: 8px;
+            font-size: 19px;
+          }
+
+          .serial-info-card-compact dl {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            border-top: 1px solid #eee;
+          }
+
+          .serial-info-card-compact dl div {
+            display: block;
+            min-width: 0;
+            border-top: 0;
+            padding: 9px 0;
+          }
+
+          .serial-info-card-compact dl div:nth-child(odd) {
+            padding-right: 14px;
+          }
+
+          .serial-info-card-compact dl div:nth-child(even) {
+            border-left: 1px solid #eee;
+            padding-left: 14px;
+          }
+
+          .serial-info-card-compact dt {
+            margin-bottom: 2px;
+            font-size: 13px;
+          }
+
+          .serial-info-card-compact dd {
+            overflow-wrap: anywhere;
+            text-align: left;
+            font-size: 16px;
+          }
+        `}</style>
       </section>
     </div>
   );
