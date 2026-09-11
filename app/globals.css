@@ -305,6 +305,20 @@ button {
   border-color: #b69a55;
 }
 
+/* Magic cards use the physical 63 × 88 mm card ratio. Keeping that ratio here
+   prevents catalogue images from sitting inside the black Yu-Gi-Oh frame. */
+.registry-card--mtg .registry-card-image {
+  aspect-ratio: 63 / 88;
+  border: 0;
+  border-radius: 2.75%;
+  background: transparent;
+  object-fit: cover;
+}
+
+.registry-card--mtg:hover .registry-card-image {
+  border-color: transparent;
+}
+
 .registry-card-count {
   box-sizing: border-box;
   position: relative;
