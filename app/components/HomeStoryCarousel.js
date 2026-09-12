@@ -58,7 +58,17 @@ export default function HomeStoryCarousel({ stories }) {
           <Link href={activeStory.href} className="home-story-button">{activeStory.actionLabel || "Learn more"}</Link>
         </div>
         <div className={`home-story-image ${activeStory.imageClass || ""}`}>
-          {activeStory.image && <img src={activeStory.image} alt={activeStory.imageAlt || activeStory.title} />}
+          {activeStory.image && (
+            <img
+              src={activeStory.image}
+              alt={activeStory.imageAlt || activeStory.title}
+              style={activeStory.imageDisplay === "contain" ? {
+                boxSizing: "border-box",
+                objectFit: "contain",
+                padding: "24px",
+              } : undefined}
+            />
+          )}
         </div>
         {stories.length > 1 && (
           <button className="home-story-arrow next" type="button" onClick={() => move(1)} aria-label="Next story">

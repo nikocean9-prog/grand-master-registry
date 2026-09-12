@@ -6,6 +6,7 @@ import CardPhoto from "./components/CardPhoto";
 import HomeStoryCarousel from "./components/HomeStoryCarousel";
 import { getPublicPulls } from "./lib/publicPulls";
 import { tcgs } from "./lib/catalog";
+import { getMagnificentMonstersCatalogImage } from "./lib/magnificentMonstersCatalog";
 
 export const dynamic = "force-dynamic";
 
@@ -66,9 +67,12 @@ export default async function Home() {
       kicker: "Card Wiki",
       title: "Dark Magician",
       summary: "Yugi's signature monster became one of the defining cards of the original animated series.",
-      image: pulls.find((pull) => pull.cardName.startsWith("Dark Magician"))?.imageUrl || darkMagician?.image_url,
+      image: darkMagician
+        ? getMagnificentMonstersCatalogImage(darkMagician)
+        : "/catalog/magnificent-monsters/dark-magician-pharaohs-servant.webp",
       imageAlt: darkMagician?.name || "Dark Magician",
       imageClass: "yugioh-feature-background",
+      imageDisplay: "contain",
       href: "/wiki/dark-magician",
       actionLabel: "Read the article",
     },
@@ -93,7 +97,10 @@ export default async function Home() {
       kicker: "Upcoming Release",
       title: "Magnificent Maestros",
       summary: "Preview the next Grand Master Rare registry ahead of the set's November 2026 release.",
-      imageClass: "maestros-feature-background",
+      image: "/magnificent-maestros-wordmark-v4.png",
+      imageAlt: "Magnificent Maestros",
+      imageClass: "yugioh-feature-background",
+      imageDisplay: "contain",
       href: "/sets/magnificent-maestros",
       actionLabel: "Preview the set",
     },
