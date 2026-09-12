@@ -17,6 +17,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
   const [selectedSerial, setSelectedSerial] = useState(null);
   const [cardTransition, setCardTransition] = useState(null);
   const [transitionPendingId, setTransitionPendingId] = useState(null);
+  const gridRef = useRef(null);
   const gridUrlRef = useRef(null);
   const transitionTimerRef = useRef(null);
   const transitionFrameRef = useRef(null);
@@ -39,6 +40,31 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       if (transitionFrameRef.current) window.cancelAnimationFrame(transitionFrameRef.current);
     };
   }, [serials, total]);
+
+  useEffect(() => {
+    if (!cardSummary?.enableCardTransition) return;
+
+    const confirmedCards = gridRef.current?.querySelectorAll(".serial-box.confirmed[data-serial-id]");
+    if (!confirmedCards?.length) return;
+
+    if (!("IntersectionObserver" in window)) {
+      Array.from(confirmedCards).slice(0, 12).forEach((element) => {
+        preloadSerialDetails(element.dataset.serialId).catch(() => {});
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        preloadSerialDetails(entry.target.dataset.serialId).catch(() => {});
+        observer.unobserve(entry.target);
+      });
+    }, { rootMargin: "900px 0px" });
+
+    confirmedCards.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, [serials, cardSummary?.enableCardTransition]);
 
   const openSerial = (event, serial) => {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
@@ -127,7 +153,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
   }, []);
 
   return (
-    <div className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}${cardSummary?.enableCardTransition ? " magnificent-monsters-card-transition" : ""}`}>
+    <div ref={gridRef} className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}${cardSummary?.enableCardTransition ? " magnificent-monsters-card-transition" : ""}`}>
       {serials.map((serial) => {
         const serialLabel = formatSerial(serial, total);
         const key = `${serial.region}-${serial.serial_number}`;
@@ -143,6 +169,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
               onFocus={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onClick={(event) => openSerial(event, serial)}
+              data-serial-id={serial.id}
               data-transition-source={cardTransition?.id === serial.id || transitionPendingId === serial.id ? "true" : undefined}
             >
               <span>{serialLabel}</span>

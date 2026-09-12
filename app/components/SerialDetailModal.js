@@ -3,6 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 const serialDetailRequests = new Map();
+const serialEvidenceImages = new Map();
+
+function preloadEvidenceImage(url) {
+  if (!url || typeof window === "undefined" || serialEvidenceImages.has(url)) return;
+
+  const evidenceImage = new Image();
+  evidenceImage.decoding = "async";
+  evidenceImage.src = url;
+  serialEvidenceImages.set(url, evidenceImage);
+}
 
 export function preloadSerialDetails(serialId) {
   if (!serialId) return Promise.resolve(null);
@@ -12,11 +22,7 @@ export function preloadSerialDetails(serialId) {
     .then(async (response) => {
       if (!response.ok) throw new Error("This confirmed serial could not be loaded.");
       const data = await response.json();
-      if (data.evidence_url && typeof window !== "undefined") {
-        const evidenceImage = new Image();
-        evidenceImage.decoding = "async";
-        evidenceImage.src = data.evidence_url;
-      }
+      preloadEvidenceImage(data.evidence_url);
       return data;
     })
     .catch((error) => {
