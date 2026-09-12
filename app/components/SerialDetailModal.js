@@ -6,12 +6,34 @@ const serialDetailRequests = new Map();
 const serialEvidenceImages = new Map();
 
 function preloadEvidenceImage(url) {
-  if (!url || typeof window === "undefined" || serialEvidenceImages.has(url)) return;
+  if (!url || typeof window === "undefined") return Promise.resolve();
+  if (serialEvidenceImages.has(url)) return serialEvidenceImages.get(url).ready;
 
   const evidenceImage = new Image();
   evidenceImage.decoding = "async";
+  let settled = false;
+  let timeoutId;
+  let resolveReady;
+  const ready = new Promise((resolve) => { resolveReady = resolve; });
+  const finish = () => {
+    if (settled) return;
+    settled = true;
+    window.clearTimeout(timeoutId);
+    resolveReady();
+  };
+
+  evidenceImage.onload = () => {
+    if (typeof evidenceImage.decode === "function") {
+      evidenceImage.decode().catch(() => {}).finally(finish);
+      return;
+    }
+    finish();
+  };
+  evidenceImage.onerror = finish;
   evidenceImage.src = url;
-  serialEvidenceImages.set(url, evidenceImage);
+  timeoutId = window.setTimeout(finish, 3000);
+  serialEvidenceImages.set(url, { image: evidenceImage, ready });
+  return ready;
 }
 
 export function preloadSerialDetails(serialId) {
@@ -22,7 +44,7 @@ export function preloadSerialDetails(serialId) {
     .then(async (response) => {
       if (!response.ok) throw new Error("This confirmed serial could not be loaded.");
       const data = await response.json();
-      preloadEvidenceImage(data.evidence_url);
+      await preloadEvidenceImage(data.evidence_url);
       return data;
     })
     .catch((error) => {

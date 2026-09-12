@@ -21,6 +21,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
   const gridUrlRef = useRef(null);
   const transitionTimerRef = useRef(null);
   const transitionFrameRef = useRef(null);
+  const transitionRunRef = useRef(0);
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -36,6 +37,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     window.addEventListener("popstate", handlePopState);
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      transitionRunRef.current += 1;
       if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
       if (transitionFrameRef.current) window.cancelAnimationFrame(transitionFrameRef.current);
     };
@@ -90,6 +92,8 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     }
 
     const sourceRect = event.currentTarget.getBoundingClientRect();
+    const transitionRun = ++transitionRunRef.current;
+    const evidenceReady = preloadSerialDetails(serial.id).catch(() => null);
     setSelectedSerial(nextSerial);
     setTransitionPendingId(serial.id);
 
@@ -123,13 +127,17 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       transitionFrameRef.current = null;
 
       transitionTimerRef.current = window.setTimeout(() => {
-        setCardTransition(null);
         transitionTimerRef.current = null;
+        evidenceReady.finally(() => {
+          if (transitionRunRef.current !== transitionRun) return;
+          setCardTransition(null);
+        });
       }, 720);
     });
   };
 
   const closeSerial = useCallback(() => {
+    transitionRunRef.current += 1;
     if (transitionTimerRef.current) {
       window.clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = null;
