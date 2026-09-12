@@ -63,7 +63,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     const sourceRect = event.currentTarget.getBoundingClientRect();
     const finalWidth = Math.min(window.innerWidth * 0.52, 238);
     const scale = finalWidth / sourceRect.width;
-    const endX = (window.innerWidth - sourceRect.width) / 2;
+    const endX = (window.innerWidth - finalWidth) / 2;
     const endY = Math.max(72, Math.min(window.innerHeight * 0.2, 180));
 
     setSelectedSerial(nextSerial);
@@ -75,19 +75,15 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       height: sourceRect.height,
       startX: sourceRect.left,
       startY: sourceRect.top,
-      midX: sourceRect.left + ((endX - sourceRect.left) * 0.62),
-      midY: sourceRect.top + ((endY - sourceRect.top) * 0.62),
       endX,
       endY,
-      midScale: 1 + ((scale - 1) * 0.58),
-      lateScale: 1 + ((scale - 1) * 0.88),
       scale,
     });
 
     transitionTimerRef.current = window.setTimeout(() => {
       setCardTransition(null);
       transitionTimerRef.current = null;
-    }, 620);
+    }, 720);
   };
 
   const closeSerial = useCallback(() => {
@@ -151,18 +147,16 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
             "--serial-flight-height": `${cardTransition.height}px`,
             "--serial-flight-start-x": `${cardTransition.startX}px`,
             "--serial-flight-start-y": `${cardTransition.startY}px`,
-            "--serial-flight-mid-x": `${cardTransition.midX}px`,
-            "--serial-flight-mid-y": `${cardTransition.midY}px`,
             "--serial-flight-end-x": `${cardTransition.endX}px`,
             "--serial-flight-end-y": `${cardTransition.endY}px`,
-            "--serial-flight-mid-scale": cardTransition.midScale,
-            "--serial-flight-late-scale": cardTransition.lateScale,
             "--serial-flight-scale": cardTransition.scale,
           }}
         >
-          <div className="serial-card-flight-face serial-card-flight-back"><span>{cardTransition.label}</span></div>
-          <div className="serial-card-flight-face serial-card-flight-front">
-            {cardTransition.imageUrl && <img src={cardTransition.imageUrl} alt="" />}
+          <div className="serial-card-flight-rotor">
+            <div className="serial-card-flight-face serial-card-flight-back"><span>{cardTransition.label}</span></div>
+            <div className="serial-card-flight-face serial-card-flight-front">
+              {cardTransition.imageUrl && <img src={cardTransition.imageUrl} alt="" />}
+            </div>
           </div>
         </div>
       )}
