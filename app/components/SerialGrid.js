@@ -16,8 +16,10 @@ const getRegionLabel = (region) => region === "GLOBAL"
 export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh = false }) {
   const [selectedSerial, setSelectedSerial] = useState(null);
   const [cardTransition, setCardTransition] = useState(null);
+  const [transitionPendingId, setTransitionPendingId] = useState(null);
   const gridUrlRef = useRef(null);
   const transitionTimerRef = useRef(null);
+  const transitionFrameRef = useRef(null);
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -34,6 +36,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     return () => {
       window.removeEventListener("popstate", handlePopState);
       if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
+      if (transitionFrameRef.current) window.cancelAnimationFrame(transitionFrameRef.current);
     };
   }, [serials, total]);
 
@@ -61,29 +64,43 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     }
 
     const sourceRect = event.currentTarget.getBoundingClientRect();
-    const finalWidth = Math.min(window.innerWidth * 0.52, 238);
-    const scale = finalWidth / sourceRect.width;
-    const endX = (window.innerWidth - finalWidth) / 2;
-    const endY = Math.max(72, Math.min(window.innerHeight * 0.2, 180));
-
     setSelectedSerial(nextSerial);
-    setCardTransition({
-      id: serial.id,
-      label: nextSerial.label,
-      imageUrl: cardSummary.image_url,
-      width: sourceRect.width,
-      height: sourceRect.height,
-      startX: sourceRect.left,
-      startY: sourceRect.top,
-      endX,
-      endY,
-      scale,
-    });
+    setTransitionPendingId(serial.id);
 
-    transitionTimerRef.current = window.setTimeout(() => {
-      setCardTransition(null);
-      transitionTimerRef.current = null;
-    }, 720);
+    transitionFrameRef.current = window.requestAnimationFrame(() => {
+      const photoPanel = document.querySelector(".serial-modal .evidence-panel");
+      const photoRect = photoPanel?.getBoundingClientRect();
+      const panelInset = photoRect ? 8 : 0;
+      const availableWidth = photoRect ? Math.max(1, photoRect.width - (panelInset * 2)) : window.innerWidth;
+      const finalWidth = Math.min(window.innerWidth * 0.52, 238, availableWidth);
+      const scale = finalWidth / sourceRect.width;
+      const endX = photoRect
+        ? photoRect.left + ((photoRect.width - finalWidth) / 2)
+        : (window.innerWidth - finalWidth) / 2;
+      const endY = photoRect
+        ? photoRect.top + panelInset
+        : Math.max(72, Math.min(window.innerHeight * 0.2, 180));
+
+      setCardTransition({
+        id: serial.id,
+        label: nextSerial.label,
+        imageUrl: cardSummary.image_url,
+        width: sourceRect.width,
+        height: sourceRect.height,
+        startX: sourceRect.left,
+        startY: sourceRect.top,
+        endX,
+        endY,
+        scale,
+      });
+      setTransitionPendingId(null);
+      transitionFrameRef.current = null;
+
+      transitionTimerRef.current = window.setTimeout(() => {
+        setCardTransition(null);
+        transitionTimerRef.current = null;
+      }, 720);
+    });
   };
 
   const closeSerial = useCallback(() => {
@@ -91,6 +108,11 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       window.clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = null;
     }
+    if (transitionFrameRef.current) {
+      window.cancelAnimationFrame(transitionFrameRef.current);
+      transitionFrameRef.current = null;
+    }
+    setTransitionPendingId(null);
     setCardTransition(null);
 
     if (window.history.state?.serialModalId) {
@@ -121,7 +143,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
               onFocus={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onClick={(event) => openSerial(event, serial)}
-              data-transition-source={cardTransition?.id === serial.id ? "true" : undefined}
+              data-transition-source={cardTransition?.id === serial.id || transitionPendingId === serial.id ? "true" : undefined}
             >
               <span>{serialLabel}</span>
             </Link>
@@ -160,7 +182,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
           </div>
         </div>
       )}
-      <SerialDetailModal serial={selectedSerial} card={cardSummary} onClose={closeSerial} isOpening={Boolean(cardTransition)} />
+      <SerialDetailModal serial={selectedSerial} card={cardSummary} onClose={closeSerial} isOpening={Boolean(cardTransition || transitionPendingId)} />
     </div>
   );
 }
