@@ -105,7 +105,8 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       const panelInset = photoRect ? 8 : 0;
       const availableWidth = photoRect ? Math.max(1, photoRect.width - (panelInset * 2)) : window.innerWidth;
       const finalWidth = Math.min(window.innerWidth * 0.52, 238, availableWidth);
-      const scale = finalWidth / sourceRect.width;
+      const finalHeight = finalWidth * (sourceRect.height / sourceRect.width);
+      const startScale = sourceRect.width / finalWidth;
       const endX = photoRect
         ? photoRect.left + ((photoRect.width - finalWidth) / 2)
         : (window.innerWidth - finalWidth) / 2;
@@ -117,13 +118,13 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
         id: serial.id,
         label: nextSerial.label,
         imageUrl: cardSummary.image_url,
-        width: sourceRect.width,
-        height: sourceRect.height,
+        width: finalWidth,
+        height: finalHeight,
         startX: sourceRect.left,
         startY: sourceRect.top,
         endX,
         endY,
-        scale,
+        startScale,
       });
       setTransitionPendingId(null);
       transitionFrameRef.current = null;
@@ -206,9 +207,9 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
             "--serial-flight-height": `${cardTransition.height}px`,
             "--serial-flight-start-x": `${cardTransition.startX}px`,
             "--serial-flight-start-y": `${cardTransition.startY}px`,
+            "--serial-flight-start-scale": cardTransition.startScale,
             "--serial-flight-end-x": `${cardTransition.endX}px`,
             "--serial-flight-end-y": `${cardTransition.endY}px`,
-            "--serial-flight-scale": cardTransition.scale,
           }}
         >
           <div className="serial-card-flight-rotor">
