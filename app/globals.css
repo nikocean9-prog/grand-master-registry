@@ -577,10 +577,10 @@ button {
 
 @keyframes serial-card-fly-forward {
   from {
-    transform: translate3d(var(--serial-flight-start-x), var(--serial-flight-start-y), 0) scale(1);
+    transform: translate3d(var(--serial-flight-start-x), var(--serial-flight-start-y), 0) scale(var(--serial-flight-start-scale));
   }
   to {
-    transform: translate3d(var(--serial-flight-end-x), var(--serial-flight-end-y), 0) scale(var(--serial-flight-scale));
+    transform: translate3d(var(--serial-flight-end-x), var(--serial-flight-end-y), 0) scale(1);
   }
 }
 
