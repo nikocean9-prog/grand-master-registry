@@ -85,13 +85,12 @@ export default function SerialDetailModal({ serial, card, onClose }) {
           <div>
             <span className="confirmed-badge">Confirmed</span>
             <h2 id="serial-modal-title">{displayedCard?.name || "Confirmed serial"}</h2>
-            <p>Serial {displayedSerial.label}</p>
           </div>
         </header>
 
         {error ? <div className="serial-modal-loading"><strong>Serial unavailable</strong><p>{error}</p></div> : (
           <div className="serial-modal-content serial-modal-content-compact">
-            <section className="serial-info-card serial-info-card-compact">
+            <section className={`serial-info-card serial-info-card-compact ${details?.submission?.country ? "has-country" : "no-country"}`}>
               <h3>Registry details</h3>
               <dl>
                 <div><dt>Serial</dt><dd>{displayedSerial.label}</dd></div>
@@ -126,16 +125,21 @@ export default function SerialDetailModal({ serial, card, onClose }) {
 
         <style jsx global>{`
           .serial-modal-content-compact {
-            gap: 14px;
+            gap: 8px;
+          }
+
+          .serial-modal .serial-modal-heading {
+            min-height: 72px;
+            padding-bottom: 12px;
           }
 
           .serial-info-card-compact {
-            padding: 16px 18px;
+            padding: 12px 14px;
           }
 
           .serial-info-card-compact h3 {
-            margin-bottom: 8px;
-            font-size: 19px;
+            margin-bottom: 6px;
+            font-size: 18px;
           }
 
           .serial-info-card-compact dl {
@@ -148,7 +152,7 @@ export default function SerialDetailModal({ serial, card, onClose }) {
             display: block;
             min-width: 0;
             border-top: 0;
-            padding: 9px 0;
+            padding: 6px 0;
           }
 
           .serial-info-card-compact dl div:nth-child(odd) {
@@ -168,7 +172,30 @@ export default function SerialDetailModal({ serial, card, onClose }) {
           .serial-info-card-compact dd {
             overflow-wrap: anywhere;
             text-align: left;
-            font-size: 16px;
+            font-size: 15px;
+          }
+
+          .serial-info-card-compact.no-country dl {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+
+          .serial-info-card-compact.no-country dl div {
+            border-left: 1px solid #eee;
+            padding-right: 8px;
+            padding-left: 8px;
+          }
+
+          .serial-info-card-compact.no-country dl div:first-child {
+            border-left: 0;
+            padding-left: 0;
+          }
+
+          .serial-info-card-compact.no-country dl div:last-child {
+            padding-right: 0;
+          }
+
+          .serial-modal-content-compact .evidence-panel {
+            padding: 8px;
           }
         `}</style>
       </section>
