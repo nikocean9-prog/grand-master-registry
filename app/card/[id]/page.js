@@ -136,6 +136,7 @@ export default async function CardPage({ params }) {
   const total = card.serial_total || serials.length;
   const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
   const isGlobal = card.card_sets?.serial_scheme === "global";
+  const enableCardTransition = card.card_sets?.slug === "magnificent-monsters";
   const catalogImage = card.card_sets?.slug === "magnificent-monsters"
     ? getMagnificentMonstersCatalogImage(card)
     : card.card_sets?.slug === "magnificent-maestros"
@@ -179,13 +180,13 @@ export default async function CardPage({ params }) {
           <h2>Worldwide</h2>
           <strong>{worldwideConfirmed} / {total.toLocaleString()} confirmed</strong>
         </div>
-        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section> : <><section className="serial-section">
         <div className="serial-section-heading">
           <h2>Americas</h2>
           <strong>{standardConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section>
 
       <section className="serial-section">
@@ -193,7 +194,7 @@ export default async function CardPage({ params }) {
           <h2>Europe-distributed</h2>
           <strong>{eConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
       </section></>}
     </main>
   );

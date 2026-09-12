@@ -15,7 +15,9 @@ const getRegionLabel = (region) => region === "GLOBAL"
 
 export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh = false }) {
   const [selectedSerial, setSelectedSerial] = useState(null);
+  const [cardTransition, setCardTransition] = useState(null);
   const gridUrlRef = useRef(null);
+  const transitionTimerRef = useRef(null);
 
   useEffect(() => {
     const handlePopState = (event) => {
@@ -29,7 +31,10 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     };
 
     window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+      if (transitionTimerRef.current) window.clearTimeout(transitionTimerRef.current);
+    };
   }, [serials, total]);
 
   const openSerial = (event, serial) => {
@@ -44,14 +49,54 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       "",
       `/serial/${serial.id}`
     );
-    setSelectedSerial({
+    const nextSerial = {
       id: serial.id,
       label: formatSerial(serial, total),
       region_label: getRegionLabel(serial.region),
+    };
+
+    if (!cardSummary?.enableCardTransition || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setSelectedSerial(nextSerial);
+      return;
+    }
+
+    const sourceRect = event.currentTarget.getBoundingClientRect();
+    const finalWidth = Math.min(window.innerWidth * 0.52, 238);
+    const scale = finalWidth / sourceRect.width;
+    const endX = (window.innerWidth - sourceRect.width) / 2;
+    const endY = Math.max(72, Math.min(window.innerHeight * 0.2, 180));
+
+    setSelectedSerial(nextSerial);
+    setCardTransition({
+      id: serial.id,
+      label: nextSerial.label,
+      imageUrl: cardSummary.image_url,
+      width: sourceRect.width,
+      height: sourceRect.height,
+      startX: sourceRect.left,
+      startY: sourceRect.top,
+      midX: sourceRect.left + ((endX - sourceRect.left) * 0.62),
+      midY: sourceRect.top + ((endY - sourceRect.top) * 0.62),
+      endX,
+      endY,
+      midScale: 1 + ((scale - 1) * 0.58),
+      lateScale: 1 + ((scale - 1) * 0.88),
+      scale,
     });
+
+    transitionTimerRef.current = window.setTimeout(() => {
+      setCardTransition(null);
+      transitionTimerRef.current = null;
+    }, 620);
   };
 
   const closeSerial = useCallback(() => {
+    if (transitionTimerRef.current) {
+      window.clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current = null;
+    }
+    setCardTransition(null);
+
     if (window.history.state?.serialModalId) {
       window.history.back();
       return;
@@ -64,7 +109,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
   }, []);
 
   return (
-    <div className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}`}>
+    <div className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}${cardSummary?.enableCardTransition ? " magnificent-monsters-card-transition" : ""}`}>
       {serials.map((serial) => {
         const serialLabel = formatSerial(serial, total);
         const key = `${serial.region}-${serial.serial_number}`;
@@ -80,6 +125,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
               onFocus={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
               onClick={(event) => openSerial(event, serial)}
+              data-transition-source={cardTransition?.id === serial.id ? "true" : undefined}
             >
               <span>{serialLabel}</span>
             </Link>
@@ -96,7 +142,31 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
           </div>
         );
       })}
-      <SerialDetailModal serial={selectedSerial} card={cardSummary} onClose={closeSerial} />
+      {cardTransition && (
+        <div
+          className="serial-card-flight"
+          aria-hidden="true"
+          style={{
+            "--serial-flight-width": `${cardTransition.width}px`,
+            "--serial-flight-height": `${cardTransition.height}px`,
+            "--serial-flight-start-x": `${cardTransition.startX}px`,
+            "--serial-flight-start-y": `${cardTransition.startY}px`,
+            "--serial-flight-mid-x": `${cardTransition.midX}px`,
+            "--serial-flight-mid-y": `${cardTransition.midY}px`,
+            "--serial-flight-end-x": `${cardTransition.endX}px`,
+            "--serial-flight-end-y": `${cardTransition.endY}px`,
+            "--serial-flight-mid-scale": cardTransition.midScale,
+            "--serial-flight-late-scale": cardTransition.lateScale,
+            "--serial-flight-scale": cardTransition.scale,
+          }}
+        >
+          <div className="serial-card-flight-face serial-card-flight-back"><span>{cardTransition.label}</span></div>
+          <div className="serial-card-flight-face serial-card-flight-front">
+            {cardTransition.imageUrl && <img src={cardTransition.imageUrl} alt="" />}
+          </div>
+        </div>
+      )}
+      <SerialDetailModal serial={selectedSerial} card={cardSummary} onClose={closeSerial} isOpening={Boolean(cardTransition)} />
     </div>
   );
 }

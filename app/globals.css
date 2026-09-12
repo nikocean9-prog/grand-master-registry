@@ -501,6 +501,84 @@ button {
   outline-offset: 2px;
 }
 
+.magnificent-monsters-card-transition .serial-box,
+.magnificent-monsters-card-transition .serial-box.confirmed {
+  border: 1px solid #c5d5dc;
+  border-radius: 0;
+  box-shadow: 3px 4px 3px rgba(10,20,15,.105);
+}
+
+.magnificent-monsters-card-transition .serial-box.confirmed:hover,
+.magnificent-monsters-card-transition .serial-box.confirmed:focus-visible {
+  border-color: #aebfc6;
+}
+
+.magnificent-monsters-card-transition .serial-box[data-transition-source="true"] {
+  visibility: hidden;
+}
+
+.serial-card-flight {
+  position: fixed;
+  z-index: 1100;
+  top: 0;
+  left: 0;
+  width: var(--serial-flight-width);
+  height: var(--serial-flight-height);
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transform-origin: center;
+  filter: saturate(1.1) contrast(1.06) drop-shadow(3px 4px 2.5px rgba(10,20,15,.145));
+  animation: serial-card-fly-forward 620ms cubic-bezier(.2,.78,.18,1) forwards;
+}
+
+.serial-card-flight-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 0;
+  background: #111;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(1px);
+}
+
+.serial-card-flight-back {
+  display: grid;
+  place-items: center;
+  background: #111 url("/graphics/card-backs/yugioh-card-back-hq.webp") center / cover no-repeat;
+  color: #ffd45c;
+  font-size: clamp(12px, 1.35vw, 16px);
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 1px #171108, 0 2px 4px rgba(0,0,0,.9);
+}
+
+.serial-card-flight-front {
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+.serial-card-flight-front img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@keyframes serial-card-fly-forward {
+  0% {
+    transform: translate3d(var(--serial-flight-start-x), var(--serial-flight-start-y), 0) rotateY(0deg) rotateZ(0deg) scale(1);
+  }
+  42% {
+    transform: translate3d(var(--serial-flight-mid-x), var(--serial-flight-mid-y), 0) rotateY(78deg) rotateZ(-5deg) scale(var(--serial-flight-mid-scale));
+  }
+  72% {
+    transform: translate3d(var(--serial-flight-end-x), var(--serial-flight-end-y), 0) rotateY(155deg) rotateZ(2deg) scale(var(--serial-flight-late-scale));
+  }
+  100% {
+    transform: translate3d(var(--serial-flight-end-x), var(--serial-flight-end-y), 0) rotateY(180deg) rotateZ(0deg) scale(var(--serial-flight-scale));
+  }
+}
+
 @media (max-width: 800px) {
   .card-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1746,6 +1824,36 @@ button {
   background: #f5f5f5;
   padding: 28px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+
+.serial-modal-backdrop.has-card-transition {
+  animation: serial-modal-backdrop-in 180ms ease-out both;
+}
+
+.serial-modal-backdrop.has-card-transition .serial-modal {
+  animation: serial-modal-enter 260ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.serial-modal-backdrop.is-card-opening .serial-modal {
+  visibility: hidden;
+  opacity: 0;
+  animation: none;
+}
+
+@keyframes serial-modal-backdrop-in {
+  from { background-color: rgba(5,20,13,0); }
+  to { background-color: rgba(5,20,13,.72); }
+}
+
+@keyframes serial-modal-enter {
+  from { opacity: 0; transform: translateY(18px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .serial-card-flight { display: none; }
+  .serial-modal-backdrop,
+  .serial-modal { animation: none; }
 }
 
 .serial-modal-close {
