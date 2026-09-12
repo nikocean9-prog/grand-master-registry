@@ -12,6 +12,7 @@ const supabase = createClient(
 
 export default function TcgCatalog({ tcgs }) {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [confirmedByTcg, setConfirmedByTcg] = useState({});
 
   useEffect(() => {
     getCurrentAdmin(supabase).then((admin) => setIsAdmin(Boolean(admin)));
@@ -20,21 +21,54 @@ export default function TcgCatalog({ tcgs }) {
   const liveTcgs = tcgs.filter((tcg) => tcg.sets.some((set) => set.status === "live"));
   const futureTcgs = tcgs.filter((tcg) => !tcg.sets.some((set) => set.status === "live"));
 
+  useEffect(() => {
+    async function loadConfirmedTotals() {
+      const totals = await Promise.all(liveTcgs.map(async (tcg) => {
+        const liveSetSlugs = tcg.sets
+          .filter((set) => set.status === "live" && set.slug)
+          .map((set) => set.slug);
+        if (!liveSetSlugs.length) return [tcg.slug, 0];
+
+        const { count, error } = await supabase
+          .from("serials")
+          .select("id, cards!inner(card_sets!inner(slug))", { count: "exact", head: true })
+          .eq("status", "confirmed")
+          .in("cards.card_sets.slug", liveSetSlugs);
+
+        return [tcg.slug, error ? 0 : (count || 0)];
+      }));
+
+      setConfirmedByTcg(Object.fromEntries(totals));
+    }
+
+    loadConfirmedTotals();
+  }, [tcgs]);
+
   return (
     <>
-      <div className="live-registry-list">
+      <div className="live-registry-list live-registry-grid">
         {liveTcgs.map((tcg) => {
           const liveSetCount = tcg.sets.filter((set) => set.status === "live").length;
           const previewCount = tcg.sets.filter((set) => set.status !== "live").length;
+          const total = tcg.sets
+            .filter((set) => set.status === "live")
+            .reduce((sum, set) => sum + Number(set.serials || 0), 0);
+          const confirmed = confirmedByTcg[tcg.slug] || 0;
+          const percentage = total ? (confirmed / total) * 100 : 0;
           return (
             <Link href={`/tcg/${tcg.slug}`} className={`live-registry-card tcg-${tcg.slug}`} key={tcg.slug}>
-              <span className="live-registry-art" aria-hidden="true">{tcg.logo && <img src={tcg.logo} alt="" />}</span>
-              <div className="live-registry-copy">
-                <span>Trading card game</span>
-                <h3>{tcg.name}</h3>
-                <p>{liveSetCount} live {liveSetCount === 1 ? "set" : "sets"}{isAdmin && previewCount ? ` · ${previewCount} admin preview` : ""}</p>
-              </div>
-              <strong>View sets <i aria-hidden="true">→</i></strong>
+              <span className="live-registry-name">{tcg.name}</span>
+              <span className="live-registry-art">{tcg.logo && <img src={tcg.slug === "magic-the-gathering" ? "/graphics/magic-official-logo-dark.webp" : tcg.logo} alt={tcg.name} />}</span>
+              <span className="live-registry-tracker">
+                <span className="live-registry-tracker-heading">
+                  <strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong>
+                  <span>{percentage.toFixed(2)}% documented</span>
+                </span>
+                <span className="live-registry-progress" role="progressbar" aria-label={`${tcg.name} registry progress`} aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}>
+                  <span style={{ width: `${percentage}%` }} />
+                </span>
+                {isAdmin && previewCount ? <small>{liveSetCount} live {liveSetCount === 1 ? "set" : "sets"} · {previewCount} admin preview</small> : null}
+              </span>
             </Link>
           );
         })}
