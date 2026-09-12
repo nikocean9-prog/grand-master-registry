@@ -36,15 +36,17 @@ function preloadEvidenceImage(url) {
   return ready;
 }
 
-export function preloadSerialDetails(serialId) {
+export function preloadSerialDetails(serialId, evidenceUrl = null) {
   if (!serialId) return Promise.resolve(null);
   if (serialDetailRequests.has(serialId)) return serialDetailRequests.get(serialId);
 
+  const suppliedEvidenceReady = preloadEvidenceImage(evidenceUrl);
   const request = fetch(`/api/serials/${serialId}`)
     .then(async (response) => {
       if (!response.ok) throw new Error("This confirmed serial could not be loaded.");
       const data = await response.json();
-      await preloadEvidenceImage(data.evidence_url);
+      if (evidenceUrl) data.evidence_url = evidenceUrl;
+      await (evidenceUrl ? suppliedEvidenceReady : preloadEvidenceImage(data.evidence_url));
       return data;
     })
     .catch((error) => {

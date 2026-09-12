@@ -51,7 +51,8 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
 
     if (!("IntersectionObserver" in window)) {
       Array.from(confirmedCards).slice(0, 12).forEach((element) => {
-        preloadSerialDetails(element.dataset.serialId).catch(() => {});
+        const matchingSerial = serials.find((serial) => String(serial.id) === element.dataset.serialId);
+        preloadSerialDetails(element.dataset.serialId, matchingSerial?.evidence_url).catch(() => {});
       });
       return;
     }
@@ -59,7 +60,8 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
-        preloadSerialDetails(entry.target.dataset.serialId).catch(() => {});
+        const matchingSerial = serials.find((serial) => String(serial.id) === entry.target.dataset.serialId);
+        preloadSerialDetails(entry.target.dataset.serialId, matchingSerial?.evidence_url).catch(() => {});
         observer.unobserve(entry.target);
       });
     }, { rootMargin: "900px 0px" });
@@ -93,7 +95,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
 
     const sourceRect = event.currentTarget.getBoundingClientRect();
     const transitionRun = ++transitionRunRef.current;
-    const evidenceReady = preloadSerialDetails(serial.id).catch(() => null);
+    const evidenceReady = preloadSerialDetails(serial.id, serial.evidence_url).catch(() => null);
     setSelectedSerial(nextSerial);
     setTransitionPendingId(serial.id);
 
@@ -173,9 +175,9 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
               href={`/serial/${serial.id}`}
               className="serial-box confirmed"
               title="Confirmed — view details"
-              onPointerEnter={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
-              onFocus={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
-              onTouchStart={() => { preloadSerialDetails(serial.id).catch(() => {}); }}
+              onPointerEnter={() => { preloadSerialDetails(serial.id, serial.evidence_url).catch(() => {}); }}
+              onFocus={() => { preloadSerialDetails(serial.id, serial.evidence_url).catch(() => {}); }}
+              onTouchStart={() => { preloadSerialDetails(serial.id, serial.evidence_url).catch(() => {}); }}
               onClick={(event) => openSerial(event, serial)}
               data-serial-id={serial.id}
               data-transition-source={cardTransition?.id === serial.id || transitionPendingId === serial.id ? "true" : undefined}
