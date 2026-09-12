@@ -28,7 +28,7 @@ export function preloadSerialDetails(serialId) {
   return request;
 }
 
-export default function SerialDetailModal({ serial, card, onClose }) {
+export default function SerialDetailModal({ serial, card, onClose, isOpening = false }) {
   const [details, setDetails] = useState(null);
   const [error, setError] = useState("");
   const closeButtonRef = useRef(null);
@@ -70,7 +70,7 @@ export default function SerialDetailModal({ serial, card, onClose }) {
     && ["1", "01", "001", "001/001"].includes(displayedSerial.label);
 
   return (
-    <div className="serial-modal-backdrop" role="presentation" onMouseDown={onClose}>
+    <div className={`serial-modal-backdrop${card?.enableCardTransition ? " has-card-transition" : ""}${isOpening ? " is-card-opening" : ""}`} role="presentation" onMouseDown={isOpening ? undefined : onClose}>
       <section
         className="serial-modal"
         role="dialog"
