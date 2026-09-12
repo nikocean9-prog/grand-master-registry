@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import SerialGrid from "../../components/SerialGrid";
 import PublicHeader from "../../components/PublicHeader";
+import { getEvidencePath } from "../../lib/evidenceUrl";
 import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonstersCatalog";
 import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestrosCatalog";
 
@@ -122,9 +123,48 @@ export default async function CardPage({ params }) {
     );
   }
 
-  const standard = serials.filter((serial) => serial.region === "AMERICAS");
-  const eRegion = serials.filter((serial) => serial.region === "E");
-  const worldwide = serials.filter((serial) => serial.region === "GLOBAL");
+  const enableCardTransition = card.card_sets?.slug === "magnificent-monsters";
+  let serialsWithEvidence = serials;
+
+  if (enableCardTransition) {
+    const confirmedIds = serials
+      .filter((serial) => serial.status === "confirmed")
+      .map((serial) => serial.id);
+
+    if (confirmedIds.length) {
+      const { data: approvedSubmissions } = await supabase
+        .from("submissions")
+        .select("serial_id, photo_url, created_at")
+        .in("serial_id", confirmedIds)
+        .eq("status", "approved")
+        .not("photo_url", "is", null)
+        .order("created_at", { ascending: false });
+
+      const latestPhotoBySerial = new Map();
+      for (const submission of approvedSubmissions || []) {
+        if (!latestPhotoBySerial.has(submission.serial_id)) {
+          latestPhotoBySerial.set(submission.serial_id, getEvidencePath(submission.photo_url));
+        }
+      }
+
+      const paths = Array.from(latestPhotoBySerial.values()).filter(Boolean);
+      const { data: signedFiles } = paths.length
+        ? await supabase.storage.from("submission-evidence").createSignedUrls(paths, 3600)
+        : { data: [] };
+      const signedByPath = new Map(
+        (signedFiles || []).map((file, index) => [paths[index], file.signedUrl])
+      );
+
+      serialsWithEvidence = serials.map((serial) => {
+        const path = latestPhotoBySerial.get(serial.id);
+        return path ? { ...serial, evidence_url: signedByPath.get(path) || null } : serial;
+      });
+    }
+  }
+
+  const standard = serialsWithEvidence.filter((serial) => serial.region === "AMERICAS");
+  const eRegion = serialsWithEvidence.filter((serial) => serial.region === "E");
+  const worldwide = serialsWithEvidence.filter((serial) => serial.region === "GLOBAL");
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
   ).length;
@@ -136,7 +176,6 @@ export default async function CardPage({ params }) {
   const total = card.serial_total || serials.length;
   const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
   const isGlobal = card.card_sets?.serial_scheme === "global";
-  const enableCardTransition = card.card_sets?.slug === "magnificent-monsters";
   const catalogImage = card.card_sets?.slug === "magnificent-monsters"
     ? getMagnificentMonstersCatalogImage(card)
     : card.card_sets?.slug === "magnificent-maestros"
