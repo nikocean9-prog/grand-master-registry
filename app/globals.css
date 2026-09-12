@@ -2508,8 +2508,9 @@ button {
 }
 
 
-/* Premium Yu-Gi-Oh TCG heading */
-.catalog-heading.tcg-heading-yugioh {
+/* Premium image-led TCG headings */
+.catalog-heading.tcg-heading-yugioh,
+.catalog-heading.tcg-heading-magic-the-gathering {
   position: relative;
   min-height: 0;
   justify-content: center;
@@ -2520,11 +2521,13 @@ button {
   box-shadow: none;
 }
 
-.catalog-heading.tcg-heading-yugioh::after {
+.catalog-heading.tcg-heading-yugioh::after,
+.catalog-heading.tcg-heading-magic-the-gathering::after {
   content: none;
 }
 
-.catalog-heading.tcg-heading-yugioh > div {
+.catalog-heading.tcg-heading-yugioh > div,
+.catalog-heading.tcg-heading-magic-the-gathering > div {
   position: relative;
   z-index: 1;
   width: 100%;
@@ -2532,15 +2535,18 @@ button {
   text-align: center;
 }
 
-.catalog-heading.tcg-heading-yugioh .eyebrow {
+.catalog-heading.tcg-heading-yugioh .eyebrow,
+.catalog-heading.tcg-heading-magic-the-gathering .eyebrow {
   display: none;
 }
 
-.catalog-heading.tcg-heading-yugioh h1 {
+.catalog-heading.tcg-heading-yugioh h1,
+.catalog-heading.tcg-heading-magic-the-gathering h1 {
   margin: 0;
 }
 
-.catalog-heading.tcg-heading-yugioh .tcg-official-logo {
+.catalog-heading.tcg-heading-yugioh .tcg-official-logo,
+.catalog-heading.tcg-heading-magic-the-gathering .tcg-official-logo {
   display: block;
   width: min(100%, 560px);
   max-width: 100%;
@@ -2549,35 +2555,53 @@ button {
   filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.2));
 }
 
-.catalog-heading.tcg-heading-yugioh p:last-child {
+.catalog-heading.tcg-heading-yugioh p:last-child,
+.catalog-heading.tcg-heading-magic-the-gathering p:last-child {
   display: none;
 }
 
+.catalog-heading.tcg-heading-magic-the-gathering .tcg-official-logo { width:min(100%,500px); }
+
 @media (max-width: 700px) {
-  .catalog-heading.tcg-heading-yugioh {
+  .catalog-heading.tcg-heading-yugioh,
+  .catalog-heading.tcg-heading-magic-the-gathering {
     padding: 8px 0 0;
   }
 
-  .catalog-heading.tcg-heading-yugioh > div {
+  .catalog-heading.tcg-heading-yugioh > div,
+  .catalog-heading.tcg-heading-magic-the-gathering > div {
     max-width: none;
   }
 }
 
-/* Yu-Gi-Oh set wordmarks and trackers */
-.yugioh-set-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; gap:40px 32px; }
-.yugioh-set-tile { display:flex; min-width:0; flex-direction:column; border:0; background:transparent; color:inherit; box-shadow:none; text-decoration:none; }
-.yugioh-set-wordmark { position:relative; display:grid; box-sizing:border-box; aspect-ratio:3 / 1; overflow:visible; padding:10px 8px 12px; place-items:center; }
-.yugioh-set-wordmark img { display:block; width:100%; max-width:100%; height:auto; max-height:100%; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease; }
-.yugioh-set-tile:hover .yugioh-set-wordmark img,.yugioh-set-tile:focus-visible .yugioh-set-wordmark img { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); }
-.yugioh-set-tile:focus-visible { border-radius:4px; outline:3px solid #2c7448; outline-offset:6px; }
-.yugioh-set-tracker { display:block; margin-top:6px; border:0; background:transparent; padding:0; box-shadow:none; }
-.yugioh-set-tracker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:8px; color:#273029; font-family:Arial,Helvetica,sans-serif; font-weight:900; letter-spacing:-.035em; text-transform:uppercase; }
-.yugioh-set-tracker-heading strong { color:#111713; font-size:17px; font-weight:900; }
-.yugioh-set-tracker-heading > span { font-size:12px; }
-.yugioh-set-progress { display:block; height:7px; overflow:hidden; border-radius:999px; background:#d2d7d3; }
-.yugioh-set-progress > span { display:block; min-height:100%; border-radius:inherit; background:linear-gradient(90deg,#1e6e3d,#4cbf72); }
-@media (max-width:700px) { .yugioh-set-grid { grid-template-columns:1fr; gap:30px; } .yugioh-set-wordmark { max-width:560px; width:100%; margin:0 auto; } }
-@media (max-width:430px) { .yugioh-set-tracker-heading strong { font-size:15px; } .yugioh-set-tracker-heading > span { font-size:10px; } .yugioh-set-progress { height:6px; } }
+/* Image-led set directory wordmarks and trackers */
+.set-logo-grid { display:grid; align-items:start; gap:46px 32px; }
+.set-logo-grid--yugioh { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.set-logo-grid--magic-the-gathering { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.set-logo-tile { display:flex; min-width:0; flex-direction:column; border:0; background:transparent; color:inherit; box-shadow:none; text-decoration:none; }
+.set-logo-art { position:relative; display:grid; box-sizing:border-box; width:100%; height:166px; overflow:visible; padding:10px 8px 12px; place-items:center; }
+.set-logo-grid--yugioh .set-logo-art { aspect-ratio:3 / 1; height:auto; }
+.set-logo-art img { display:block; width:100%; max-width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease,transform 160ms ease; }
+.set-logo-tile:hover .set-logo-art img,.set-logo-tile:focus-visible .set-logo-art img { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); transform:translateY(-2px); }
+.set-logo-tile:focus-visible { border-radius:4px; outline:3px solid #2c7448; outline-offset:6px; }
+.set-logo-tracker { display:block; margin-top:6px; border:0; background:transparent; padding:0; box-shadow:none; }
+.set-logo-tracker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:9px; margin-bottom:8px; color:#273029; font-family:Arial,Helvetica,sans-serif; font-weight:900; letter-spacing:-.035em; text-transform:uppercase; }
+.set-logo-tracker-heading strong { color:#111713; font-size:15px; font-weight:900; }
+.set-logo-tracker-heading > span { font-size:10px; }
+.set-logo-grid--yugioh .set-logo-tracker-heading strong { font-size:17px; }
+.set-logo-grid--yugioh .set-logo-tracker-heading > span { font-size:12px; }
+.set-logo-progress { display:block; height:7px; overflow:hidden; border-radius:999px; background:#d2d7d3; }
+.set-logo-progress > span { display:block; min-width:2px; min-height:100%; border-radius:inherit; background:linear-gradient(90deg,#1e6e3d,#4cbf72); }
+@media (max-width:800px) { .set-logo-grid--magic-the-gathering { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:700px) { .set-logo-grid--yugioh { grid-template-columns:1fr; gap:30px; } .set-logo-grid--yugioh .set-logo-art { max-width:560px; width:100%; margin:0 auto; } }
+@media (max-width:480px) { .set-logo-grid--magic-the-gathering { grid-template-columns:1fr; gap:34px; } .set-logo-art { height:146px; } .set-logo-tracker-heading strong { font-size:15px; } .set-logo-tracker-heading > span { font-size:10px; } .set-logo-progress { height:6px; } }
+
+/* Branded set pages share the approved Magnificent Monsters composition. */
+.registry-set-intro--branded { margin-top:24px; }
+.registry-set-lockup { display:flex; min-height:320px; flex-direction:column; align-items:center; justify-content:center; gap:8px; margin:0 auto 18px; }
+.registry-set-tcg-logo { display:block; width:min(100%,360px); max-height:112px; object-fit:contain; }
+.registry-set-wordmark { display:block; width:min(100%,610px); max-height:220px; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); }
+@media (max-width:480px) { .registry-set-lockup { min-height:260px; gap:4px; margin-bottom:12px; } .registry-set-tcg-logo { width:min(86%,300px); max-height:90px; } .registry-set-wordmark { width:min(100%,520px); max-height:176px; } }
 
 /* Public homepage discovery experience */
 .home-page,

@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import PublicHeader from "./PublicHeader";
+import { getSetWordmark, TCG_HEADER_LOGOS } from "../lib/setWordmarks";
 
 export default async function SerializedSetPage({ slug, tcgName, eyebrow, title, description, backHref }) {
   const usesCompactCardTiles = tcgName === "Magic: The Gathering";
@@ -25,15 +26,29 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
     0
   ) ?? 0;
   const percentage = total ? ((confirmed / total) * 100).toFixed(2) : "0.00";
+  const setWordmark = getSetWordmark(slug);
+  const tcgSlug = tcgName === "Magic: The Gathering" ? "magic-the-gathering" : null;
+  const tcgLogo = tcgSlug ? TCG_HEADER_LOGOS[tcgSlug] : null;
+  const sharedSerialTotal = cards?.length && cards.every((card) => card.serial_total === cards[0].serial_total)
+    ? cards[0].serial_total
+    : null;
 
   return (
     <main>
       <PublicHeader />
       <Link href={backHref} className="back-link">← {tcgName} sets</Link>
-      <section className="registry-hero compact">
-        <p className="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
-        <p className="hero-copy">{description}</p>
+      <section className={setWordmark ? "registry-set-intro registry-set-intro--branded" : "registry-hero compact"}>
+        {setWordmark ? (
+          <>
+            <h1 className="visually-hidden">{tcgName} {title}</h1>
+            <div className="registry-set-lockup">
+              {tcgLogo && <img src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}
+              <img src={setWordmark} alt={title} className="registry-set-wordmark" />
+            </div>
+          </>
+        ) : (
+          <><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="hero-copy">{description}</p></>
+        )}
         {setError || cardsError ? (
           <p>Registry totals are temporarily unavailable.</p>
         ) : (
@@ -50,8 +65,8 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
       </section>
       <section className="registry-section">
         <div className="section-heading">
-          <div><p className="eyebrow">The complete serialized release</p><h2>Choose a card</h2></div>
-          <p>{cards?.length ?? 0} serial-numbered {cards?.length === 1 ? "card" : "cards"} · {total.toLocaleString()} serials</p>
+          <div><p className="eyebrow">The complete set</p><h2>Choose a card</h2></div>
+          <p>{sharedSerialTotal ? `Each card contains ${sharedSerialTotal.toLocaleString()} serial numbers.` : `${cards?.length ?? 0} serial-numbered ${cards?.length === 1 ? "card" : "cards"} · ${total.toLocaleString()} serials`}</p>
         </div>
         {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : (
           <div className="card-grid">

@@ -4,38 +4,28 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../lib/adminAuth";
+import { SET_WORDMARKS } from "../lib/setWordmarks";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
-const YUGIOH_SET_LOGOS = {
-  "magnificent-monsters": {
-    src: "/magnificent-monsters-wordmark-v4.png",
-    treatment: "wordmark",
-  },
-  "magnificent-maestros": {
-    src: "/magnificent-maestros-wordmark-v4.png",
-    treatment: "wordmark",
-  },
-};
-
-function YugiohSetTile({ set, logo, confirmed = 0 }) {
+function SetLogoTile({ set, logo, confirmed = 0 }) {
   const total = set.serials || 0;
   const percentage = total ? (confirmed / total) * 100 : 0;
   return (
-    <Link href={set.href} className="yugioh-set-tile" aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
-      <span className={`yugioh-set-wordmark yugioh-set-wordmark--${logo.treatment}`}><img src={logo.src} alt={set.name} /></span>
-      <span className="yugioh-set-tracker">
-        <span className="yugioh-set-tracker-heading"><strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong><span>{percentage.toFixed(2)}% documented</span></span>
-        <span className="yugioh-set-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></span>
+    <Link href={set.href} className="set-logo-tile" aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
+      <span className="set-logo-art"><img src={logo} alt={set.name} /></span>
+      <span className="set-logo-tracker">
+        <span className="set-logo-tracker-heading"><strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong><span>{percentage.toFixed(2)}% documented</span></span>
+        <span className="set-logo-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></span>
       </span>
     </Link>
   );
 }
 
-export default function TcgSetDirectory({ sets }) {
+export default function TcgSetDirectory({ sets, tcgSlug }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [confirmedBySet, setConfirmedBySet] = useState({});
 
@@ -44,7 +34,7 @@ export default function TcgSetDirectory({ sets }) {
   }, []);
 
   useEffect(() => {
-    const trackedSlugs = sets.filter((set) => YUGIOH_SET_LOGOS[set.slug]).map((set) => set.slug);
+    const trackedSlugs = sets.filter((set) => SET_WORDMARKS[set.slug]).map((set) => set.slug);
     if (!trackedSlugs.length) return;
 
     async function loadConfirmedTotals() {
@@ -52,10 +42,12 @@ export default function TcgSetDirectory({ sets }) {
       if (setError || !setRows?.length) return;
 
       const totals = await Promise.all(setRows.map(async (setRow) => {
-        const { data: cards, error } = await supabase.from("cards").select("serials ( status )").eq("set_id", setRow.id);
-        if (error) return [setRow.slug, 0];
-        const confirmed = (cards || []).reduce((sum, card) => sum + (card.serials?.filter((serial) => serial.status === "confirmed").length || 0), 0);
-        return [setRow.slug, confirmed];
+        const { count, error } = await supabase
+          .from("serials")
+          .select("id, cards!inner(set_id)", { count: "exact", head: true })
+          .eq("status", "confirmed")
+          .eq("cards.set_id", setRow.id);
+        return [setRow.slug, error ? 0 : (count || 0)];
       }));
       setConfirmedBySet(Object.fromEntries(totals));
     }
@@ -64,15 +56,15 @@ export default function TcgSetDirectory({ sets }) {
   }, [sets]);
 
   const visibleSets = sets.filter((set) => ["live", "preview"].includes(set.status) || isAdmin);
-  const yugiohArtSets = visibleSets.filter((set) => YUGIOH_SET_LOGOS[set.slug]);
+  const logoSets = visibleSets.filter((set) => SET_WORDMARKS[set.slug]);
 
   if (!visibleSets.length) {
     return <div className="empty-state"><h3>No sets are live yet</h3><p>This TCG is in the future expansion plan.</p><Link href="/help#contact" className="hero-button hero-button-primary">Suggest a set</Link></div>;
   }
 
-  if (yugiohArtSets.length) {
-    return <div className="yugioh-set-grid">{yugiohArtSets.map((set) => (
-      <YugiohSetTile key={set.name} set={set} logo={YUGIOH_SET_LOGOS[set.slug]} confirmed={confirmedBySet[set.slug] || 0} />
+  if (logoSets.length === visibleSets.length) {
+    return <div className={`set-logo-grid set-logo-grid--${tcgSlug}`}>{logoSets.map((set) => (
+      <SetLogoTile key={set.name} set={set} logo={SET_WORDMARKS[set.slug]} confirmed={confirmedBySet[set.slug] || 0} />
     ))}</div>;
   }
 
