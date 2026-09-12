@@ -118,6 +118,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
         id: serial.id,
         label: nextSerial.label,
         imageUrl: cardSummary.image_url,
+        cardBackUrl: cardSummary.card_back_url,
         width: finalWidth,
         height: finalHeight,
         startX: sourceRect.left,
@@ -164,7 +165,14 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
   }, []);
 
   return (
-    <div ref={gridRef} className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}${cardSummary?.enableCardTransition ? " magnificent-monsters-card-transition" : ""}`}>
+    <div
+      ref={gridRef}
+      className={`serial-grid${isYugioh ? " yugioh-serial-grid" : ""}${cardSummary?.card_back_url ? " tcg-card-grid" : ""}${cardSummary?.enableCardTransition ? " card-transition-grid" : ""}`}
+      style={cardSummary?.card_back_url ? {
+        "--tcg-card-back-image": `url("${cardSummary.card_back_url}")`,
+        "--tcg-card-aspect-ratio": cardSummary.card_aspect_ratio,
+      } : undefined}
+    >
       {serials.map((serial) => {
         const serialLabel = formatSerial(serial, total);
         const key = `${serial.region}-${serial.serial_number}`;
@@ -210,6 +218,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
             "--serial-flight-start-scale": cardTransition.startScale,
             "--serial-flight-end-x": `${cardTransition.endX}px`,
             "--serial-flight-end-y": `${cardTransition.endY}px`,
+            "--serial-card-back-image": `url("${cardTransition.cardBackUrl}")`,
           }}
         >
           <div className="serial-card-flight-rotor">

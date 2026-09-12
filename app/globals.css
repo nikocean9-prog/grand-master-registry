@@ -437,16 +437,16 @@ button {
   color: #777;
 }
 
-.yugioh-serial-grid {
+.tcg-card-grid {
   align-items: start;
 }
 
-.yugioh-serial-grid .serial-box {
+.tcg-card-grid .serial-box {
   position: relative;
   display: grid;
   box-sizing: border-box;
   min-width: 0;
-  aspect-ratio: 59 / 86;
+  aspect-ratio: var(--tcg-card-aspect-ratio, 63 / 88);
   place-items: center;
   overflow: hidden;
   border: 1px solid #c5d5dc;
@@ -461,23 +461,23 @@ button {
   text-shadow: 0 1px 1px rgba(255,255,255,.85), 0 1px 3px rgba(45,34,16,.24);
 }
 
-.yugioh-serial-grid .serial-box::before {
+.tcg-card-grid .serial-box::before {
   position: absolute;
   inset: 0;
-  background: url("/graphics/card-backs/yugioh-card-back.webp") center / cover no-repeat;
+  background: var(--tcg-card-back-image) center / cover no-repeat;
   content: "";
 }
 
-.yugioh-serial-grid .serial-box > span {
+.tcg-card-grid .serial-box > span {
   position: relative;
   z-index: 1;
 }
 
-.yugioh-serial-grid .serial-box.unreported::before {
+.tcg-card-grid .serial-box.unreported::before {
   opacity: .14;
 }
 
-.yugioh-serial-grid .serial-box.confirmed {
+.tcg-card-grid .serial-box.confirmed {
   border: 2px solid #1e9b4b;
   background: #fff;
   color: #ffd45c;
@@ -486,34 +486,34 @@ button {
   text-shadow: 0 1px 1px #171108, 0 2px 4px rgba(0,0,0,.9);
 }
 
-.yugioh-serial-grid .serial-box.confirmed::before {
+.tcg-card-grid .serial-box.confirmed::before {
   opacity: 1;
 }
 
-.yugioh-serial-grid .serial-box.confirmed:hover,
-.yugioh-serial-grid .serial-box.confirmed:focus-visible {
+.tcg-card-grid .serial-box.confirmed:hover,
+.tcg-card-grid .serial-box.confirmed:focus-visible {
   border-color: #087532;
   filter: brightness(1.06);
 }
 
-.yugioh-serial-grid .serial-box.confirmed:focus-visible {
+.tcg-card-grid .serial-box.confirmed:focus-visible {
   outline: 3px solid rgba(30,155,75,.35);
   outline-offset: 2px;
 }
 
-.magnificent-monsters-card-transition .serial-box,
-.magnificent-monsters-card-transition .serial-box.confirmed {
+.card-transition-grid .serial-box,
+.card-transition-grid .serial-box.confirmed {
   border: 1px solid #c5d5dc;
   border-radius: 0;
   box-shadow: 3px 4px 3px rgba(10,20,15,.105);
 }
 
-.magnificent-monsters-card-transition .serial-box.confirmed:hover,
-.magnificent-monsters-card-transition .serial-box.confirmed:focus-visible {
+.card-transition-grid .serial-box.confirmed:hover,
+.card-transition-grid .serial-box.confirmed:focus-visible {
   border-color: #aebfc6;
 }
 
-.magnificent-monsters-card-transition .serial-box[data-transition-source="true"] {
+.card-transition-grid .serial-box[data-transition-source="true"] {
   visibility: hidden;
 }
 
@@ -555,7 +555,7 @@ button {
 .serial-card-flight-back {
   display: grid;
   place-items: center;
-  background: #111 url("/graphics/card-backs/yugioh-card-back-hq.webp") center / cover no-repeat;
+  background: #111 var(--serial-card-back-image) center / cover no-repeat;
   color: #ffd45c;
   font-size: clamp(12px, 1.35vw, 16px);
   font-weight: 800;

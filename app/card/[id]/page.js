@@ -7,6 +7,7 @@ import PublicHeader from "../../components/PublicHeader";
 import { getEvidencePath } from "../../lib/evidenceUrl";
 import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonstersCatalog";
 import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestrosCatalog";
+import { getTcgCardAspectRatio, getTcgCardBack } from "../../lib/tcgCardBacks";
 
 function GradingMarketPanel() {
   return (
@@ -123,7 +124,10 @@ export default async function CardPage({ params }) {
     );
   }
 
-  const enableCardTransition = card.card_sets?.slug === "magnificent-monsters";
+  const tcgSlug = card.card_sets?.tcg_slug;
+  const cardBackUrl = getTcgCardBack(tcgSlug);
+  const cardAspectRatio = getTcgCardAspectRatio(tcgSlug);
+  const enableCardTransition = Boolean(cardBackUrl);
   let serialsWithEvidence = serials;
 
   if (enableCardTransition) {
@@ -132,13 +136,21 @@ export default async function CardPage({ params }) {
       .map((serial) => serial.id);
 
     if (confirmedIds.length) {
-      const { data: approvedSubmissions } = await supabase
-        .from("submissions")
-        .select("serial_id, photo_url, created_at")
-        .in("serial_id", confirmedIds)
-        .eq("status", "approved")
-        .not("photo_url", "is", null)
-        .order("created_at", { ascending: false });
+      const confirmedIdBatches = [];
+      for (let index = 0; index < confirmedIds.length; index += 100) {
+        confirmedIdBatches.push(confirmedIds.slice(index, index + 100));
+      }
+
+      const approvedSubmissionResults = await Promise.all(
+        confirmedIdBatches.map((confirmedIdBatch) => supabase
+          .from("submissions")
+          .select("serial_id, photo_url, created_at")
+          .in("serial_id", confirmedIdBatch)
+          .eq("status", "approved")
+          .not("photo_url", "is", null)
+          .order("created_at", { ascending: false }))
+      );
+      const approvedSubmissions = approvedSubmissionResults.flatMap((result) => result.data || []);
 
       const latestPhotoBySerial = new Map();
       for (const submission of approvedSubmissions || []) {
@@ -181,6 +193,13 @@ export default async function CardPage({ params }) {
     : card.card_sets?.slug === "magnificent-maestros"
       ? getMagnificentMaestrosCatalogImage(card)
       : card.image_url;
+  const cardSummary = {
+    name: card.name,
+    image_url: catalogImage,
+    card_back_url: cardBackUrl,
+    card_aspect_ratio: cardAspectRatio,
+    enableCardTransition,
+  };
   return (
     <main className="card-page">
       <PublicHeader />
@@ -219,13 +238,13 @@ export default async function CardPage({ params }) {
           <h2>Worldwide</h2>
           <strong>{worldwideConfirmed} / {total.toLocaleString()} confirmed</strong>
         </div>
-        <SerialGrid serials={worldwide} total={total} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={worldwide} total={total} cardSummary={cardSummary} isYugioh={tcgSlug === "yugioh"} />
       </section> : <><section className="serial-section">
         <div className="serial-section-heading">
           <h2>Americas</h2>
           <strong>{standardConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={standard} total={100} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={standard} total={100} cardSummary={cardSummary} isYugioh={tcgSlug === "yugioh"} />
       </section>
 
       <section className="serial-section">
@@ -233,7 +252,7 @@ export default async function CardPage({ params }) {
           <h2>Europe-distributed</h2>
           <strong>{eConfirmed} / 100 confirmed</strong>
         </div>
-        <SerialGrid serials={eRegion} total={100} cardSummary={{ name: card.name, image_url: catalogImage, enableCardTransition }} isYugioh={card.card_sets?.tcg_slug === "yugioh"} />
+        <SerialGrid serials={eRegion} total={100} cardSummary={cardSummary} isYugioh={tcgSlug === "yugioh"} />
       </section></>}
     </main>
   );
