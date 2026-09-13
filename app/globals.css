@@ -2597,19 +2597,23 @@ button {
 @media (max-width:480px) {
   .set-logo-grid--magic-the-gathering { grid-template-columns:1fr; gap:34px; }
   .set-logo-grid--magic-the-gathering .set-logo-art {
-    height:174px;
-    flex:0 0 174px;
-    overflow:hidden;
-    padding:12px 14px 24px;
+    height:auto;
+    flex:none;
+    overflow:visible;
+    padding:12px 14px 30px;
   }
   .set-logo-grid--magic-the-gathering .set-logo-art img {
+    width:auto;
     max-width:100%;
-    max-height:100%;
+    height:auto;
+    max-height:240px;
+    margin:auto;
   }
   .set-logo-grid--magic-the-gathering .set-logo-tracker {
     position:relative;
     z-index:1;
-    margin-top:8px;
+    margin-top:0;
+    background:transparent;
   }
   .set-logo-tracker-heading strong { font-size:15px; }
   .set-logo-tracker-heading > span { font-size:10px; }
