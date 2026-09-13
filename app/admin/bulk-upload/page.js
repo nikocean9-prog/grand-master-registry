@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
 import {
   isMfaRequiredError,
   safeAdminActionMessage,
 } from "../../lib/userMessages";
+import BulkCropEditor from "../../components/BulkCropEditor";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -51,6 +52,10 @@ export default function BulkUploadPage() {
   const [manualSerial, setManualSerial] = useState("");
   const [manualRegion, setManualRegion] = useState("AMERICAS");
   const [savingAction, setSavingAction] = useState("");
+  const [cropSaving, setCropSaving] = useState(false);
+  const [cropError, setCropError] = useState("");
+  const cropSaveQueue = useRef(Promise.resolve());
+  const cropSaveCount = useRef(0);
 
   const loadBatches = useCallback(async () => {
     const { data, error } = await supabase
@@ -60,7 +65,7 @@ export default function BulkUploadPage() {
         created_at, updated_at,
         items:bulk_upload_items (
           id, storage_path, original_filename, status, confidence, detected_card_id, detected_serial_number,
-          detected_region, error_message, submission_id,
+          detected_region, error_message, submission_id, display_crop,
           card:cards ( name )
         )
       `)
@@ -105,6 +110,8 @@ export default function BulkUploadPage() {
     setOpenItem(item);
     setOpenPhotoUrl("");
     setOpeningPhoto(true);
+    setCropSaving(false);
+    setCropError("");
     setManualCardId(item.detected_card_id ? String(item.detected_card_id) : "");
     setManualSerial(item.detected_serial_number ? String(item.detected_serial_number) : "");
     setManualRegion(item.detected_region || "AMERICAS");
@@ -123,6 +130,31 @@ export default function BulkUploadPage() {
     setOpenItem(null);
     setOpenPhotoUrl("");
     setOpeningPhoto(false);
+    setCropSaving(false);
+    setCropError("");
+  }
+
+  async function saveDisplayCrop(displayCrop) {
+    if (!openItem) return;
+    const itemId = openItem.id;
+    cropSaveCount.current += 1;
+    setCropSaving(true);
+    setCropError("");
+    setOpenItem((current) => current?.id === itemId ? { ...current, display_crop: displayCrop } : current);
+    setBatches((current) => current.map((batch) => ({
+      ...batch,
+      items: (batch.items || []).map((item) => item.id === itemId ? { ...item, display_crop: displayCrop } : item),
+    })));
+    cropSaveQueue.current = cropSaveQueue.current.then(async () => {
+      const { data, error } = await supabase.functions.invoke("save-bulk-display-crop", {
+        body: { item_id: itemId, display_crop: displayCrop },
+      });
+      if (error || data?.error) setCropError(data?.error || "The crop could not be saved. Please try again.");
+      else setCropError("");
+      cropSaveCount.current -= 1;
+      if (cropSaveCount.current === 0) setCropSaving(false);
+    });
+    await cropSaveQueue.current;
   }
 
   async function saveIdentification(approveNow = false) {
@@ -166,6 +198,18 @@ export default function BulkUploadPage() {
       setMessage(data?.error || "This bulk card could not be saved.");
       setSavingAction("");
       return;
+    }
+
+    if (openItem.display_crop) {
+      const { data: cropData, error: cropSyncError } = await supabase.functions.invoke("save-bulk-display-crop", {
+        body: { item_id: openItem.id, display_crop: openItem.display_crop },
+      });
+      if (cropSyncError || cropData?.error) {
+        setMessage(cropData?.error || "The card was identified, but its display crop could not be attached. Please try again.");
+        setSavingAction("");
+        await loadBatches();
+        return;
+      }
     }
 
     if (approveNow) {
@@ -479,7 +523,17 @@ export default function BulkUploadPage() {
             <button type="button" className="bulk-photo-modal-close" onClick={closeItem} aria-label="Close photo">×</button>
             <div className="bulk-photo-modal-image">
               {openingPhoto && <p>Opening photo…</p>}
-              {openPhotoUrl && <img src={openPhotoUrl} alt={openItem.original_filename} />}
+              {openPhotoUrl && (
+                <BulkCropEditor
+                  key={openItem.id}
+                  src={openPhotoUrl}
+                  alt={openItem.original_filename}
+                  value={openItem.display_crop}
+                  onCommit={saveDisplayCrop}
+                  saving={cropSaving}
+                  error={cropError}
+                />
+              )}
             </div>
             <div className="bulk-photo-modal-details">
               <p className="eyebrow">Review bulk card</p>
@@ -514,10 +568,10 @@ export default function BulkUploadPage() {
                   </select>
                 </label>
                 <div className="bulk-identify-actions">
-                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || openingPhoto || !openPhotoUrl}>
+                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || cropSaving || openingPhoto || !openPhotoUrl}>
                     {savingAction === "approve" ? "Approving…" : "Approve and publish"}
                   </button>
-                  <button type="button" className="secondary-button" onClick={() => saveIdentification(false)} disabled={Boolean(savingAction)}>
+                  <button type="button" className="secondary-button" onClick={() => saveIdentification(false)} disabled={Boolean(savingAction) || cropSaving}>
                     {savingAction === "pending" ? "Sending…" : "Save to Pending Approvals"}
                   </button>
                 </div>
