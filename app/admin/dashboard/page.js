@@ -66,6 +66,10 @@ export default function AdminHome() {
           <strong>Submission History</strong>
           <div>View all approved and rejected submissions.</div>
         </Link>
+        <Link href="/admin/special-mentions" style={linkStyle}>
+          <strong>Special Mentions</strong>
+          <div>Review the working shortlist for an open-ended rare-card census.</div>
+        </Link>
 
         {isOwner && (
           <>

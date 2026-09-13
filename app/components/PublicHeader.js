@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AdminSpecialMentionsLink from "./AdminSpecialMentionsLink";
 
 export default function PublicHeader({ showSubmit = true }) {
   return (
@@ -15,6 +16,7 @@ export default function PublicHeader({ showSubmit = true }) {
           <Link href="/gallery">Gallery</Link>
           <Link href="/wiki">Wiki &amp; Articles</Link>
           <Link href="/serialized-cards">Serialized Card Guide</Link>
+          <AdminSpecialMentionsLink />
         </div>
       </details>
       <Link href="/" className="site-name" aria-label="TCG Serial Tracker home">
