@@ -11,12 +11,23 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+const SET_RELEASE_LABELS = {
+  "lotr-special-edition": {
+    text: "Holiday Release",
+    image: "/graphics/mtg-set-wordmarks/lotr-holiday-release-ribbon.webp",
+  },
+};
+
 function SetLogoTile({ set, logo, confirmed = 0 }) {
   const total = set.serials || 0;
   const percentage = total ? (confirmed / total) * 100 : 0;
+  const releaseLabel = SET_RELEASE_LABELS[set.slug];
   return (
-    <Link href={set.href} className="set-logo-tile" aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
-      <span className="set-logo-art"><img src={logo} alt={set.name} /></span>
+    <Link href={set.href} className={`set-logo-tile set-logo-tile--${set.slug}`} aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
+      <span className={`set-logo-art${releaseLabel ? " set-logo-art--holiday" : ""}`}>
+        <img src={logo} alt={set.name} />
+        {releaseLabel ? <img className="set-release-ribbon" src={releaseLabel.image} alt={releaseLabel.text} /> : null}
+      </span>
       <span className="set-logo-tracker">
         <span className="set-logo-tracker-heading"><strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong><span>{percentage.toFixed(2)}% documented</span></span>
         <span className="set-logo-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></span>

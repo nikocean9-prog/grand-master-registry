@@ -5,8 +5,8 @@ export const tcgs = [
   ] },
   { slug: "pokemon", name: "Pokémon", initials: "PKM", logo: "/graphics/pokemon-logo.svg", status: "planned", description: "A future home for numbered Pokémon releases and Japanese promos.", sets: [{ name: "Japanese serialised releases", status: "planned" }] },
   { slug: "magic-the-gathering", name: "Magic: The Gathering", initials: "MTG", logo: "/graphics/magic-official-logo-hq.webp", status: "live", description: "Track serialized cards across major Magic releases.", sets: [
-    { slug: "lotr-original", name: "The Lord of the Rings · Original Release", status: "live", serials: 1901, summary: "4 serialized cards · 1,901 serial numbers", href: "/sets/lotr-original" },
-    { slug: "lotr-special-edition", name: "The Lord of the Rings · Special Edition", status: "live", serials: 5000, summary: "50 serialized cards · 5,000 serial numbers", href: "/sets/lotr-special-edition" },
+    { slug: "lotr-original", name: "The Lord of the Rings: Tales of Middle-earth", status: "live", serials: 1901, summary: "4 serialized cards · 1,901 serial numbers", href: "/sets/lotr-original" },
+    { slug: "lotr-special-edition", name: "The Lord of the Rings: Tales of Middle-earth · Holiday Release", status: "live", serials: 5000, summary: "50 serialized cards · 5,000 serial numbers", href: "/sets/lotr-special-edition" },
     { slug: "mtg-final-fantasy", name: "FINAL FANTASY", status: "live", serials: 77, summary: "Golden Traveling Chocobo · 77 serial numbers", href: "/sets/mtg-final-fantasy" },
     { slug: "secret-lair-serialized-promos", name: "Secret Lair Serialized Promos", status: "live", serials: 1575, summary: "6 serialized cards · 1,575 serial numbers", description: "Track the original Viscera Seer /100 and the five Secret Lair 295 convention promos.", href: "/sets/secret-lair-serialized-promos" },
     { slug: "the-brothers-war", name: "The Brothers’ War", status: "live", serials: 31500, summary: "63 serialized cards · 31,500 serial numbers", description: "Track all 63 serialized retro-frame artifacts, each individually numbered to 500.", href: "/sets/the-brothers-war" },

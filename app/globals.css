@@ -2581,8 +2581,11 @@ button {
 .set-logo-tile { display:flex; min-width:0; flex-direction:column; border:0; background:transparent; color:inherit; box-shadow:none; text-decoration:none; }
 .set-logo-art { position:relative; display:grid; box-sizing:border-box; width:100%; height:166px; overflow:visible; padding:10px 8px 12px; place-items:center; }
 .set-logo-grid--yugioh .set-logo-art { aspect-ratio:3 / 1; height:auto; }
-.set-logo-art img { display:block; width:100%; max-width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease,transform 160ms ease; }
-.set-logo-tile:hover .set-logo-art img,.set-logo-tile:focus-visible .set-logo-art img { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); transform:translateY(-2px); }
+.set-logo-art > img:first-child { display:block; width:100%; max-width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease,transform 160ms ease; }
+.set-logo-art--holiday { grid-template-rows:minmax(0,1fr) auto; gap:5px; }
+.set-logo-art--holiday > img:first-child { width:92%; min-height:0; }
+.set-logo-art .set-release-ribbon { display:block; width:82%; max-width:430px; height:auto; object-fit:contain; filter:drop-shadow(0 4px 4px rgba(45,19,10,.24)); }
+.set-logo-tile:hover .set-logo-art > img:first-child,.set-logo-tile:focus-visible .set-logo-art > img:first-child { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); transform:translateY(-2px); }
 .set-logo-tile:focus-visible { border-radius:4px; outline:3px solid #2c7448; outline-offset:6px; }
 .set-logo-tracker { display:block; margin-top:6px; border:0; background:transparent; padding:0; box-shadow:none; }
 .set-logo-tracker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:9px; margin-bottom:8px; color:#273029; font-family:Arial,Helvetica,sans-serif; font-weight:900; letter-spacing:-.035em; text-transform:uppercase; }
@@ -2602,13 +2605,16 @@ button {
     overflow:visible;
     padding:12px 14px 30px;
   }
-  .set-logo-grid--magic-the-gathering .set-logo-art img {
+  .set-logo-grid--magic-the-gathering .set-logo-art > img:first-child {
     width:auto;
     max-width:100%;
     height:auto;
     max-height:240px;
     margin:auto;
   }
+  .set-logo-grid--magic-the-gathering .set-logo-art--holiday { gap:6px; }
+  .set-logo-grid--magic-the-gathering .set-logo-art--holiday > img:first-child { width:88%; }
+  .set-logo-grid--magic-the-gathering .set-logo-art .set-release-ribbon { width:78%; max-width:430px; height:auto; margin:0 auto; }
   .set-logo-grid--magic-the-gathering .set-logo-tracker {
     position:relative;
     z-index:1;
