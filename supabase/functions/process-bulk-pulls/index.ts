@@ -516,6 +516,32 @@ Deno.serve(async (req: Request) => {
     return json({ processed: true, submission_id: submission.id });
   }
 
+  // A worker can be interrupted after claiming an item (for example by an
+  // upstream AI timeout). Return genuinely stale claims to the queue instead
+  // of leaving the entire batch permanently stuck in "processing".
+  const staleBefore = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+  await supabase
+    .from("bulk_upload_items")
+    .update({
+      status: "queued",
+      processing_started_at: null,
+      error_message: "Previous assessment was interrupted; retrying automatically.",
+    })
+    .eq("status", "processing")
+    .lt("processing_started_at", staleBefore)
+    .lt("attempts", 5);
+
+  await supabase
+    .from("bulk_upload_items")
+    .update({
+      status: "error",
+      error_message: "Assessment stopped after five interrupted attempts.",
+      processed_at: new Date().toISOString(),
+    })
+    .eq("status", "processing")
+    .lt("processing_started_at", staleBefore)
+    .gte("attempts", 5);
+
   const { data: queued } = await supabase
     .from("bulk_upload_items")
     .select("id,batch_id,storage_path,original_filename,mime_type,attempts")

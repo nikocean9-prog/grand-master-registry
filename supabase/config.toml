@@ -1,0 +1,4 @@
+[functions.process-bulk-pulls]
+# The scheduled caller uses a dedicated Vault-backed header. The function
+# validates that secret itself before performing any privileged operation.
+verify_jwt = false
