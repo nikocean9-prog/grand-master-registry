@@ -11,7 +11,7 @@ import { getMagnificentMonstersCatalogImage } from "./lib/magnificentMonstersCat
 export const dynamic = "force-dynamic";
 
 const cardBackImages = {
-  yugioh: "/graphics/card-backs/yugioh-card-back-hq.webp",
+  yugioh: "/graphics/card-backs/yugioh-card-back-v2.webp",
   "magic-the-gathering": "/graphics/card-backs/mtg-card-back-hq.webp",
   "flesh-and-blood": "/graphics/card-backs/flesh-and-blood-card-back-hq.webp",
 };

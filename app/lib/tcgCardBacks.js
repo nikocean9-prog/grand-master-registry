@@ -1,5 +1,5 @@
 const TCG_CARD_BACKS = {
-  yugioh: "/graphics/card-backs/yugioh-card-back-hq.webp",
+  yugioh: "/graphics/card-backs/yugioh-card-back-v2.webp",
   pokemon: "/graphics/card-backs/pokemon-card-back-hq.webp",
   "magic-the-gathering": "/graphics/card-backs/mtg-card-back-hq.webp",
   "one-piece": "/graphics/card-backs/one-piece-card-back-hq.webp",
