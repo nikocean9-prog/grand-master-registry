@@ -2594,7 +2594,27 @@ button {
 .set-logo-progress > span { display:block; min-width:2px; min-height:100%; border-radius:inherit; background:linear-gradient(90deg,#1e6e3d,#4cbf72); }
 @media (max-width:800px) { .set-logo-grid--magic-the-gathering { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:700px) { .set-logo-grid--yugioh { grid-template-columns:1fr; gap:30px; } .set-logo-grid--yugioh .set-logo-art { max-width:560px; width:100%; margin:0 auto; } }
-@media (max-width:480px) { .set-logo-grid--magic-the-gathering { grid-template-columns:1fr; gap:34px; } .set-logo-art { height:146px; } .set-logo-tracker-heading strong { font-size:15px; } .set-logo-tracker-heading > span { font-size:10px; } .set-logo-progress { height:6px; } }
+@media (max-width:480px) {
+  .set-logo-grid--magic-the-gathering { grid-template-columns:1fr; gap:34px; }
+  .set-logo-grid--magic-the-gathering .set-logo-art {
+    height:174px;
+    flex:0 0 174px;
+    overflow:hidden;
+    padding:12px 14px 24px;
+  }
+  .set-logo-grid--magic-the-gathering .set-logo-art img {
+    max-width:100%;
+    max-height:100%;
+  }
+  .set-logo-grid--magic-the-gathering .set-logo-tracker {
+    position:relative;
+    z-index:1;
+    margin-top:8px;
+  }
+  .set-logo-tracker-heading strong { font-size:15px; }
+  .set-logo-tracker-heading > span { font-size:10px; }
+  .set-logo-progress { height:6px; }
+}
 
 /* Branded set pages share the approved Magnificent Monsters composition. */
 .registry-set-intro--branded { margin-top:24px; }
