@@ -58,7 +58,7 @@ export default function TcgCatalog({ tcgs }) {
           return (
             <Link href={`/tcg/${tcg.slug}`} className={`live-registry-card tcg-${tcg.slug}`} key={tcg.slug}>
               <span className="live-registry-name">{tcg.name}</span>
-              <span className="live-registry-art">{tcg.logo && <img src={tcg.slug === "magic-the-gathering" ? "/graphics/magic-official-logo-dark.webp" : tcg.logo} alt={tcg.name} />}</span>
+              <span className="live-registry-art">{tcg.logo && <img src={tcg.logo} alt={tcg.name} />}</span>
               <span className="live-registry-tracker">
                 <span className="live-registry-tracker-heading">
                   <strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong>

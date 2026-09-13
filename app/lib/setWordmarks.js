@@ -23,11 +23,10 @@ export const SET_WORDMARKS = {
 };
 
 export const TCG_HEADER_LOGOS = {
-  yugioh: "/graphics/yugioh-official-logo.svg",
-  "magic-the-gathering": "/graphics/magic-official-logo-dark.webp",
+  yugioh: "/graphics/yugioh-official-logo-hq.webp",
+  "magic-the-gathering": "/graphics/magic-official-logo-hq.webp",
 };
 
 export function getSetWordmark(slug) {
   return SET_WORDMARKS[slug] || null;
 }
-
