@@ -823,6 +823,7 @@ button {
 }
 
 .bulk-open-item { padding: 7px 13px; }
+.bulk-published-label { color: #176b3a !important; font-weight: 800; }
 .bulk-photo-modal-backdrop { position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center; padding: 24px; background: rgba(4, 14, 9, .82); }
 .bulk-photo-modal { position: relative; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr); width: min(1050px, 96vw); max-height: 92vh; overflow: auto; border-radius: 16px; background: #fff; box-shadow: 0 24px 70px rgba(0,0,0,.35); }
 .bulk-photo-modal-image { display: grid; min-height: 420px; max-height: 88vh; place-items: center; padding: 16px; background: #e8efea; }
@@ -838,6 +839,8 @@ button {
 .bulk-identify-form label { display: grid; gap: 6px; color: #24382c; font-weight: 800; }
 .bulk-identify-form input,
 .bulk-identify-form select { width: 100%; min-width: 0; border: 1px solid #cbd5ce; border-radius: 8px; padding: 11px 12px; background: #fff; font: inherit; }
+.bulk-identify-actions { display: grid; gap: 10px; }
+.bulk-identify-actions .secondary-button { text-align: center; }
 .bulk-reject-button { margin-top: 10px; border-color: #a33a31; background: #fff; color: #922d25; }
 
 @media (max-width: 700px) {

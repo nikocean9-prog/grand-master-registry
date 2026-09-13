@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../../lib/adminAuth";
+import {
+  isMfaRequiredError,
+  safeAdminActionMessage,
+} from "../../lib/userMessages";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -46,7 +50,7 @@ export default function BulkUploadPage() {
   const [manualCardId, setManualCardId] = useState("");
   const [manualSerial, setManualSerial] = useState("");
   const [manualRegion, setManualRegion] = useState("AMERICAS");
-  const [savingIdentification, setSavingIdentification] = useState(false);
+  const [savingAction, setSavingAction] = useState("");
 
   const loadBatches = useCallback(async () => {
     const { data, error } = await supabase
@@ -61,9 +65,31 @@ export default function BulkUploadPage() {
         )
       `)
       .order("created_at", { ascending: false })
-      .limit(8);
+      .limit(50);
 
-    if (!error) setBatches(data || []);
+    if (error) return;
+
+    const submissionIds = [...new Set(
+      (data || []).flatMap((batch) => batch.items || []).map((item) => item.submission_id).filter(Boolean)
+    )];
+    let submissionStatuses = {};
+    if (submissionIds.length > 0) {
+      const { data: submissionData } = await supabase
+        .from("submissions")
+        .select("id,status")
+        .in("id", submissionIds);
+      submissionStatuses = Object.fromEntries(
+        (submissionData || []).map((submission) => [submission.id, submission.status])
+      );
+    }
+
+    setBatches((data || []).map((batch) => ({
+      ...batch,
+      items: (batch.items || []).map((item) => ({
+        ...item,
+        submission_status: item.submission_id ? submissionStatuses[item.submission_id] || "pending" : null,
+      })),
+    })));
   }, []);
 
   useEffect(() => {
@@ -99,45 +125,90 @@ export default function BulkUploadPage() {
     setOpeningPhoto(false);
   }
 
-  async function sendToApprovals() {
+  async function saveIdentification(approveNow = false) {
     const cardId = Number(manualCardId);
     const serialNumber = Number(manualSerial);
     if (!Number.isInteger(cardId) || !Number.isInteger(serialNumber) || serialNumber < 1) {
       setMessage("Choose the card and enter a valid serial number.");
       return;
     }
-    setSavingIdentification(true);
+
+    const selectedCard = cards.find((card) => card.id === cardId);
+    const serialLabel = `${String(serialNumber).padStart(3, "0")}${manualRegion === "E" ? "E" : ""}`;
+    if (approveNow) {
+      const { data: serial } = await supabase
+        .from("serials")
+        .select("id,status")
+        .eq("card_id", cardId)
+        .eq("serial_number", serialNumber)
+        .eq("region", manualRegion)
+        .maybeSingle();
+
+      if (serial?.status === "confirmed") {
+        const replace = window.confirm(
+          `${selectedCard?.name || "This card"} ${serialLabel} is already confirmed. Approve this photo as the replacement record?`
+        );
+        if (!replace) return;
+      } else {
+        const confirmed = window.confirm(
+          `Approve and publish ${selectedCard?.name || "this card"} ${serialLabel}?`
+        );
+        if (!confirmed) return;
+      }
+    }
+
+    setSavingAction(approveNow ? "approve" : "pending");
     setMessage("");
     const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
       body: { action: "manual_identify", item_id: openItem.id, card_id: cardId, serial_number: serialNumber, region: manualRegion },
     });
     if (error || data?.error) {
-      setMessage(data?.error || "This item could not be sent to Pending Approvals.");
-      setSavingIdentification(false);
+      setMessage(data?.error || "This bulk card could not be saved.");
+      setSavingAction("");
       return;
     }
+
+    if (approveNow) {
+      const { error: approvalError } = await supabase.rpc("approve_submission", {
+        p_submission_id: data.submission_id,
+      });
+      if (approvalError) {
+        setMessage(
+          `${safeAdminActionMessage(approvalError, "approve this card")} It has been kept in Pending Approvals.`
+        );
+        setSavingAction("");
+        if (isMfaRequiredError(approvalError)) {
+          window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
+        }
+        await loadBatches();
+        return;
+      }
+    }
+
     closeItem();
     await loadBatches();
-    setMessage("The identified card was sent to Pending Approvals.");
-    setSavingIdentification(false);
+    setMessage(approveNow
+      ? `${selectedCard?.name || "The card"} ${serialLabel} was approved and published.`
+      : "The identified card was sent to Pending Approvals.");
+    setSavingAction("");
   }
 
   async function rejectItem() {
     if (!window.confirm("Reject this bulk-upload item and remove it from the list?")) return;
-    setSavingIdentification(true);
+    setSavingAction("reject");
     setMessage("");
     const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
       body: { action: "dismiss_item", item_id: openItem.id },
     });
     if (error || data?.error) {
       setMessage(data?.error || "This item could not be rejected.");
-      setSavingIdentification(false);
+      setSavingAction("");
       return;
     }
     closeItem();
     await loadBatches();
     setMessage("The unsuitable item was removed from the bulk review list.");
-    setSavingIdentification(false);
+    setSavingAction("");
   }
 
   useEffect(() => {
@@ -298,7 +369,7 @@ export default function BulkUploadPage() {
         <div>
           <p className="eyebrow">Owner tools</p>
           <h1>Bulk Upload</h1>
-          <p>Upload card photos once. Each image is assessed separately and added to Pending Approvals when its card and serial can be identified.</p>
+          <p>Upload card photos once. Review, correct and publish each card here without repeating the work in Pending Approvals.</p>
         </div>
         <a className="secondary-button" href="/admin/approvals">Open Pending Approvals</a>
       </header>
@@ -379,11 +450,17 @@ export default function BulkUploadPage() {
                       </div>
                       <div className="bulk-item-result">
                         {Number.isInteger(item.confidence) && <small>{item.confidence}%</small>}
-                        {item.submission_id ? (
-                          <a href="/admin/approvals">Review</a>
+                        {item.submission_status === "approved" ? (
+                          <span className="bulk-published-label">Published</span>
+                        ) : item.submission_status === "rejected" ? (
+                          <span>Rejected</span>
+                        ) : item.submission_id ? (
+                          <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
+                            Review &amp; approve
+                          </button>
                         ) : ["needs_review", "error"].includes(item.status) ? (
                           <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
-                            Open
+                            Review &amp; approve
                           </button>
                         ) : <span>{statusLabel(item.status)}</span>}
                       </div>
@@ -405,9 +482,9 @@ export default function BulkUploadPage() {
               {openPhotoUrl && <img src={openPhotoUrl} alt={openItem.original_filename} />}
             </div>
             <div className="bulk-photo-modal-details">
-              <p className="eyebrow">Needs identification</p>
+              <p className="eyebrow">Review bulk card</p>
               <h2 id="bulk-photo-title">{openItem.card?.name || openItem.original_filename}</h2>
-              <p>{openItem.error_message || "The card or serial could not be identified confidently."}</p>
+              <p>Check the suggested card, serial number and region against the original photo. You can publish it directly from here.</p>
               <dl>
                 <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
                 <div><dt>AI confidence</dt><dd>{Number.isInteger(openItem.confidence) ? `${openItem.confidence}%` : "Not available"}</dd></div>
@@ -436,12 +513,17 @@ export default function BulkUploadPage() {
                     ) : <><option value="AMERICAS">Americas</option><option value="E">E-Region</option></>}
                   </select>
                 </label>
-                <button type="button" onClick={sendToApprovals} disabled={savingIdentification}>
-                  {savingIdentification ? "Sending…" : "Send to Pending Approvals"}
-                </button>
+                <div className="bulk-identify-actions">
+                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || openingPhoto || !openPhotoUrl}>
+                    {savingAction === "approve" ? "Approving…" : "Approve and publish"}
+                  </button>
+                  <button type="button" className="secondary-button" onClick={() => saveIdentification(false)} disabled={Boolean(savingAction)}>
+                    {savingAction === "pending" ? "Sending…" : "Save to Pending Approvals"}
+                  </button>
+                </div>
               </div>
-              <button type="button" className="secondary-button" onClick={closeItem} disabled={savingIdentification}>Close</button>
-              <button type="button" className="bulk-reject-button" onClick={rejectItem} disabled={savingIdentification}>Reject from bulk upload</button>
+              <button type="button" className="secondary-button" onClick={closeItem} disabled={Boolean(savingAction)}>Close</button>
+              {!openItem.submission_id && <button type="button" className="bulk-reject-button" onClick={rejectItem} disabled={Boolean(savingAction)}>Reject from bulk upload</button>}
             </div>
           </section>
         </div>
