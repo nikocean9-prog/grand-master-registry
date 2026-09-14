@@ -11,7 +11,7 @@ export default function HomeFeaturedSet({ pulls, confirmed = 0, total = 3600 }) 
         <img
           id="home-featured-set-title"
           className="home-featured-set-logo"
-          src="/magnificent-monsters-wordmark-v4.png"
+          src="/magnificent-monsters-wordmark.webp"
           alt="Magnificent Monsters"
         />
       </Link>
