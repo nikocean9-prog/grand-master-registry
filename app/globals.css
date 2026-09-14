@@ -3092,7 +3092,7 @@ button {
 }
 
 @media (max-width: 700px) {
-  .home-registry-hero { min-height: 654px; margin-top: 18px; background-size: cover; background-position: 59% bottom; }
+  .home-registry-hero { min-height: 555px; margin-top: 18px; background-size: cover; background-position: 59% bottom; }
   .home-registry-hero-copy { padding: 30px 18px 0; }
   .home-registry-hero-copy h1 { font-size: clamp(34px,9.5vw,43px); letter-spacing: -.052em; }
   .home-registry-hero-summary { max-width: 355px; margin-top: 16px; font-size: 17px; }
