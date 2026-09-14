@@ -70,19 +70,32 @@ export default async function Home() {
   let oneRing = null;
   let darkMagician = null;
   let confirmedSerials = [];
+  let confirmedMagnificentMonsterSerials = 0;
 
   if (supabase) {
-    const [{ data: oneRingCards }, { data: darkMagicianCards }, { data: confirmedData }] = await Promise.all([
+    const [{ data: oneRingCards }, { data: darkMagicianCards }, { data: confirmedData }, { data: magnificentMonsterSet }] = await Promise.all([
       supabase.from("cards").select("id, name, image_url, card_sets!inner(slug)")
         .eq("name", "The One Ring").eq("card_sets.slug", "lotr-original").limit(1),
       supabase.from("cards").select("id, name, image_url, card_sets!inner(slug)")
         .ilike("name", "Dark Magician%").eq("card_sets.slug", "magnificent-monsters").limit(1),
       supabase.from("serials").select("card_id, card:cards(id, name, image_url, serial_total, card_sets(slug))")
         .eq("status", "confirmed"),
+      supabase.from("card_sets").select("id").eq("slug", "magnificent-monsters").eq("status", "live").single(),
     ]);
     oneRing = oneRingCards?.[0] || null;
     darkMagician = darkMagicianCards?.[0] || null;
     confirmedSerials = confirmedData || [];
+
+    if (magnificentMonsterSet?.id) {
+      const { data: magnificentMonsterCards } = await supabase
+        .from("cards")
+        .select("serials(status)")
+        .eq("set_id", magnificentMonsterSet.id);
+      confirmedMagnificentMonsterSerials = magnificentMonsterCards?.reduce(
+        (total, card) => total + (card.serials?.filter((serial) => serial.status === "confirmed").length || 0),
+        0
+      ) || 0;
+    }
   }
 
   const discoveriesByCard = confirmedSerials.reduce((totals, serial) => {
@@ -155,9 +168,6 @@ export default async function Home() {
     .filter(Boolean);
   const photoPulls = pulls.filter((pull) => pull.imageUrl);
   const featuredSetPulls = selectFeaturedPulls(magnificentMonstersPulls);
-  const confirmedMagnificentMonsterSerials = confirmedSerials.filter((serial) =>
-    serial.card?.card_sets?.slug === "magnificent-monsters"
-  ).length;
   const recentPulls = photoPulls.slice(0, 4);
 
   return (
