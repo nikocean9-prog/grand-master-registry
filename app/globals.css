@@ -2755,7 +2755,7 @@ button {
 .set-logo-grid--yugioh { grid-template-columns:repeat(2,minmax(0,1fr)); }
 .set-logo-grid--magic-the-gathering { grid-template-columns:repeat(3,minmax(0,1fr)); }
 .set-logo-tile { display:flex; min-width:0; flex-direction:column; border:0; background:transparent; color:inherit; box-shadow:none; text-decoration:none; }
-.set-logo-art { position:relative; display:grid; box-sizing:border-box; width:100%; height:166px; overflow:visible; padding:10px 8px 12px; place-items:center; }
+.set-logo-art { position:relative; display:grid; box-sizing:border-box; width:100%; height:166px; overflow:visible; margin-bottom:20px; padding:10px 8px 12px; place-items:center; }
 .set-logo-grid--yugioh .set-logo-art { aspect-ratio:3 / 1; height:auto; }
 .set-logo-art > img:first-child { display:block; width:auto; max-width:100%; height:auto; max-height:100%; min-width:0; min-height:0; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); transition:filter 160ms ease,transform 160ms ease; }
 .set-logo-art--holiday { grid-template-rows:minmax(0,1fr) auto; gap:5px; }
@@ -2763,7 +2763,7 @@ button {
 .set-logo-art .set-release-ribbon { display:block; width:82%; max-width:430px; height:auto; object-fit:contain; filter:drop-shadow(0 4px 4px rgba(45,19,10,.24)); }
 .set-logo-tile:hover .set-logo-art > img:first-child,.set-logo-tile:focus-visible .set-logo-art > img:first-child { filter:drop-shadow(0 10px 9px rgba(20,18,11,.42)) drop-shadow(0 2px 1px rgba(0,0,0,.5)); transform:translateY(-2px); }
 .set-logo-tile:focus-visible { border-radius:4px; outline:3px solid #2c7448; outline-offset:6px; }
-.set-logo-tracker { display:block; margin-top:6px; border:0; background:transparent; padding:0; box-shadow:none; }
+.set-logo-tracker { display:block; margin-top:0; border:0; background:transparent; padding:0; box-shadow:none; }
 .set-logo-tracker-heading { display:flex; align-items:baseline; justify-content:space-between; gap:9px; margin-bottom:8px; color:#273029; font-family:Arial,Helvetica,sans-serif; font-weight:900; letter-spacing:-.035em; text-transform:uppercase; }
 .set-logo-tracker-heading strong { color:#111713; font-size:15px; font-weight:900; }
 .set-logo-tracker-heading > span { font-size:10px; }
@@ -2779,7 +2779,7 @@ button {
     height:auto;
     flex:none;
     overflow:visible;
-    padding:12px 14px 30px;
+    padding:12px 14px;
   }
   .set-logo-grid--magic-the-gathering .set-logo-art > img:first-child {
     width:auto;
@@ -2804,10 +2804,10 @@ button {
 
 /* Branded set pages share the approved Magnificent Monsters composition. */
 .registry-set-intro--branded { margin-top:24px; }
-.registry-set-lockup { display:flex; min-height:320px; flex-direction:column; align-items:center; justify-content:center; gap:8px; margin:0 auto 18px; }
+.registry-set-lockup { display:flex; min-height:320px; flex-direction:column; align-items:center; justify-content:center; gap:8px; margin:0 auto 20px; }
 .registry-set-tcg-logo { display:block; width:min(100%,360px); max-height:112px; object-fit:contain; }
 .registry-set-wordmark { display:block; width:min(100%,610px); max-height:220px; object-fit:contain; filter:drop-shadow(0 8px 7px rgba(20,18,11,.32)) drop-shadow(0 2px 1px rgba(0,0,0,.45)); }
-@media (max-width:480px) { .registry-set-lockup { min-height:260px; gap:4px; margin-bottom:12px; } .registry-set-tcg-logo { width:min(86%,300px); max-height:90px; } .registry-set-wordmark { width:min(100%,520px); max-height:176px; } }
+@media (max-width:480px) { .registry-set-lockup { min-height:260px; gap:4px; margin-bottom:20px; } .registry-set-tcg-logo { width:min(86%,300px); max-height:90px; } .registry-set-wordmark { width:min(100%,520px); max-height:176px; } }
 
 /* Approved homepage registry hub */
 .home-registry-hero {
@@ -2946,7 +2946,7 @@ button {
   margin: 48px auto 0;
   text-align: center;
 }
-.home-featured-set-logo-link { display: block; width: min(100%, 850px); text-decoration: none; }
+.home-featured-set-logo-link { display: block; width: min(100%, 850px); margin-bottom: 20px; text-decoration: none; }
 .home-featured-set-logo {
   display: block;
   width: 100%;
@@ -2954,7 +2954,7 @@ button {
   object-fit: contain;
   filter: drop-shadow(0 13px 12px rgba(20,18,11,.3)) drop-shadow(0 3px 2px rgba(0,0,0,.38));
 }
-.home-featured-set-summary { margin: -2px 0 13px; color: #65708c; font-size: 18px; }
+.home-featured-set-summary { margin: 0 0 13px; color: #65708c; font-size: 18px; }
 .home-featured-set-status {
   display: flex;
   width: 100%;
