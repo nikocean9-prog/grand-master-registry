@@ -6,7 +6,8 @@ const DEFAULT_FRAME = { cx: 0.5, cy: 0.5, width: 1, height: 1, rotation: 0 };
 const MIN_SIZE = 0.12;
 const MAX_SIZE = 1;
 const SNAP_ANGLES = [-180, -90, 0, 90, 180];
-const SNAP_THRESHOLD = 4;
+const SNAP_THRESHOLD = 8;
+const SNAP_RELEASE_THRESHOLD = 14;
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -19,12 +20,21 @@ function normaliseAngle(value) {
   return angle;
 }
 
-function snapAngle(value) {
+function angleDistance(first, second) {
+  return Math.abs(normaliseAngle(first - second));
+}
+
+function snapAngle(value, currentValue) {
   const angle = normaliseAngle(value);
+  const heldAngle = SNAP_ANGLES.find((candidate) => (
+    angleDistance(currentValue, candidate) < 0.001
+    && angleDistance(angle, candidate) <= SNAP_RELEASE_THRESHOLD
+  ));
+  if (heldAngle !== undefined) return heldAngle;
   const closest = SNAP_ANGLES.reduce((best, candidate) => (
-    Math.abs(candidate - angle) < Math.abs(best - angle) ? candidate : best
+    angleDistance(candidate, angle) < angleDistance(best, angle) ? candidate : best
   ), SNAP_ANGLES[0]);
-  return Math.abs(closest - angle) <= SNAP_THRESHOLD ? closest : angle;
+  return angleDistance(closest, angle) <= SNAP_THRESHOLD ? closest : angle;
 }
 
 function sanitiseFrame(frame) {
@@ -194,8 +204,11 @@ export default function BulkCropEditor({ src, alt, value, onCommit, saving = fal
       return;
     }
     if (gesture.action === "rotate") {
-      const angle = Math.atan2(point.y - gesture.frame.cy, point.x - gesture.frame.cx) * 180 / Math.PI + 90;
-      updateFrame(fitFrame({ ...gesture.frame, rotation: snapAngle(angle) }));
+      const bounds = stageRef.current.getBoundingClientRect();
+      const centreX = bounds.left + gesture.frame.cx * bounds.width;
+      const centreY = bounds.top + gesture.frame.cy * bounds.height;
+      const angle = Math.atan2(event.clientY - centreY, event.clientX - centreX) * 180 / Math.PI + 90;
+      updateFrame(fitFrame({ ...gesture.frame, rotation: snapAngle(angle, frameRef.current.rotation) }));
     }
   }
 
@@ -271,7 +284,7 @@ export default function BulkCropEditor({ src, alt, value, onCommit, saving = fal
         >↻</button>
       </div>
       <p className={`bulk-crop-status${error ? " bulk-crop-status-error" : ""}`} role="status">
-        {error || (saving ? "Saving crop…" : "Changes save automatically")}
+        {error || (saving ? "Saving crop…" : `Rotation ${Math.round(frame.rotation)}° · changes save automatically`)}
       </p>
     </div>
   );
