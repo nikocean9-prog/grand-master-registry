@@ -56,6 +56,8 @@ export default function BulkUploadPage() {
   const [savingAction, setSavingAction] = useState("");
   const [cropSaving, setCropSaving] = useState(false);
   const [cropError, setCropError] = useState("");
+  const [duplicateCheck, setDuplicateCheck] = useState({ status: "idle" });
+  const [backgroundApprovals, setBackgroundApprovals] = useState({});
   const cropSaveQueue = useRef(Promise.resolve());
   const cropSaveCount = useRef(0);
 
@@ -98,23 +100,60 @@ export default function BulkUploadPage() {
     const submissionIds = [...new Set(
       (data || []).flatMap((batch) => batch.items || []).map((item) => item.submission_id).filter(Boolean)
     )];
-    let submissionStatuses = {};
+    let submissionsById = {};
+    let approvedSubmissionIdsBySerial = {};
     if (submissionIds.length > 0) {
       const { data: submissionData } = await supabase
         .from("submissions")
-        .select("id,status")
+        .select("id,status,serial_id,exact_duplicate_of")
         .in("id", submissionIds);
-      submissionStatuses = Object.fromEntries(
-        (submissionData || []).map((submission) => [submission.id, submission.status])
+      submissionsById = Object.fromEntries(
+        (submissionData || []).map((submission) => [submission.id, submission])
       );
+
+      const serialIds = [...new Set((submissionData || []).map((submission) => submission.serial_id).filter(Boolean))];
+      if (serialIds.length > 0) {
+        const { data: approvedData } = await supabase
+          .from("submissions")
+          .select("id,serial_id")
+          .in("serial_id", serialIds)
+          .eq("status", "approved");
+        approvedSubmissionIdsBySerial = (approvedData || []).reduce((result, submission) => {
+          if (!result[submission.serial_id]) result[submission.serial_id] = [];
+          result[submission.serial_id].push(submission.id);
+          return result;
+        }, {});
+      }
     }
+
+    const tupleCounts = (data || []).flatMap((batch) => batch.items || []).reduce((counts, item) => {
+      if (!item.detected_card_id || !item.detected_serial_number || item.status === "dismissed") return counts;
+      const key = `${item.detected_card_id}:${item.detected_serial_number}:${item.detected_region}`;
+      counts[key] = (counts[key] || 0) + 1;
+      return counts;
+    }, {});
 
     setBatches((data || []).map((batch) => ({
       ...batch,
-      items: (batch.items || []).map((item) => ({
-        ...item,
-        submission_status: item.submission_id ? submissionStatuses[item.submission_id] || "pending" : null,
-      })),
+      items: (batch.items || []).map((item) => {
+        const submission = item.submission_id ? submissionsById[item.submission_id] : null;
+        const tupleKey = item.detected_card_id && item.detected_serial_number
+          ? `${item.detected_card_id}:${item.detected_serial_number}:${item.detected_region}`
+          : null;
+        const approvedIds = submission?.serial_id
+          ? approvedSubmissionIdsBySerial[submission.serial_id] || []
+          : [];
+        return {
+          ...item,
+          submission_status: submission?.status || (item.submission_id ? "pending" : null),
+          exact_duplicate_of: submission?.exact_duplicate_of || null,
+          possible_duplicate: Boolean(
+            submission?.exact_duplicate_of ||
+            (tupleKey && tupleCounts[tupleKey] > 1) ||
+            approvedIds.some((id) => id !== item.submission_id)
+          ),
+        };
+      }),
     })));
   }, []);
 
@@ -133,6 +172,7 @@ export default function BulkUploadPage() {
     setOpeningPhoto(true);
     setCropSaving(false);
     setCropError("");
+    setDuplicateCheck({ status: "idle" });
     setManualCardId(item.detected_card_id ? String(item.detected_card_id) : "");
     setManualSerial(item.detected_serial_number ? String(item.detected_serial_number) : "");
     setManualRegion(item.detected_region || "AMERICAS");
@@ -153,7 +193,77 @@ export default function BulkUploadPage() {
     setOpeningPhoto(false);
     setCropSaving(false);
     setCropError("");
+    setDuplicateCheck({ status: "idle" });
   }
+
+  useEffect(() => {
+    if (!openItem) return undefined;
+    const cardId = Number(manualCardId);
+    const serialNumber = Number(manualSerial);
+    if (!Number.isInteger(cardId) || !Number.isInteger(serialNumber) || serialNumber < 1) {
+      setDuplicateCheck({ status: "idle" });
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setDuplicateCheck({ status: "checking" });
+      const { data: serial, error: serialError } = await supabase
+        .from("serials")
+        .select("id,status")
+        .eq("card_id", cardId)
+        .eq("serial_number", serialNumber)
+        .eq("region", manualRegion)
+        .maybeSingle();
+
+      if (cancelled) return;
+      if (serialError || !serial) {
+        setDuplicateCheck({ status: "unavailable" });
+        return;
+      }
+
+      const [submissionResult, bulkResult] = await Promise.all([
+        supabase
+          .from("submissions")
+          .select("id,status,exact_duplicate_of")
+          .eq("serial_id", serial.id)
+          .in("status", ["pending", "approved"]),
+        supabase
+          .from("bulk_upload_items")
+          .select("id,status,submission_id")
+          .eq("detected_card_id", cardId)
+          .eq("detected_serial_number", serialNumber)
+          .eq("detected_region", manualRegion)
+          .neq("id", openItem.id)
+          .neq("status", "dismissed"),
+      ]);
+
+      if (cancelled) return;
+      if (submissionResult.error || bulkResult.error) {
+        setDuplicateCheck({ status: "unavailable" });
+        return;
+      }
+      const otherSubmissions = (submissionResult.data || []).filter(
+        (submission) => submission.id !== openItem.submission_id
+      );
+      const currentSubmission = (submissionResult.data || []).find(
+        (submission) => submission.id === openItem.submission_id
+      );
+      setDuplicateCheck({
+        status: "ready",
+        serialStatus: serial.status,
+        approvedCount: otherSubmissions.filter((submission) => submission.status === "approved").length,
+        pendingCount: otherSubmissions.filter((submission) => submission.status === "pending").length,
+        matchingBulkCount: (bulkResult.data || []).length,
+        exactDuplicateOf: currentSubmission?.exact_duplicate_of || null,
+      });
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [manualCardId, manualRegion, manualSerial, openItem?.id, openItem?.submission_id]);
 
   async function saveDisplayCrop(displayCrop) {
     if (!openItem) return;
@@ -178,6 +288,87 @@ export default function BulkUploadPage() {
     await cropSaveQueue.current;
   }
 
+  function updateBackgroundApproval(itemId, values) {
+    setBackgroundApprovals((current) => ({
+      ...current,
+      [itemId]: { ...current[itemId], ...values },
+    }));
+  }
+
+  function nextReviewItem(currentItemId) {
+    return batches
+      .flatMap((batch) => batch.items || [])
+      .find((item) =>
+        item.id !== currentItemId &&
+        !backgroundApprovals[item.id] &&
+        item.submission_status !== "approved" &&
+        item.submission_status !== "rejected" &&
+        (item.submission_id || ["needs_review", "error"].includes(item.status))
+      );
+  }
+
+  async function runBackgroundApproval(job) {
+    updateBackgroundApproval(job.itemId, { status: "working" });
+    const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
+      body: {
+        action: "manual_identify",
+        item_id: job.itemId,
+        card_id: job.cardId,
+        serial_number: job.serialNumber,
+        region: job.region,
+      },
+    });
+    if (error || data?.error) {
+      updateBackgroundApproval(job.itemId, {
+        status: "failed",
+        error: data?.error || "This bulk card could not be prepared for approval.",
+      });
+      await loadBatches();
+      return;
+    }
+
+    if (data?.exact_duplicate_of) {
+      updateBackgroundApproval(job.itemId, {
+        status: "failed",
+        error: `Exact duplicate of submission #${data.exact_duplicate_of}. It remains in Pending Approvals and was not published.`,
+      });
+      await loadBatches();
+      return;
+    }
+
+    if (job.displayCrop) {
+      const { data: cropData, error: cropSyncError } = await supabase.functions.invoke("save-bulk-display-crop", {
+        body: { item_id: job.itemId, display_crop: job.displayCrop },
+      });
+      if (cropSyncError || cropData?.error) {
+        updateBackgroundApproval(job.itemId, {
+          status: "failed",
+          error: cropData?.error || "The display crop could not be attached. The card remains in Pending Approvals.",
+        });
+        await loadBatches();
+        return;
+      }
+    }
+
+    const { error: approvalError } = await supabase.rpc("approve_submission", {
+      p_submission_id: data.submission_id,
+    });
+    if (approvalError) {
+      updateBackgroundApproval(job.itemId, {
+        status: "failed",
+        error: `${safeAdminActionMessage(approvalError, "approve this card")} It remains in Pending Approvals.`,
+      });
+      if (isMfaRequiredError(approvalError)) {
+        window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
+      }
+      await loadBatches();
+      return;
+    }
+
+    updateBackgroundApproval(job.itemId, { status: "complete" });
+    await loadBatches();
+  }
+
   async function saveIdentification(approveNow = false) {
     const cardId = Number(manualCardId);
     const serialNumber = Number(manualSerial);
@@ -189,28 +380,53 @@ export default function BulkUploadPage() {
     const selectedCard = cards.find((card) => card.id === cardId);
     const serialLabel = `${String(serialNumber).padStart(3, "0")}${manualRegion === "E" ? "E" : ""}`;
     if (approveNow) {
-      const { data: serial } = await supabase
-        .from("serials")
-        .select("id,status")
-        .eq("card_id", cardId)
-        .eq("serial_number", serialNumber)
-        .eq("region", manualRegion)
-        .maybeSingle();
-
-      if (serial?.status === "confirmed") {
+      if (duplicateCheck.status !== "ready") {
+        setMessage("Wait for the duplicate check before approving this card.");
+        return;
+      }
+      const hasConfirmedRecord = duplicateCheck.status === "ready" && (
+        duplicateCheck.serialStatus === "confirmed" || duplicateCheck.approvedCount > 0
+      );
+      if (hasConfirmedRecord) {
         const replace = window.confirm(
           `${selectedCard?.name || "This card"} ${serialLabel} is already confirmed. Approve this photo as the replacement record?`
         );
         if (!replace) return;
+      } else if (
+        duplicateCheck.exactDuplicateOf ||
+        duplicateCheck.pendingCount > 0 ||
+        duplicateCheck.matchingBulkCount > 0
+      ) {
+        const approveDuplicate = window.confirm(
+          `${selectedCard?.name || "This card"} ${serialLabel} may be a duplicate. Approve it anyway?`
+        );
+        if (!approveDuplicate) return;
       } else {
         const confirmed = window.confirm(
           `Approve and publish ${selectedCard?.name || "this card"} ${serialLabel}?`
         );
         if (!confirmed) return;
       }
+
+      const itemId = openItem.id;
+      const nextItem = nextReviewItem(itemId);
+      const job = {
+        itemId,
+        cardId,
+        serialNumber,
+        region: manualRegion,
+        displayCrop: openItem.display_crop || null,
+        label: `${selectedCard?.name || "Card"} ${serialLabel}`,
+      };
+      updateBackgroundApproval(itemId, { status: "queued", label: job.label, error: "" });
+      closeItem();
+      setMessage(`${job.label} is approving in the background.`);
+      if (nextItem) void viewItem(nextItem);
+      void runBackgroundApproval(job);
+      return;
     }
 
-    setSavingAction(approveNow ? "approve" : "pending");
+    setSavingAction("pending");
     setMessage("");
     const { data, error } = await supabase.functions.invoke("process-bulk-pulls", {
       body: { action: "manual_identify", item_id: openItem.id, card_id: cardId, serial_number: serialNumber, region: manualRegion },
@@ -233,28 +449,9 @@ export default function BulkUploadPage() {
       }
     }
 
-    if (approveNow) {
-      const { error: approvalError } = await supabase.rpc("approve_submission", {
-        p_submission_id: data.submission_id,
-      });
-      if (approvalError) {
-        setMessage(
-          `${safeAdminActionMessage(approvalError, "approve this card")} It has been kept in Pending Approvals.`
-        );
-        setSavingAction("");
-        if (isMfaRequiredError(approvalError)) {
-          window.setTimeout(() => { window.location.href = "/admin/mfa"; }, 1500);
-        }
-        await loadBatches();
-        return;
-      }
-    }
-
     closeItem();
     await loadBatches();
-    setMessage(approveNow
-      ? `${selectedCard?.name || "The card"} ${serialLabel} was approved and published.`
-      : "The identified card was sent to Pending Approvals.");
+    setMessage("The identified card was sent to Pending Approvals.");
     setSavingAction("");
   }
 
@@ -467,6 +664,18 @@ export default function BulkUploadPage() {
         )}
 
         {message && <p className="bulk-message" role="status">{message}</p>}
+        {Object.keys(backgroundApprovals).length > 0 && (
+          <div className="bulk-background-approvals" aria-live="polite">
+            <strong>Background approvals</strong>
+            {Object.entries(backgroundApprovals).map(([itemId, job]) => (
+              <div className={`bulk-background-job bulk-background-job-${job.status}`} key={itemId}>
+                <span>{job.label}</span>
+                <b>{job.status === "queued" ? "Queued" : job.status === "working" ? "Approving…" : job.status === "complete" ? "Published" : "Failed"}</b>
+                {job.error && <small>{job.error}</small>}
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="bulk-batches">
@@ -531,7 +740,9 @@ export default function BulkUploadPage() {
                           </div>
                           <div className="bulk-item-result">
                             {Number.isInteger(item.confidence) && <small>{item.confidence}%</small>}
-                            {item.submission_status === "approved" ? (
+                            {backgroundApprovals[item.id]?.status === "queued" || backgroundApprovals[item.id]?.status === "working" ? (
+                              <span className="bulk-approving-label">Approving…</span>
+                            ) : item.submission_status === "approved" ? (
                               <span className="bulk-published-label">Published</span>
                             ) : item.submission_status === "rejected" ? (
                               <span>Rejected</span>
@@ -545,6 +756,7 @@ export default function BulkUploadPage() {
                               </button>
                             ) : <span>{statusLabel(item.status)}</span>}
                           </div>
+                          {item.possible_duplicate && <span className="bulk-duplicate-label">Possible duplicate</span>}
                         </div>
                       );
                     })}
@@ -582,6 +794,22 @@ export default function BulkUploadPage() {
                 <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
                 <div><dt>AI confidence</dt><dd>{Number.isInteger(openItem.confidence) ? `${openItem.confidence}%` : "Not available"}</dd></div>
               </dl>
+              {duplicateCheck.status === "checking" && <p className="bulk-duplicate-check">Checking for duplicates…</p>}
+              {duplicateCheck.status === "unavailable" && <p className="bulk-duplicate-check bulk-duplicate-check-error">This card, serial and region could not be verified. Check the details before approving.</p>}
+              {duplicateCheck.status === "ready" && (
+                duplicateCheck.exactDuplicateOf ||
+                duplicateCheck.approvedCount > 0 ||
+                duplicateCheck.pendingCount > 0 ||
+                duplicateCheck.matchingBulkCount > 0
+              ) && (
+                <div className="bulk-duplicate-warning" role="alert">
+                  <strong>Possible duplicate</strong>
+                  {duplicateCheck.exactDuplicateOf && <span>This exact photo was submitted previously.</span>}
+                  {duplicateCheck.approvedCount > 0 && <span>This card and serial already has an approved record.</span>}
+                  {duplicateCheck.pendingCount > 0 && <span>{duplicateCheck.pendingCount} other pending submission{duplicateCheck.pendingCount === 1 ? "" : "s"} use this card and serial.</span>}
+                  {duplicateCheck.matchingBulkCount > 0 && <span>{duplicateCheck.matchingBulkCount} other bulk-upload item{duplicateCheck.matchingBulkCount === 1 ? "" : "s"} use this card and serial.</span>}
+                </div>
+              )}
               <div className="bulk-identify-form">
                 <label>Card
                   <select value={manualCardId} onChange={(event) => {
@@ -607,8 +835,8 @@ export default function BulkUploadPage() {
                   </select>
                 </label>
                 <div className="bulk-identify-actions">
-                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || cropSaving || openingPhoto || !openPhotoUrl}>
-                    {savingAction === "approve" ? "Approving…" : "Approve and publish"}
+                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || cropSaving || openingPhoto || !openPhotoUrl || duplicateCheck.status !== "ready"}>
+                    Approve and continue
                   </button>
                   <button type="button" className="secondary-button" onClick={() => saveIdentification(false)} disabled={Boolean(savingAction) || cropSaving}>
                     {savingAction === "pending" ? "Sending…" : "Save to Pending Approvals"}

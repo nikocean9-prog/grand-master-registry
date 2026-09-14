@@ -410,6 +410,13 @@ Deno.serve(async (req: Request) => {
     if (evidenceError && !String(evidenceError.message).toLowerCase().includes("already exists")) return json({ error: "The photo could not be prepared for approval" }, 500);
 
     const digest = await sha256(blob);
+    let duplicateQuery = supabase.from("submissions").select("id,status").eq("photo_sha256", digest);
+    if (item.submission_id) duplicateQuery = duplicateQuery.neq("id", item.submission_id);
+    const { data: duplicate, error: duplicateError } = await duplicateQuery
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (duplicateError) return json({ error: "The duplicate check could not be completed" }, 500);
     const serialLabel = `${String(serialNumber).padStart(3, "0")}${region === "E" ? "E" : ""}`;
     const submissionValues = {
       serial_id: serial.id, photo_url: evidencePath, status: "pending",
@@ -420,6 +427,7 @@ Deno.serve(async (req: Request) => {
       ai_card_name_read: item.assessment?.first?.title || item.assessment?.second?.title || null,
       ai_serial_read: item.assessment?.first?.serialText || item.assessment?.second?.serialText || null,
       ai_confidence: item.confidence || 0, ai_checked_at: new Date().toISOString(), photo_sha256: digest,
+      exact_duplicate_of: duplicate?.id || null,
       client_request_id: item.id,
     };
     const submissionRequest = isManualRecheck
@@ -513,7 +521,11 @@ Deno.serve(async (req: Request) => {
       }
     })();
     EdgeRuntime.waitUntil(backgroundCheck);
-    return json({ processed: true, submission_id: submission.id });
+    return json({
+      processed: true,
+      submission_id: submission.id,
+      exact_duplicate_of: duplicate?.id || null,
+    });
   }
 
   // A worker can be interrupted after claiming an item (for example by an
