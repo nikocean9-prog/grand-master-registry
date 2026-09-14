@@ -166,7 +166,7 @@ export default async function Home() {
       <section className="home-registry-hero">
         <div className="home-registry-hero-copy">
           <p className="home-section-eyebrow">The global serialised card registry</p>
-          <h1>Tracking every serial.<br />Preserving every pull.</h1>
+          <h1><span>Tracking every serial.</span><span>Preserving every pull.</span></h1>
           <p className="home-registry-hero-summary">Search, explore and contribute to the global registry of serialised trading cards.</p>
           <form className="home-registry-search" action="/search" method="get" role="search">
             <span className="home-registry-search-icon" aria-hidden="true" />
@@ -175,11 +175,12 @@ export default async function Home() {
           </form>
         </div>
         <div className="home-registry-visual" aria-hidden="true">
-          {photoPulls[0]?.imageUrl && (
-            <span className="home-registry-hero-card">
-              <CardPhoto src={photoPulls[0].imageUrl} crop={photoPulls[0].displayCrop} alt="" />
-            </span>
-          )}
+          <span className="home-registry-hero-card">
+            <img
+              src="/catalog/magnificent-monsters/stardust-dragon-victim-sanctuary.webp"
+              alt=""
+            />
+          </span>
           <div className="home-registry-stats">
             <span><strong>{tcgs.filter((tcg) => tcg.status === "live").length}</strong> TCGs</span>
             <span><strong>{tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live").length}</strong> sets</span>
