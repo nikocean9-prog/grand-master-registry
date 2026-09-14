@@ -750,6 +750,50 @@ button {
   gap: 16px;
 }
 
+.bulk-batch-summary-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.bulk-batch-toggle {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #bdc9c1;
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: #fff;
+  color: #174b35;
+  box-shadow: none;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.bulk-batch-toggle:hover {
+  border-color: #176b4a;
+  background: #f0f6f2;
+}
+
+.bulk-batch-toggle > span {
+  width: 15px;
+  color: inherit;
+  font-size: 1.15rem;
+  line-height: 0.8;
+  text-align: center;
+}
+
+.bulk-batch-collapsed {
+  padding-block: 14px;
+  background: #fbfcfa;
+}
+
+.bulk-batch-content[hidden] {
+  display: none;
+}
+
 .bulk-status {
   padding: 6px 10px;
   border-radius: 999px;
@@ -879,6 +923,15 @@ button {
     align-items: flex-start;
     flex-direction: column;
     gap: 4px;
+  }
+
+  .bulk-batch-summary {
+    align-items: flex-start;
+  }
+
+  .bulk-batch-summary-actions {
+    align-items: flex-end;
+    flex-direction: column;
   }
 
   .bulk-item {

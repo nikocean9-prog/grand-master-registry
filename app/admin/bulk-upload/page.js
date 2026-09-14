@@ -16,6 +16,7 @@ const supabase = createClient(
 
 const MAX_FILES = 50;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const COLLAPSED_BATCHES_KEY = "bulk-upload-collapsed-batches";
 const ACCEPTED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -41,6 +42,7 @@ export default function BulkUploadPage() {
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState([]);
   const [batches, setBatches] = useState([]);
+  const [collapsedBatchIds, setCollapsedBatchIds] = useState(() => new Set());
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const [message, setMessage] = useState("");
@@ -56,6 +58,25 @@ export default function BulkUploadPage() {
   const [cropError, setCropError] = useState("");
   const cropSaveQueue = useRef(Promise.resolve());
   const cropSaveCount = useRef(0);
+
+  useEffect(() => {
+    try {
+      const savedIds = JSON.parse(window.localStorage.getItem(COLLAPSED_BATCHES_KEY) || "[]");
+      if (Array.isArray(savedIds)) setCollapsedBatchIds(new Set(savedIds));
+    } catch {
+      window.localStorage.removeItem(COLLAPSED_BATCHES_KEY);
+    }
+  }, []);
+
+  function toggleBatch(batchId) {
+    setCollapsedBatchIds((current) => {
+      const next = new Set(current);
+      if (next.has(batchId)) next.delete(batchId);
+      else next.add(batchId);
+      window.localStorage.setItem(COLLAPSED_BATCHES_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  }
 
   const loadBatches = useCallback(async () => {
     const { data, error } = await supabase
@@ -459,62 +480,80 @@ export default function BulkUploadPage() {
 
         {batches.length === 0 ? (
           <p>No bulk uploads yet.</p>
-        ) : batches.map((batch) => (
-          <article className="bulk-batch" key={batch.id}>
-            <div className="bulk-batch-summary">
-              <div>
-                <strong>{new Date(batch.created_at).toLocaleString()}</strong>
-                <span>{batch.processed_items} of {batch.total_items} assessed</span>
+        ) : batches.map((batch) => {
+          const isCollapsed = collapsedBatchIds.has(batch.id);
+          const contentId = `bulk-batch-content-${batch.id}`;
+          return (
+            <article className={`bulk-batch${isCollapsed ? " bulk-batch-collapsed" : ""}`} key={batch.id}>
+              <div className="bulk-batch-summary">
+                <div>
+                  <strong>{new Date(batch.created_at).toLocaleString()}</strong>
+                  <span>{batch.processed_items} of {batch.total_items} assessed</span>
+                </div>
+                <span className="bulk-batch-summary-actions">
+                  <span className={`bulk-status bulk-status-${batch.status}`}>
+                    {statusLabel(batch.status)}
+                  </span>
+                  <button
+                    type="button"
+                    className="bulk-batch-toggle"
+                    aria-expanded={!isCollapsed}
+                    aria-controls={contentId}
+                    onClick={() => toggleBatch(batch.id)}
+                  >
+                    <span aria-hidden="true">{isCollapsed ? "+" : "−"}</span>
+                    {isCollapsed ? "Expand" : "Minimize"}
+                  </button>
+                </span>
               </div>
-              <span className={`bulk-status bulk-status-${batch.status}`}>
-                {statusLabel(batch.status)}
-              </span>
-            </div>
 
-            <div className="bulk-progress" aria-label={`${batch.processed_items} of ${batch.total_items} assessed`}>
-              <span style={{ width: `${batch.total_items ? (batch.processed_items / batch.total_items) * 100 : 0}%` }} />
-            </div>
+              <div id={contentId} className="bulk-batch-content" hidden={isCollapsed}>
+                <div className="bulk-progress" aria-label={`${batch.processed_items} of ${batch.total_items} assessed`}>
+                  <span style={{ width: `${batch.total_items ? (batch.processed_items / batch.total_items) * 100 : 0}%` }} />
+                </div>
 
-            <div className="bulk-batch-counts">
-              <span><strong>{batch.ready_items}</strong> in approvals</span>
-              <span><strong>{batch.review_items}</strong> need attention</span>
-            </div>
+                <div className="bulk-batch-counts">
+                  <span><strong>{batch.ready_items}</strong> in approvals</span>
+                  <span><strong>{batch.review_items}</strong> need attention</span>
+                </div>
 
-            {batch.items?.length > 0 && (
-              <div className="bulk-item-list">
-                {batch.items.filter((item) => item.status !== "dismissed").map((item) => {
-                  const number = item.detected_serial_number
-                    ? `${String(item.detected_serial_number).padStart(3, "0")}${item.detected_region === "E" ? "E" : ""}`
-                    : "Serial unreadable";
-                  return (
-                    <div className={`bulk-item bulk-item-${item.status}`} key={item.id}>
-                      <div>
-                        <strong>{item.card?.name || item.original_filename}</strong>
-                        <span>{item.card?.name ? number : statusLabel(item.status)}</span>
-                      </div>
-                      <div className="bulk-item-result">
-                        {Number.isInteger(item.confidence) && <small>{item.confidence}%</small>}
-                        {item.submission_status === "approved" ? (
-                          <span className="bulk-published-label">Published</span>
-                        ) : item.submission_status === "rejected" ? (
-                          <span>Rejected</span>
-                        ) : item.submission_id ? (
-                          <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
-                            Review &amp; approve
-                          </button>
-                        ) : ["needs_review", "error"].includes(item.status) ? (
-                          <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
-                            Review &amp; approve
-                          </button>
-                        ) : <span>{statusLabel(item.status)}</span>}
-                      </div>
-                    </div>
-                  );
-                })}
+                {batch.items?.length > 0 && (
+                  <div className="bulk-item-list">
+                    {batch.items.filter((item) => item.status !== "dismissed").map((item) => {
+                      const number = item.detected_serial_number
+                        ? `${String(item.detected_serial_number).padStart(3, "0")}${item.detected_region === "E" ? "E" : ""}`
+                        : "Serial unreadable";
+                      return (
+                        <div className={`bulk-item bulk-item-${item.status}`} key={item.id}>
+                          <div>
+                            <strong>{item.card?.name || item.original_filename}</strong>
+                            <span>{item.card?.name ? number : statusLabel(item.status)}</span>
+                          </div>
+                          <div className="bulk-item-result">
+                            {Number.isInteger(item.confidence) && <small>{item.confidence}%</small>}
+                            {item.submission_status === "approved" ? (
+                              <span className="bulk-published-label">Published</span>
+                            ) : item.submission_status === "rejected" ? (
+                              <span>Rejected</span>
+                            ) : item.submission_id ? (
+                              <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
+                                Review &amp; approve
+                              </button>
+                            ) : ["needs_review", "error"].includes(item.status) ? (
+                              <button type="button" className="bulk-open-item" onClick={() => viewItem(item)}>
+                                Review &amp; approve
+                              </button>
+                            ) : <span>{statusLabel(item.status)}</span>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </section>
 
       {openItem && (
