@@ -2,9 +2,11 @@
 
 import { useId, useRef, useState } from "react";
 
-const DEFAULT_FRAME = { cx: 0.5, cy: 0.5, width: 0.96, height: 0.96, rotation: 0 };
+const DEFAULT_FRAME = { cx: 0.5, cy: 0.5, width: 1, height: 1, rotation: 0 };
 const MIN_SIZE = 0.12;
-const MAX_ROTATION = 45;
+const MAX_SIZE = 1;
+const SNAP_ANGLES = [-180, -90, 0, 90, 180];
+const SNAP_THRESHOLD = 4;
 
 function clamp(value, minimum, maximum) {
   return Math.min(maximum, Math.max(minimum, value));
@@ -14,7 +16,15 @@ function normaliseAngle(value) {
   let angle = value;
   while (angle > 180) angle -= 360;
   while (angle < -180) angle += 360;
-  return clamp(angle, -MAX_ROTATION, MAX_ROTATION);
+  return angle;
+}
+
+function snapAngle(value) {
+  const angle = normaliseAngle(value);
+  const closest = SNAP_ANGLES.reduce((best, candidate) => (
+    Math.abs(candidate - angle) < Math.abs(best - angle) ? candidate : best
+  ), SNAP_ANGLES[0]);
+  return Math.abs(closest - angle) <= SNAP_THRESHOLD ? closest : angle;
 }
 
 function sanitiseFrame(frame) {
@@ -27,8 +37,8 @@ function sanitiseFrame(frame) {
     rotation: Number(frame.rotation),
   };
   if (!Object.values(next).every(Number.isFinite)) return { ...DEFAULT_FRAME };
-  next.width = clamp(next.width, MIN_SIZE, 0.96);
-  next.height = clamp(next.height, MIN_SIZE, 0.96);
+  next.width = clamp(next.width, MIN_SIZE, MAX_SIZE);
+  next.height = clamp(next.height, MIN_SIZE, MAX_SIZE);
   next.rotation = normaliseAngle(next.rotation);
   return fitFrame(next);
 }
@@ -52,11 +62,11 @@ function fitFrame(frame) {
   const radians = frame.rotation * Math.PI / 180;
   const cosine = Math.abs(Math.cos(radians));
   const sine = Math.abs(Math.sin(radians));
-  let width = clamp(frame.width, MIN_SIZE, 0.96);
-  let height = clamp(frame.height, MIN_SIZE, 0.96);
+  let width = clamp(frame.width, MIN_SIZE, MAX_SIZE);
+  let height = clamp(frame.height, MIN_SIZE, MAX_SIZE);
   const initialExtentX = cosine * width / 2 + sine * height / 2;
   const initialExtentY = sine * width / 2 + cosine * height / 2;
-  const scale = Math.min(1, 0.49 / Math.max(initialExtentX, 0.001), 0.49 / Math.max(initialExtentY, 0.001));
+  const scale = Math.min(1, 0.5 / Math.max(initialExtentX, 0.001), 0.5 / Math.max(initialExtentY, 0.001));
   width = Math.max(MIN_SIZE, width * scale);
   height = Math.max(MIN_SIZE, height * scale);
   const extentX = cosine * width / 2 + sine * height / 2;
@@ -185,7 +195,7 @@ export default function BulkCropEditor({ src, alt, value, onCommit, saving = fal
     }
     if (gesture.action === "rotate") {
       const angle = Math.atan2(point.y - gesture.frame.cy, point.x - gesture.frame.cx) * 180 / Math.PI + 90;
-      updateFrame(fitFrame({ ...gesture.frame, rotation: normaliseAngle(angle) }));
+      updateFrame(fitFrame({ ...gesture.frame, rotation: snapAngle(angle) }));
     }
   }
 

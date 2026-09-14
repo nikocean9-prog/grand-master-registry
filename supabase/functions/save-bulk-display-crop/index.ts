@@ -56,8 +56,8 @@ function normaliseDisplayCrop(value: unknown) {
   };
   if (!Object.values(frame).every(Number.isFinite)
     || frame.cx < 0 || frame.cx > 1 || frame.cy < 0 || frame.cy > 1
-    || frame.width < 0.12 || frame.width > 0.96 || frame.height < 0.12 || frame.height > 0.96
-    || frame.rotation < -45 || frame.rotation > 45) return null;
+    || frame.width < 0.12 || frame.width > 1 || frame.height < 0.12 || frame.height > 1
+    || frame.rotation < -180 || frame.rotation > 180) return null;
   return { version: 1, safety, corners, frame };
 }
 
