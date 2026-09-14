@@ -2865,19 +2865,20 @@ button {
 /* Approved homepage registry hub */
 .home-registry-hero {
   position: relative;
+  box-sizing: border-box;
+  width: 100vw;
   min-height: 722px;
-  overflow: hidden;
-  margin-top: 18px;
-  border-radius: 0 0 28px 28px;
-  background: #fff url("/graphics/yugioh-tile-bg.webp") right center / auto 100% no-repeat;
+  margin: 18px calc(50% - 50vw) 0;
+  border-radius: 0;
+  background: #05271d url("/graphics/yugioh-tile-bg.webp") center center / cover no-repeat;
 }
 .home-registry-hero::after {
   position: absolute;
   z-index: 0;
   inset: 0;
   background:
-    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.99) 35%, rgba(255,255,255,.78) 47%, rgba(255,255,255,.12) 68%, rgba(255,255,255,0) 82%),
-    linear-gradient(180deg, #fff 0%, rgba(255,255,255,.95) 19%, rgba(255,255,255,.22) 46%, rgba(255,255,255,0) 66%);
+    linear-gradient(90deg, #fff 0%, rgba(255,255,255,.96) 27%, rgba(255,255,255,.64) 42%, rgba(255,255,255,.08) 60%, rgba(255,255,255,0) 72%),
+    linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(255,255,255,.78) 14%, rgba(255,255,255,.12) 42%, rgba(255,255,255,0) 58%);
   content: "";
   pointer-events: none;
 }
@@ -2886,7 +2887,7 @@ button {
   z-index: 3;
   box-sizing: border-box;
   width: min(820px, 68%);
-  padding: 62px 0 0 40px;
+  padding: 62px 0 0 max(40px, calc((100vw - 1320px) / 2 + 40px));
 }
 .home-registry-hero-copy h1 {
   margin: 0;
@@ -2965,13 +2966,13 @@ button {
   position: absolute;
   z-index: 1;
   inset: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 .home-registry-hero-card {
   position: absolute;
   z-index: 1;
   left: 27%;
-  bottom: 0;
+  bottom: -28px;
   display: block;
   width: min(25%, 300px);
   transform: rotate(4deg);
@@ -3079,26 +3080,26 @@ button {
 .search-results small { color: #69736d; }
 
 @media (max-width: 900px) {
-  .home-registry-hero { min-height: 710px; background-size: auto 78%; background-position: right bottom; }
+  .home-registry-hero { min-height: 710px; background-size: cover; background-position: 57% bottom; }
   .home-registry-hero::after {
     background:
-      linear-gradient(180deg,#fff 0%,rgba(255,255,255,.98) 34%,rgba(255,255,255,.58) 49%,rgba(255,255,255,0) 67%),
-      linear-gradient(90deg,#fff 0%,rgba(255,255,255,.76) 24%,rgba(255,255,255,0) 62%);
+      linear-gradient(180deg,#fff 0%,rgba(255,255,255,.94) 25%,rgba(255,255,255,.5) 39%,rgba(255,255,255,.05) 57%,rgba(255,255,255,0) 68%),
+      linear-gradient(90deg,rgba(255,255,255,.86) 0%,rgba(255,255,255,.48) 27%,rgba(255,255,255,0) 64%);
   }
   .home-registry-hero-copy { width: 100%; padding: 40px 30px 0; }
-  .home-registry-hero-card { left: 15%; bottom: 0; width: 225px; }
+  .home-registry-hero-card { left: 15%; bottom: -24px; width: 225px; }
   .home-registry-stats { right: 12%; bottom: 40px; }
 }
 
 @media (max-width: 700px) {
-  .home-registry-hero { min-height: 654px; margin-right: -18px; margin-left: -18px; border-radius: 0; background-size: auto 66%; }
+  .home-registry-hero { min-height: 654px; margin-top: 18px; background-size: cover; background-position: 59% bottom; }
   .home-registry-hero-copy { padding: 30px 18px 0; }
   .home-registry-hero-copy h1 { font-size: clamp(34px,9.5vw,43px); letter-spacing: -.052em; }
   .home-registry-hero-summary { max-width: 355px; margin-top: 16px; font-size: 17px; }
   .home-registry-search { width: 100%; min-height: 60px; grid-template-columns: 38px minmax(0,1fr) auto; gap: 5px; margin-top: 20px; }
   .home-registry-search input { font-size: 16px; }
   .home-registry-search button { min-height: 46px; padding: 0 19px; font-size: 15px; }
-  .home-registry-hero-card { left: 12%; bottom: 0; width: 178px; }
+  .home-registry-hero-card { left: 12%; bottom: -22px; width: 178px; }
   .home-registry-stats { right: 7%; bottom: 38px; gap: 9px; padding-left: 16px; }
   .home-registry-stats span { font-size: 13px; }
   .home-registry-stats strong { font-size: 29px; }
