@@ -8,12 +8,32 @@ export function formatSerialLabel(serial) {
   if (serial?.region === "E") return `${number}E`;
   return number;
 }
-export async function getPublicPulls(supabase, limit = 24) {
+export async function getPublicPulls(supabase, limit = 24, options = {}) {
   if (!supabase) return [];
 
-  const { data, error } = await supabase
-    .from("submissions")
-    .select(`
+  const relation = options.setSlug ? `
+      id,
+      photo_url,
+      display_crop,
+      created_at,
+      serial:serials!inner (
+        id,
+        serial_number,
+        region,
+        confirmed_at,
+        card:cards!inner (
+          id,
+          name,
+          image_url,
+          serial_total,
+          card_sets!inner (
+            name,
+            slug,
+            tcg_slug
+          )
+        )
+      )
+    ` : `
       id,
       photo_url,
       display_crop,
@@ -35,11 +55,16 @@ export async function getPublicPulls(supabase, limit = 24) {
           )
         )
       )
-    `)
+    `;
+  let request = supabase
+    .from("submissions")
+    .select(relation)
     .eq("status", "approved")
-    .not("photo_url", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(limit);
+    .not("photo_url", "is", null);
+
+  if (options.setSlug) request = request.eq("serial.card.card_sets.slug", options.setSlug);
+
+  const { data, error } = await request.order("created_at", { ascending: false }).limit(limit);
 
   if (error) {
     console.error("Could not load public pulls:", error);

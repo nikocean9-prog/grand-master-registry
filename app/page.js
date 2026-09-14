@@ -1,14 +1,20 @@
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import PublicHeader from "./components/PublicHeader";
-import FeaturedPullCarousel from "./components/FeaturedPullCarousel";
 import CardPhoto from "./components/CardPhoto";
 import HomeStoryCarousel from "./components/HomeStoryCarousel";
+import HomeFeaturedSet from "./components/HomeFeaturedSet";
 import { getPublicPulls } from "./lib/publicPulls";
 import { tcgs } from "./lib/catalog";
 import { getMagnificentMonstersCatalogImage } from "./lib/magnificentMonstersCatalog";
 
 export const dynamic = "force-dynamic";
+
+const featuredPullSelection = [
+  { card: "stardustdragonvictimsanctuary", serial: "010" },
+  { card: "wingedkuribohsabatiellv10", serial: "090E" },
+  { card: "favoriteheroflamewingman", serial: "086" },
+];
 
 const cardBackImages = {
   yugioh: "/graphics/card-backs/yugioh-card-back-v2.webp",
@@ -30,9 +36,37 @@ function tcgLabel(slug) {
   return "Trading card game";
 }
 
+function normalizedCardName(name = "") {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function selectFeaturedPulls(pulls) {
+  const selected = [];
+  const usedCards = new Set();
+
+  for (const wanted of featuredPullSelection) {
+    const candidates = pulls.filter((pull) => (
+      pull.setSlug === "magnificent-monsters"
+      && normalizedCardName(pull.cardName) === wanted.card
+      && pull.imageUrl
+      && pull.displayCrop
+      && !usedCards.has(pull.cardId)
+    ));
+    const match = candidates.find((pull) => pull.serialLabel === wanted.serial) || candidates[0];
+    if (!match) continue;
+    usedCards.add(match.cardId);
+    selected.push(match);
+  }
+
+  return selected;
+}
+
 export default async function Home() {
   const supabase = createPublicClient();
-  const pulls = await getPublicPulls(supabase, 12);
+  const [pulls, magnificentMonstersPulls] = await Promise.all([
+    getPublicPulls(supabase, 24),
+    getPublicPulls(supabase, 200, { setSlug: "magnificent-monsters" }),
+  ]);
   let oneRing = null;
   let darkMagician = null;
   let confirmedSerials = [];
@@ -43,7 +77,7 @@ export default async function Home() {
         .eq("name", "The One Ring").eq("card_sets.slug", "lotr-original").limit(1),
       supabase.from("cards").select("id, name, image_url, card_sets!inner(slug)")
         .ilike("name", "Dark Magician%").eq("card_sets.slug", "magnificent-monsters").limit(1),
-      supabase.from("serials").select("card_id, card:cards(id, name, image_url, serial_total)")
+      supabase.from("serials").select("card_id, card:cards(id, name, image_url, serial_total, card_sets(slug))")
         .eq("status", "confirmed"),
     ]);
     oneRing = oneRingCards?.[0] || null;
@@ -120,31 +154,41 @@ export default async function Home() {
     .map((slug) => tcgs.find((tcg) => tcg.slug === slug))
     .filter(Boolean);
   const photoPulls = pulls.filter((pull) => pull.imageUrl);
-  const featuredYugiohPulls = photoPulls
-    .filter((pull) => pull.tcgSlug === "yugioh")
-    .slice(0, 8)
-    .map((pull) => {
-      const confirmedCount = discoveriesByCard[pull.cardId]?.count || 0;
-      return {
-        ...pull,
-        confirmedCount,
-        discoveredPercent: Math.min(
-          100,
-          Math.round((confirmedCount / pull.serialTotal) * 100)
-        ),
-      };
-    });
+  const featuredSetPulls = selectFeaturedPulls(magnificentMonstersPulls);
+  const confirmedMagnificentMonsterSerials = confirmedSerials.filter((serial) =>
+    serial.card?.card_sets?.slug === "magnificent-monsters"
+  ).length;
   const recentPulls = photoPulls.slice(0, 4);
 
   return (
     <main className="home-page">
       <PublicHeader />
-      <section className="home-intro">
-        <p className="home-section-eyebrow">The global serialised card registry</p>
-        <h1>Find and track serialised cards</h1>
+      <section className="home-registry-hero">
+        <div className="home-registry-hero-copy">
+          <p className="home-section-eyebrow">The global serialised card registry</p>
+          <h1>Tracking every serial.<br />Preserving every pull.</h1>
+          <p className="home-registry-hero-summary">Search, explore and contribute to the global registry of serialised trading cards.</p>
+          <form className="home-registry-search" action="/search" method="get" role="search">
+            <span className="home-registry-search-icon" aria-hidden="true" />
+            <input name="q" type="search" placeholder="Search card, set or serial" aria-label="Search card, set or serial" />
+            <button type="submit">Search</button>
+          </form>
+        </div>
+        <div className="home-registry-visual" aria-hidden="true">
+          {photoPulls[0]?.imageUrl && (
+            <span className="home-registry-hero-card">
+              <CardPhoto src={photoPulls[0].imageUrl} crop={photoPulls[0].displayCrop} alt="" />
+            </span>
+          )}
+          <div className="home-registry-stats">
+            <span><strong>{tcgs.filter((tcg) => tcg.status === "live").length}</strong> TCGs</span>
+            <span><strong>{tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live").length}</strong> sets</span>
+            <span><strong>{tcgs.flatMap((tcg) => tcg.sets).filter((set) => set.status === "live").reduce((sum, set) => sum + Number(set.serials || 0), 0).toLocaleString()}</strong> tracked</span>
+          </div>
+        </div>
       </section>
 
-      <FeaturedPullCarousel pulls={featuredYugiohPulls} />
+      <HomeFeaturedSet pulls={featuredSetPulls} confirmed={confirmedMagnificentMonsterSerials} />
 
       <section className="home-explore" aria-labelledby="explore-registry-title">
         <div className="home-section-heading"><h2 id="explore-registry-title">Explore the registry</h2></div>
