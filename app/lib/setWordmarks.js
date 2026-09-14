@@ -1,7 +1,7 @@
 const WORDMARK_ROOT = "/graphics/mtg-set-wordmarks";
 
 export const SET_WORDMARKS = {
-  "magnificent-monsters": "/magnificent-monsters-wordmark-v4.png",
+  "magnificent-monsters": "/magnificent-monsters-wordmark.webp",
   "magnificent-maestros": "/magnificent-maestros-wordmark-v4.png",
   "lotr-original": `${WORDMARK_ROOT}/lotr-original.webp`,
   "lotr-special-edition": `${WORDMARK_ROOT}/lotr-special-edition.webp`,
