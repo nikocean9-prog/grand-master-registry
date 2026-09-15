@@ -57,6 +57,7 @@ export default function BulkUploadPage() {
   const [cropSaving, setCropSaving] = useState(false);
   const [cropError, setCropError] = useState("");
   const [duplicateCheck, setDuplicateCheck] = useState({ status: "idle" });
+  const [approvalConfirmation, setApprovalConfirmation] = useState("");
   const [backgroundApprovals, setBackgroundApprovals] = useState({});
   const cropSaveQueue = useRef(Promise.resolve());
   const cropSaveCount = useRef(0);
@@ -88,7 +89,7 @@ export default function BulkUploadPage() {
         created_at, updated_at,
         items:bulk_upload_items (
           id, storage_path, original_filename, status, confidence, detected_card_id, detected_serial_number,
-          detected_region, error_message, submission_id, display_crop,
+          detected_region, error_message, submission_id, display_crop, assessment,
           card:cards ( name )
         )
       `)
@@ -173,6 +174,7 @@ export default function BulkUploadPage() {
     setCropSaving(false);
     setCropError("");
     setDuplicateCheck({ status: "idle" });
+    setApprovalConfirmation("");
     setManualCardId(item.detected_card_id ? String(item.detected_card_id) : "");
     setManualSerial(item.detected_serial_number ? String(item.detected_serial_number) : "");
     setManualRegion(item.detected_region || "AMERICAS");
@@ -194,6 +196,7 @@ export default function BulkUploadPage() {
     setCropSaving(false);
     setCropError("");
     setDuplicateCheck({ status: "idle" });
+    setApprovalConfirmation("");
   }
 
   useEffect(() => {
@@ -276,14 +279,19 @@ export default function BulkUploadPage() {
       ...batch,
       items: (batch.items || []).map((item) => item.id === itemId ? { ...item, display_crop: displayCrop } : item),
     })));
-    cropSaveQueue.current = cropSaveQueue.current.then(async () => {
-      const { data, error } = await supabase.functions.invoke("save-bulk-display-crop", {
-        body: { item_id: itemId, display_crop: displayCrop },
-      });
-      if (error || data?.error) setCropError(data?.error || "The crop could not be saved. Please try again.");
-      else setCropError("");
-      cropSaveCount.current -= 1;
-      if (cropSaveCount.current === 0) setCropSaving(false);
+    cropSaveQueue.current = cropSaveQueue.current.catch(() => {}).then(async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke("save-bulk-display-crop", {
+          body: { item_id: itemId, display_crop: displayCrop },
+        });
+        if (error || data?.error) setCropError(data?.error || "The crop could not be saved. Please try again.");
+        else setCropError("");
+      } catch {
+        setCropError("The crop could not be saved. Please try again.");
+      } finally {
+        cropSaveCount.current -= 1;
+        if (cropSaveCount.current === 0) setCropSaving(false);
+      }
     });
     await cropSaveQueue.current;
   }
@@ -380,32 +388,26 @@ export default function BulkUploadPage() {
     const selectedCard = cards.find((card) => card.id === cardId);
     const serialLabel = `${String(serialNumber).padStart(3, "0")}${manualRegion === "E" ? "E" : ""}`;
     if (approveNow) {
-      if (duplicateCheck.status !== "ready") {
-        setMessage("Wait for the duplicate check before approving this card.");
-        return;
-      }
       const hasConfirmedRecord = duplicateCheck.status === "ready" && (
         duplicateCheck.serialStatus === "confirmed" || duplicateCheck.approvedCount > 0
       );
-      if (hasConfirmedRecord) {
-        const replace = window.confirm(
-          `${selectedCard?.name || "This card"} ${serialLabel} is already confirmed. Approve this photo as the replacement record?`
-        );
-        if (!replace) return;
-      } else if (
+      const hasPossibleDuplicate = duplicateCheck.status === "ready" && (
         duplicateCheck.exactDuplicateOf ||
         duplicateCheck.pendingCount > 0 ||
         duplicateCheck.matchingBulkCount > 0
-      ) {
-        const approveDuplicate = window.confirm(
-          `${selectedCard?.name || "This card"} ${serialLabel} may be a duplicate. Approve it anyway?`
+      );
+      const duplicateCheckUnavailable = duplicateCheck.status === "unavailable";
+      const confirmationKey = `${openItem.id}:${cardId}:${serialNumber}:${manualRegion}`;
+      if ((hasConfirmedRecord || hasPossibleDuplicate || duplicateCheckUnavailable) && approvalConfirmation !== confirmationKey) {
+        setApprovalConfirmation(confirmationKey);
+        setMessage(
+          hasConfirmedRecord
+            ? `${selectedCard?.name || "This card"} ${serialLabel} is already confirmed. Press Confirm and continue to replace it.`
+            : hasPossibleDuplicate
+              ? `${selectedCard?.name || "This card"} ${serialLabel} may be a duplicate. Press Confirm and continue to approve it anyway.`
+              : "The preview duplicate check could not finish. The server will still block an exact duplicate. Press Confirm and continue to proceed."
         );
-        if (!approveDuplicate) return;
-      } else {
-        const confirmed = window.confirm(
-          `Approve and publish ${selectedCard?.name || "this card"} ${serialLabel}?`
-        );
-        if (!confirmed) return;
+        return;
       }
 
       const itemId = openItem.id;
@@ -419,6 +421,7 @@ export default function BulkUploadPage() {
         label: `${selectedCard?.name || "Card"} ${serialLabel}`,
       };
       updateBackgroundApproval(itemId, { status: "queued", label: job.label, error: "" });
+      setApprovalConfirmation("");
       closeItem();
       setMessage(`${job.label} is approving in the background.`);
       if (nextItem) void viewItem(nextItem);
@@ -757,6 +760,9 @@ export default function BulkUploadPage() {
                             ) : <span>{statusLabel(item.status)}</span>}
                           </div>
                           {item.possible_duplicate && <span className="bulk-duplicate-label">Possible duplicate</span>}
+                          {item.assessment?.investigation_required && (
+                            <span className="bulk-investigation-label">Investigation required</span>
+                          )}
                         </div>
                       );
                     })}
@@ -794,6 +800,24 @@ export default function BulkUploadPage() {
                 <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
                 <div><dt>AI confidence</dt><dd>{Number.isInteger(openItem.confidence) ? `${openItem.confidence}%` : "Not available"}</dd></div>
               </dl>
+              {openItem.assessment?.investigation_required && (
+                <div className="bulk-investigation-panel" role="note">
+                  <strong>Investigation required</strong>
+                  <p>{openItem.assessment.investigation_note || "Verify the card and serial against the original source before approval."}</p>
+                  {openItem.assessment.source_url && (
+                    <a href={openItem.assessment.source_url} target="_blank" rel="noopener noreferrer">
+                      Open original source <span aria-hidden="true">↗</span>
+                    </a>
+                  )}
+                </div>
+              )}
+              {!openItem.assessment?.investigation_required && openItem.assessment?.source_url && (
+                <p className="bulk-source-link">
+                  <a href={openItem.assessment.source_url} target="_blank" rel="noopener noreferrer">
+                    View original source <span aria-hidden="true">↗</span>
+                  </a>
+                </p>
+              )}
               {duplicateCheck.status === "checking" && <p className="bulk-duplicate-check">Checking for duplicates…</p>}
               {duplicateCheck.status === "unavailable" && <p className="bulk-duplicate-check bulk-duplicate-check-error">This card, serial and region could not be verified. Check the details before approving.</p>}
               {duplicateCheck.status === "ready" && (
@@ -814,6 +838,7 @@ export default function BulkUploadPage() {
                 <label>Card
                   <select value={manualCardId} onChange={(event) => {
                     const value = event.target.value;
+                    setApprovalConfirmation("");
                     setManualCardId(value);
                     const selected = cards.find((card) => String(card.id) === value);
                     setManualRegion((current) => selected?.set?.serial_scheme === "global"
@@ -825,18 +850,24 @@ export default function BulkUploadPage() {
                   </select>
                 </label>
                 <label>Serial number
-                  <input type="number" min="1" inputMode="numeric" value={manualSerial} onChange={(event) => setManualSerial(event.target.value)} />
+                  <input type="number" min="1" inputMode="numeric" value={manualSerial} onChange={(event) => {
+                    setApprovalConfirmation("");
+                    setManualSerial(event.target.value);
+                  }} />
                 </label>
                 <label>Region
-                  <select value={manualRegion} onChange={(event) => setManualRegion(event.target.value)}>
+                  <select value={manualRegion} onChange={(event) => {
+                    setApprovalConfirmation("");
+                    setManualRegion(event.target.value);
+                  }}>
                     {cards.find((card) => String(card.id) === manualCardId)?.set?.serial_scheme === "global" ? (
                       <option value="GLOBAL">Global</option>
                     ) : <><option value="AMERICAS">Americas</option><option value="E">E-Region</option></>}
                   </select>
                 </label>
                 <div className="bulk-identify-actions">
-                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || cropSaving || openingPhoto || !openPhotoUrl || duplicateCheck.status !== "ready"}>
-                    Approve and continue
+                  <button type="button" onClick={() => saveIdentification(true)} disabled={Boolean(savingAction) || cropSaving || openingPhoto || !openPhotoUrl}>
+                    {approvalConfirmation ? "Confirm and continue" : "Approve and continue"}
                   </button>
                   <button type="button" className="secondary-button" onClick={() => saveIdentification(false)} disabled={Boolean(savingAction) || cropSaving}>
                     {savingAction === "pending" ? "Sending…" : "Save to Pending Approvals"}
