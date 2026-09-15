@@ -12,6 +12,23 @@ function quadPoint(corners, u, v) {
   return pointBetween(top, bottom, v);
 }
 
+function expandTriangle(points, amount = 1) {
+  const centre = points.reduce(
+    (total, point) => ({ x: total.x + point.x / points.length, y: total.y + point.y / points.length }),
+    { x: 0, y: 0 }
+  );
+
+  return points.map((point) => {
+    const distance = Math.hypot(point.x - centre.x, point.y - centre.y);
+    if (distance < 0.00001) return point;
+    const scale = (distance + amount) / distance;
+    return {
+      x: centre.x + (point.x - centre.x) * scale,
+      y: centre.y + (point.y - centre.y) * scale,
+    };
+  });
+}
+
 function drawTriangle(context, image, source, destination) {
   const [s0, s1, s2] = source;
   const [d0, d1, d2] = destination;
@@ -27,9 +44,10 @@ function drawTriangle(context, image, source, destination) {
 
   context.save();
   context.beginPath();
-  context.moveTo(d0.x, d0.y);
-  context.lineTo(d1.x, d1.y);
-  context.lineTo(d2.x, d2.y);
+  const [clip0, clip1, clip2] = expandTriangle(destination);
+  context.moveTo(clip0.x, clip0.y);
+  context.lineTo(clip1.x, clip1.y);
+  context.lineTo(clip2.x, clip2.y);
   context.closePath();
   context.clip();
   context.setTransform(a, b, c, d, e, f);
