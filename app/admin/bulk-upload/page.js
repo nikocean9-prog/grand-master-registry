@@ -61,6 +61,8 @@ export default function BulkUploadPage() {
   const [backgroundApprovals, setBackgroundApprovals] = useState({});
   const cropSaveQueue = useRef(Promise.resolve());
   const cropSaveCount = useRef(0);
+  const photoRequestId = useRef(0);
+  const reviewDrafts = useRef({});
 
   useEffect(() => {
     try {
@@ -88,7 +90,7 @@ export default function BulkUploadPage() {
         id, status, total_items, processed_items, ready_items, review_items,
         created_at, updated_at,
         items:bulk_upload_items (
-          id, storage_path, original_filename, status, confidence, detected_card_id, detected_serial_number,
+          id, created_at, storage_path, original_filename, status, confidence, detected_card_id, detected_serial_number,
           detected_region, error_message, submission_id, display_crop, assessment,
           card:cards ( name )
         )
@@ -136,7 +138,9 @@ export default function BulkUploadPage() {
 
     setBatches((data || []).map((batch) => ({
       ...batch,
-      items: (batch.items || []).map((item) => {
+      items: [...(batch.items || [])].sort((a, b) =>
+        a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id)
+      ).map((item) => {
         const submission = item.submission_id ? submissionsById[item.submission_id] : null;
         const tupleKey = item.detected_card_id && item.detected_serial_number
           ? `${item.detected_card_id}:${item.detected_serial_number}:${item.detected_region}`
@@ -165,9 +169,11 @@ export default function BulkUploadPage() {
     };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [openItem]);
+  }, [openItem, manualCardId, manualSerial, manualRegion]);
 
   async function viewItem(item) {
+    const requestId = ++photoRequestId.current;
+    const draft = reviewDrafts.current[item.id];
     setOpenItem(item);
     setOpenPhotoUrl("");
     setOpeningPhoto(true);
@@ -175,12 +181,14 @@ export default function BulkUploadPage() {
     setCropError("");
     setDuplicateCheck({ status: "idle" });
     setApprovalConfirmation("");
-    setManualCardId(item.detected_card_id ? String(item.detected_card_id) : "");
-    setManualSerial(item.detected_serial_number ? String(item.detected_serial_number) : "");
-    setManualRegion(item.detected_region || "AMERICAS");
+    setManualCardId(draft?.cardId ?? (item.detected_card_id ? String(item.detected_card_id) : ""));
+    setManualSerial(draft?.serial ?? (item.detected_serial_number ? String(item.detected_serial_number) : ""));
+    setManualRegion(draft?.region ?? (item.detected_region || "AMERICAS"));
     const { data, error } = await supabase.storage
       .from("bulk-submission-evidence")
       .createSignedUrl(item.storage_path, 3600);
+    // A slower earlier request must not replace the next card's photo.
+    if (requestId !== photoRequestId.current) return;
     if (error || !data?.signedUrl) {
       setMessage("The original bulk-upload photo could not be opened.");
     } else {
@@ -190,6 +198,8 @@ export default function BulkUploadPage() {
   }
 
   function closeItem() {
+    rememberReviewDraft();
+    photoRequestId.current += 1;
     setOpenItem(null);
     setOpenPhotoUrl("");
     setOpeningPhoto(false);
@@ -304,15 +314,35 @@ export default function BulkUploadPage() {
   }
 
   function nextReviewItem(currentItemId) {
-    return batches
-      .flatMap((batch) => batch.items || [])
+    const items = batches.flatMap((batch) => batch.items || []);
+    const currentIndex = items.findIndex((item) => item.id === currentItemId);
+    if (currentIndex === -1) return null;
+    return items
+      .slice(currentIndex + 1)
       .find((item) =>
-        item.id !== currentItemId &&
-        !backgroundApprovals[item.id] &&
+        item.status !== "dismissed" &&
+        !["queued", "working", "complete"].includes(backgroundApprovals[item.id]?.status) &&
         item.submission_status !== "approved" &&
         item.submission_status !== "rejected" &&
         (item.submission_id || ["needs_review", "error"].includes(item.status))
       );
+  }
+
+  function rememberReviewDraft() {
+    if (!openItem) return;
+    reviewDrafts.current[openItem.id] = {
+      cardId: manualCardId,
+      serial: manualSerial,
+      region: manualRegion,
+    };
+  }
+
+  function viewNextItem() {
+    if (!openItem || savingAction || cropSaving) return;
+    const nextItem = nextReviewItem(openItem.id);
+    if (!nextItem) return;
+    rememberReviewDraft();
+    void viewItem(nextItem);
   }
 
   async function runBackgroundApproval(job) {
@@ -795,6 +825,14 @@ export default function BulkUploadPage() {
             <div className="bulk-photo-modal-details">
               <p className="eyebrow">Review bulk card</p>
               <h2 id="bulk-photo-title">{openItem.card?.name || openItem.original_filename}</h2>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={viewNextItem}
+                disabled={Boolean(savingAction) || cropSaving || !nextReviewItem(openItem.id)}
+                aria-label="Next card without approving"
+              >Next →</button>
+              {!nextReviewItem(openItem.id) && <p role="status">This is the last card available for review in the list.</p>}
               <p>Check the suggested card, serial number and region against the original photo. You can publish it directly from here.</p>
               <dl>
                 <div><dt>File</dt><dd>{openItem.original_filename}</dd></div>
