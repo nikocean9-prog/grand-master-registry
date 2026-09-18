@@ -4,7 +4,7 @@ import { tcgs } from "../lib/catalog";
 
 export const metadata = {
   title: "Serialized Trading Card Games | TCG Serial Tracker",
-  description: "Browse serialized-card registries for Gundam, Yu-Gi-Oh!, Magic: The Gathering, Star Wars: Unlimited, Flesh and Blood and Digimon.",
+  description: "Browse serialized-card registries for Grand Archive, UniVersus, Weiß Schwarz, Gundam, Yu-Gi-Oh!, Magic: The Gathering and more.",
   alternates: { canonical: "/tcgs" },
 };
 

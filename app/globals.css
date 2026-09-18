@@ -4205,3 +4205,7 @@ button {
   }
   .pull-gallery-item .pull-gallery-photo { height: 390px; }
 }
+
+.live-registry-text-mark { color: #183d2b; font-family: Georgia, serif; font-size: clamp(30px, 4vw, 46px); line-height: 1.15; text-align: center; letter-spacing: -.025em; }
+
+.registry-card-art-unavailable { display: grid; place-items: center; min-height: 260px; padding: 24px; background: #e8eee9; color: #52665a; text-align: center; }

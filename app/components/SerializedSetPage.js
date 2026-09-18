@@ -91,7 +91,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
               }
               return (
                 <Link key={card.id} href={`/card/${card.id}`} className="registry-card">
-                  {card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}
+                  {card.image_url ? <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" /> : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
                   <div className="registry-card-content">
                     <h3>{card.name}</h3>
                     <p>{cardConfirmed} / {card.serial_total.toLocaleString()} confirmed · {cardPercentage}%</p>

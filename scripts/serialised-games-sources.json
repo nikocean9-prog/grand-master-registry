@@ -1,0 +1,159 @@
+{
+  "verifiedAt": "2026-09-18",
+  "note": "Catalogue images are reference artwork only, never evidence of a confirmed serial. Initial supported releases; not a complete game-wide checklist.",
+  "sets": [
+    {
+      "tcg": "grand-archive",
+      "game": "Grand Archive",
+      "initials": "GA",
+      "slug": "dawn-of-ashes-first-edition",
+      "name": "Dawn of Ashes · First Edition CURs",
+      "limit": 70,
+      "source": "https://www.gatcg.com/article/dawn-of-ashes-first-and-alter-edition",
+      "cards": [
+        {
+          "name": "Lorraine, Wandering Warrior",
+          "number": "DOA1st EN-004 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/lorraine-wandering-warrior-doa1e-cur.jpg"
+        },
+        {
+          "name": "Lorraine, Blademaster",
+          "number": "DOA1st EN-005 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/lorraine-blademaster-doa1e-cur.jpg"
+        },
+        {
+          "name": "Lorraine, Spirit Ruler",
+          "number": "DOA1st EN-006 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/lorraine-spirit-ruler-doa1e-cur.jpg"
+        },
+        {
+          "name": "Rai, Spellcrafter",
+          "number": "DOA1st EN-007 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/rai-spellcrafter-doa1e-cur.jpg"
+        },
+        {
+          "name": "Rai, Archmage",
+          "number": "DOA1st EN-008 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/rai-archmage-doa1e-cur.jpg"
+        },
+        {
+          "name": "Rai, Mana Weaver",
+          "number": "DOA1st EN-009 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/rai-mana-weaver-doa1e-cur.jpg"
+        },
+        {
+          "name": "Silvie, Wilds Whisperer",
+          "number": "DOA1st EN-010 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/silvie-wilds-whisperer-doa1e-cur.jpg"
+        },
+        {
+          "name": "Silvie, With the Pack",
+          "number": "DOA1st EN-011 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/silvie-with-the-pack-doa1e-cur.jpg"
+        },
+        {
+          "name": "Silvie, Earth's Tune",
+          "number": "DOA1st EN-012 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/silvie-earths-tune-doa1e-cur.jpg"
+        },
+        {
+          "name": "Zander, Prepared Scout",
+          "number": "DOA1st EN-013 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/zander-prepared-scout-doa1e-cur.jpg"
+        },
+        {
+          "name": "Zander, Always Watching",
+          "number": "DOA1st EN-014 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/zander-always-watching-doa1e-cur.jpg"
+        },
+        {
+          "name": "Zander, Corhazi's Chosen",
+          "number": "DOA1st EN-015 CUR",
+          "image": "https://ga-index-public.s3.us-west-2.amazonaws.com/cards/zander-corhazis-chosen-doa1e-cur.jpg"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "game": "UniVersus",
+      "initials": "UVS",
+      "slug": "heroes-clash-chrome-rares",
+      "name": "My Hero Academia: Heroes Clash · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/mha03-heroes-clash/",
+      "cards": [
+        {
+          "name": "Eijiro Kirishima (Serial Numbered)",
+          "number": "1/5 CR",
+          "image": null,
+          "source": "https://www.tcgplayer.com/product/450516/universus-universus-my-hero-academia-heroes-clash-eijiro-kirishima-serial-numbered?page=1",
+          "imageNote": "Retailer image is a placeholder; no card artwork imported."
+        },
+        {
+          "name": "Izuku Midoriya (Serial Numbered)",
+          "number": "2/5 CR",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450517_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450517/universus-universus-my-hero-academia-heroes-clash-izuku-midoriya-serial-numbered?page=1"
+        },
+        {
+          "name": "Katsuki Bakugo (Serial Numbered)",
+          "number": "3/5 CR",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450520_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450520/universus-universus-my-hero-academia-heroes-clash-katsuki-bakugo-serial-numbered?page=1"
+        },
+        {
+          "name": "Shoto Todoroki (Serial Numbered)",
+          "number": "4/5 CR",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450523_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450523/universus-universus-my-hero-academia-heroes-clash-shoto-todoroki-serial-numbered?page=1"
+        },
+        {
+          "name": "Tenya Iida (Serial Numbered)",
+          "number": "5/5 CR",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450525_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450525/universus-universus-my-hero-academia-heroes-clash-tenya-iida-serial-numbered?page=1"
+        }
+      ]
+    },
+    {
+      "tcg": "weiss-schwarz",
+      "game": "Weiß Schwarz",
+      "initials": "WS",
+      "slug": "saekano-serial-numbered",
+      "name": "Saekano: How to Raise a Boring Girlfriend · English Serialised SPs",
+      "limit": 10,
+      "cards": [
+        {
+          "name": "Qualities of a Maiden, Eriri (Serialised SP)",
+          "number": "SHS/W56-E001SP",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450542_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450542/weiss-schwarz-saekano-how-to-raise-a-boring-girlfriend-qualities-of-a-maiden-eriri-sp-serial-numbered?page=1&Language=all"
+        },
+        {
+          "name": "Tomoya's Beloved Disciple, Izumi (Serialised SP)",
+          "number": "SHS/W56-E002SP",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450547_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450547/weiss-schwarz-saekano-how-to-raise-a-boring-girlfriend-tomoyas-beloved-disciple-izumi-sp-serial-numbered?page=1&Language=all"
+        },
+        {
+          "name": "Ideal Girl, Megumi (Serialised SP)",
+          "number": "SHS/W56-E032SP",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450551_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450551/weiss-schwarz-saekano-how-to-raise-a-boring-girlfriend-ideal-girl-megumi-sp-serial-numbered?page=1&Language=all"
+        },
+        {
+          "name": "Pride of Creators, Utaha (Serialised SP)",
+          "number": "SHS/W56-E059SP",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450546_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450546/weiss-schwarz-saekano-how-to-raise-a-boring-girlfriend-pride-of-creators-utaha-sp-serial-numbered?page=1&Language=all"
+        },
+        {
+          "name": "icy tail, Michiru (Serialised SP)",
+          "number": "SHS/W56-E081SP",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/450549_in_1000x1000.jpg",
+          "source": "https://www.tcgplayer.com/product/450549/weiss-schwarz-saekano-how-to-raise-a-boring-girlfriend-icy-tail-michiru-sp-serial-numbered?page=1&Language=all"
+        }
+      ]
+    }
+  ]
+}
