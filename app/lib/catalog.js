@@ -23,6 +23,9 @@ export const tcgs = [
     { slug: "lorwyn-eclipsed", name: "Lorwyn Eclipsed", status: "live", serials: 500, summary: "Bitterbloom Bearer · 500 serial numbers", description: "Track the 500 individually numbered Bitterbloom Bearer cards.", href: "/sets/lorwyn-eclipsed" },
     { slug: "secrets-of-strixhaven", name: "Secrets of Strixhaven", status: "live", serials: 500, summary: "Emeritus of Ideation · 500 serial numbers", description: "Track the 500 individually numbered Emeritus of Ideation cards.", href: "/sets/secrets-of-strixhaven" },
   ] },
+  { slug: "gundam", name: "Gundam Card Game", initials: "GCG", logo: "/graphics/gundam-official-logo.png", status: "live", description: "Track serial-numbered Gundam Card Game promos by release and language edition.", sets: [
+    { slug: "gundam-1st-anniversary", name: "1st Anniversary Promos · English", status: "live", serials: 999, summary: "Strike Freedom Gundam EXBP-028 · English edition · 999 serial numbers", description: "Track the 999 serial-numbered English copies of Strike Freedom Gundam (EXBP-028), an EX Base token released through the 2026 1st Anniversary events. Other language editions are separate releases.", href: "/sets/gundam-1st-anniversary" },
+  ] },
   { slug: "one-piece", name: "One Piece Card Game", initials: "OP", logo: "/graphics/one-piece-logo.webp", status: "planned", description: "A planned registry for numbered One Piece cards.", sets: [] },
   { slug: "dragon-ball-super", name: "Dragon Ball Super Card Game", initials: "DBS", logo: "/graphics/dragon-ball-super-logo.webp", status: "planned", description: "A planned registry for serial-numbered Dragon Ball cards.", sets: [] },
   { slug: "disney-lorcana", name: "Disney Lorcana", initials: "DLC", logo: "/graphics/disney-lorcana-logo.webp", status: "planned", description: "A planned registry for rare and numbered Lorcana releases.", sets: [] },

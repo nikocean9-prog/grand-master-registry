@@ -23,6 +23,7 @@ export const SET_WORDMARKS = {
 };
 
 export const TCG_HEADER_LOGOS = {
+  gundam: "/graphics/gundam-official-logo.png",
   yugioh: "/graphics/yugioh-official-logo-hq.webp",
   "magic-the-gathering": "/graphics/magic-official-logo-hq.webp",
 };
