@@ -1,0 +1,93 @@
+{
+  "checked": "2026-09-20",
+  "note": "Publisher collector population and printed serial range verified for Tristan. UniVersus publisher confirms /100 Chrome Rares; TCGplayer five-card checklist. All six SAO SAMPLE images show /10. No catalogue image is evidence of a reported copy.",
+  "sets": [
+    {
+      "tcg": "grand-archive",
+      "slug": "mercurial-heart-first-edition",
+      "name": "Mercurial Heart · First Edition CUR",
+      "limit": 72,
+      "source": "https://index.gatcg.com/edition/tristan-shadowreaver-mrc-cur",
+      "cards": [
+        [
+          "Tristan, Shadowreaver",
+          "MRC 1st EN-006 CUR",
+          "https://api.gatcg.com/cards/images/emozdelso9.jpg"
+        ]
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "undaunted-raid-chrome-rares",
+      "name": "My Hero Academia: Undaunted Raid · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/mha05-undaunted-raid/",
+      "cards": [
+        [
+          "Rejuvenating Smash (Chrome Rare)",
+          "1/5 CR",
+          "https://tcgplayer-cdn.tcgplayer.com/product/502393_in_1000x1000.jpg"
+        ],
+        [
+          "Spiral Blasts (Chrome Rare)",
+          "2/5 CR",
+          "https://tcgplayer-cdn.tcgplayer.com/product/502397_in_1000x1000.jpg"
+        ],
+        [
+          "Vast Hybrid Chimera Kraken (Chrome Rare)",
+          "3/5 CR",
+          "https://tcgplayer-cdn.tcgplayer.com/product/502405_in_1000x1000.jpg"
+        ],
+        [
+          "Schoolyard Smackdown (Chrome Rare)",
+          "4/5 CR",
+          "https://tcgplayer-cdn.tcgplayer.com/product/502408_in_1000x1000.jpg"
+        ],
+        [
+          "Stalagmite Piercer (Chrome Rare)",
+          "5/5 CR",
+          "https://tcgplayer-cdn.tcgplayer.com/product/502410_in_1000x1000.jpg"
+        ]
+      ]
+    },
+    {
+      "tcg": "weiss-schwarz",
+      "slug": "sao-alicization-vol-2-serial-numbered",
+      "name": "Sword Art Online Alicization Vol. 2 · English Serialised SPs",
+      "limit": 10,
+      "source": "https://www.tcgplayer.com/product/252412",
+      "cards": [
+        [
+          "Unbending Fighting Spirit, Asuna (Serialised SP)",
+          "SAO/S80-E004SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252408_in_1000x1000.jpg"
+        ],
+        [
+          "Priestess of Light, Alice (Serialised SP)",
+          "SAO/S80-E005SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252409_in_1000x1000.jpg"
+        ],
+        [
+          "As His Little Sister, Leafa (Serialised SP)",
+          "SAO/S80-E033SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252410_in_1000x1000.jpg"
+        ],
+        [
+          "Time to Rise Up, Kirito (Serialised SP)",
+          "SAO/S80-E073SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252411_in_1000x1000.jpg"
+        ],
+        [
+          "\"Aincrad Style\" Eugeo (Serialised SP)",
+          "SAO/S80-E075SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252412_in_1000x1000.jpg"
+        ],
+        [
+          "\"Light That Penetrates Darkness\" Sinon (Serialised SP)",
+          "SAO/S80-E076SP",
+          "https://tcgplayer-cdn.tcgplayer.com/product/252413_in_1000x1000.jpg"
+        ]
+      ]
+    }
+  ]
+}
