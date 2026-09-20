@@ -1,0 +1,41 @@
+{
+  "checked_at": "2026-09-20",
+  "upload_status": "not_uploaded_authenticator_submission_incomplete",
+  "duplicates": {
+    "existing_submissions_all_statuses": 0,
+    "existing_bulk_items": 0
+  },
+  "leads": [
+    {
+      "card_id": 554,
+      "card": "Rai, Mana Weaver",
+      "claimed_serial": 5,
+      "total": 70,
+      "source_url": "https://www.ebay.com/itm/358501836277",
+      "image_url": "https://i.ebayimg.com/images/g/pNMAAeSwtBZouk9T/s-l1600.webp",
+      "photo_reviewed": true,
+      "serial_independently_readable": false,
+      "note": "Seller title says Mana Reaver but photo and slab identify Rai, Mana Weaver. Physical slab photograph inspected; serial partly obscured at this angle. Seller claims 5/70; requires closer serial photograph before approval."
+    },
+    {
+      "card_id": 549,
+      "card": "Lorraine, Wandering Warrior",
+      "claimed_serial": 59,
+      "total": 70,
+      "source_url": "https://www.ebay.com/itm/168563518149",
+      "photo_reviewed": false,
+      "note": "eBay search result claims 59/70, PSA 10. Listing detail blocked by challenge. Research lead only; no original photograph verified."
+    }
+  ],
+  "secondary_research_sources": [
+    {
+      "url": "https://www.universusacademy.org/support/chrome-rares",
+      "note": "Community tracker; follow individual evidence to original source before using reported serials."
+    }
+  ],
+  "limitations": [
+    "No pull confirmed or lodged by this research run.",
+    "Social search returned irrelevant results, so social coverage is incomplete.",
+    "Weiss Schwarz catalogue SAMPLE images excluded from pull evidence."
+  ]
+}
