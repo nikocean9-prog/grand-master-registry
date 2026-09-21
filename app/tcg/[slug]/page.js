@@ -42,7 +42,7 @@ export default async function TcgPage({ params }) {
   const headerLogo = TCG_HEADER_LOGOS[tcg.slug];
   return (
     <main><PublicHeader /><Link href="/tcgs" className="back-link">← All TCGs</Link>
-      <section className={`catalog-heading tcg-heading-${tcg.slug}`}><div><p className="eyebrow">Trading card game</p><h1>{headerLogo ? <img className="tcg-official-logo" src={headerLogo} alt={tcg.name} /> : tcg.name}</h1><p>{tcg.description}</p></div></section>
+      <section className={`catalog-heading tcg-heading-${tcg.slug}${["grand-archive", "universus", "weiss-schwarz"].includes(tcg.slug) ? " tcg-heading-magic-the-gathering" : ""}`}><div><p className="eyebrow">Trading card game</p><h1>{headerLogo ? <img className="tcg-official-logo" src={headerLogo} alt={tcg.name} /> : tcg.name}</h1><p>{tcg.description}</p></div></section>
       <section className="registry-section"><div className="section-heading"><div><p className="eyebrow">Set directory</p><h2>Choose a set</h2></div></div>
         <TcgSetDirectory sets={tcg.sets} tcgSlug={tcg.slug} />
       </section>

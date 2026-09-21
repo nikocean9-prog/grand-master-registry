@@ -1,12 +1,12 @@
 const WORDMARK_ROOT = "/graphics/mtg-set-wordmarks";
 
 export const SET_WORDMARKS = {
-  "dawn-of-ashes-first-edition": "/graphics/new-set-wordmarks/dawn-of-ashes-first-edition.webp",
-  "mercurial-heart-first-edition": "/graphics/new-set-wordmarks/mercurial-heart-first-edition.webp",
-  "heroes-clash-chrome-rares": "/graphics/new-set-wordmarks/heroes-clash-chrome-rares.webp",
-  "undaunted-raid-chrome-rares": "/graphics/new-set-wordmarks/undaunted-raid-chrome-rares.webp",
-  "saekano-serial-numbered": "/graphics/new-set-wordmarks/saekano-serial-numbered.webp",
-  "sao-alicization-vol-2-serial-numbered": "/graphics/new-set-wordmarks/sao-alicization-vol-2-serial-numbered.webp",
+  "dawn-of-ashes-first-edition": "/graphics/new-set-wordmarks/dawn-of-ashes-first-edition-transparent-v2.webp",
+  "mercurial-heart-first-edition": "/graphics/new-set-wordmarks/mercurial-heart-first-edition-transparent-v2.webp",
+  "heroes-clash-chrome-rares": "/graphics/new-set-wordmarks/heroes-clash-chrome-rares-transparent-v2.webp",
+  "undaunted-raid-chrome-rares": "/graphics/new-set-wordmarks/undaunted-raid-chrome-rares-transparent-v2.webp",
+  "saekano-serial-numbered": "/graphics/new-set-wordmarks/saekano-serial-numbered-transparent-v2.webp",
+  "sao-alicization-vol-2-serial-numbered": "/graphics/new-set-wordmarks/sao-alicization-vol-2-serial-numbered-transparent-v2.webp",
 
   "magnificent-monsters": "/magnificent-monsters-wordmark.webp",
   "magnificent-maestros": "/magnificent-maestros-wordmark-v4.png",
@@ -30,9 +30,9 @@ export const SET_WORDMARKS = {
 };
 
 export const TCG_HEADER_LOGOS = {
-  "grand-archive": "/graphics/grand-archive-logo.webp",
-  "universus": "/graphics/universus-logo.webp",
-  "weiss-schwarz": "/graphics/weiss-schwarz-logo.webp",
+  "grand-archive": "/graphics/grand-archive-logo-transparent-v2.webp",
+  "universus": "/graphics/universus-logo-transparent-v2.webp",
+  "weiss-schwarz": "/graphics/weiss-schwarz-logo-transparent-v2.webp",
 
   gundam: "/graphics/gundam-official-logo.png",
   yugioh: "/graphics/yugioh-official-logo-hq.webp",

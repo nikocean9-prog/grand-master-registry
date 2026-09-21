@@ -1,46 +1,26 @@
-# Homepage Hero Design QA
+# Directory branding visual QA
 
-## Comparison target
-
-- Source visual truth: `/workspace/scratch/7fb291b95d45/generated_images/exec-e3d8f287-3726-44cf-a115-40ae507635fb.png`
-- Implementation: cloud-browser capture of `http://terminal.local:4173/` and the responsive 426 px QA frame
-- Source pixels: 853 × 1848
-- Desktop implementation viewport: 1363 × 936 CSS px at device pixel ratio 1
-- Mobile implementation viewport: 426 × 924 CSS px at device pixel ratio 1
-- State: public homepage, initial loaded state
-
-## Full-view comparison evidence
-
-The implementation keeps the approved two-line editorial headline, white-to-emerald transition, original green-and-gold background artwork, lower hero card, right-side live totals, and featured-set transition. The desktop capture preserves clear separation between the card and totals. The 426 px responsive capture keeps the headline to exactly two lines and reduces the hero from the previous oversized mobile layout.
-
-## Focused region evidence
-
-- Hero card: the implementation uses the 708 × 1032 catalog asset directly with `width: 100%; height: auto`; it is not passed through evidence-photo cropping or perspective correction.
-- Background: the rendered CSS references `/graphics/yugioh-tile-bg.webp`, matching the approved original asset.
-- Featured logo: the rendered element still references `/magnificent-monsters-wordmark-v4.png`; its installed artwork was not modified.
-- Search: the 426 px layout reports a 375 px search field inside the 411 px content width, with the button fully inside the field.
-
-## Required fidelity surfaces
-
-- Fonts and typography: passed. Serif display treatment, two-line wrapping, weights, and hierarchy match the selected direction.
-- Spacing and layout rhythm: passed. Hero, search, card, totals, and featured-set transition remain separated at desktop and mobile breakpoints.
-- Colors and visual tokens: passed. White, emerald, gold, and muted blue-grey copy match the approved palette.
-- Image quality and asset fidelity: passed. Original supplied background and catalog card assets are used without stretching; the current Magnificent Monsters logo is unchanged.
-- Copy and content: passed. Approved headline, summary, search copy, live totals, and featured-set copy are preserved.
+Source: user screenshot IMG_1378.jpeg (Magic set directory), with the existing /tcg/magic-the-gathering route as the same-viewport reference.
+Implementation screenshot: /workspace/scratch/tcg-directory-comparison.jpg.
+Viewport: three side-by-side 393 x 852 CSS-pixel frames, screenshot 1363 x 936. The user image is 706 x 1536 including iOS browser chrome; live reference and implementation were compared at equal CSS scale, excluding iOS chrome.
+State: public directories, top of page, loaded logos and counters.
 
 ## Comparison history
+- P1: rectangular image backgrounds and rectangle-shaped shadows. Replaced with alpha-transparent logo assets; shadows follow artwork.
+- P1: boxed game header and additional directory descriptions differed from the Magic reference. Reused Magic heading and directory CSS; removed directory descriptions.
+- P2: first preview had a missing Heroes Clash asset while processing. Completed asset and recaptured; all visible logo assets load.
+- Final comparison shows matching header, directory labels, typography, progress treatment and mobile margins. Different logo aspect ratios cause expected differences in total tile height.
 
-1. Initial implementation review found the mobile search container could inherit content-box sizing and risk edge overflow.
-2. Added explicit border-box sizing to the hero copy and search container.
-3. Post-fix browser measurements confirm the search container ends at x=393 within a 411 px content area and the search button ends at x=385.
-4. Browser checks confirmed the search input and button are visible and enabled, with no console errors.
+## Fidelity checks
+- Fonts: same existing components, family, sizes and weights as Magic.
+- Spacing: same established responsive directory CSS and grid; no additional copy gaps.
+- Colors: existing green, gold, grey page background and progress tokens retained.
+- Images: transparent game and set assets, no rectangular backgrounds; lettering preserved at display size.
+- Copy: game and set names in accessible image text; counters remain dynamic; redundant description paragraphs removed.
 
-## Findings
+## Verification
+Production build passed. Browser-rendered side-by-side comparison inspected, including focused logos and counters. Browser logs contain only extension metadata errors; no application errors observed in comparison view. Existing set hrefs retained; card data and approval behavior untouched.
 
-No actionable P0, P1, or P2 differences remain. The approved composition is reproduced responsively while preserving dynamic registry totals.
-
-## Follow-up polish
-
-No blocking follow-up polish.
+Residual gap: comparison uses desktop Chrome frames at mobile CSS width, not physical Safari.
 
 final result: passed

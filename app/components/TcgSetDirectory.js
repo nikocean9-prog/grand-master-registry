@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../lib/adminAuth";
-import { SET_WORDMARKS, SET_BRAND_LABELS } from "../lib/setWordmarks";
+import { SET_WORDMARKS } from "../lib/setWordmarks";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -28,7 +28,6 @@ function SetLogoTile({ set, logo, confirmed = 0 }) {
         <img src={logo} alt={set.name} />
         {releaseLabel ? <img className="set-release-ribbon" src={releaseLabel.image} alt={releaseLabel.text} /> : null}
       </span>
-      {SET_BRAND_LABELS[set.slug] && <p className="set-brand-label">{SET_BRAND_LABELS[set.slug]}<br />{set.summary}</p>}
       <span className="set-logo-tracker">
         <span className="set-logo-tracker-heading"><strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong><span>{percentage.toFixed(2)}% documented</span></span>
         <span className="set-logo-progress" role="progressbar" aria-valuemin="0" aria-valuemax={total} aria-valuenow={confirmed}><span style={{ width: `${percentage}%` }} /></span>
@@ -75,7 +74,7 @@ export default function TcgSetDirectory({ sets, tcgSlug }) {
   }
 
   if (logoSets.length === visibleSets.length) {
-    return <div className={`set-logo-grid set-logo-grid--${tcgSlug}`}>{logoSets.map((set) => (
+    return <div className={`set-logo-grid set-logo-grid--${["grand-archive", "universus", "weiss-schwarz"].includes(tcgSlug) ? "magic-the-gathering" : tcgSlug}`}>{logoSets.map((set) => (
       <SetLogoTile key={set.name} set={set} logo={SET_WORDMARKS[set.slug]} confirmed={confirmedBySet[set.slug] || 0} />
     ))}</div>;
   }
