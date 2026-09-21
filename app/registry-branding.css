@@ -1,0 +1,16 @@
+/* Approved directory and set branding for the three new registries. */
+.catalog-heading:is(.tcg-heading-grand-archive,.tcg-heading-universus,.tcg-heading-weiss-schwarz) { text-align:center; }
+.catalog-heading:is(.tcg-heading-grand-archive,.tcg-heading-universus,.tcg-heading-weiss-schwarz) > div { width:100%; }
+.catalog-heading:is(.tcg-heading-grand-archive,.tcg-heading-universus,.tcg-heading-weiss-schwarz) .tcg-official-logo { display:block; width:min(100%,460px); max-height:190px; object-fit:contain; margin:0 auto; mix-blend-mode:multiply; }
+:is(.set-logo-grid--grand-archive,.set-logo-grid--universus,.set-logo-grid--weiss-schwarz) .set-logo-art { height:180px; margin-bottom:12px; }
+:is(.set-logo-grid--grand-archive,.set-logo-grid--universus,.set-logo-grid--weiss-schwarz) .set-logo-art img,
+.expanded-brand-registry .registry-set-wordmark { mix-blend-mode:multiply; filter:none; }
+.set-brand-label { text-align:center; font-size:15px; line-height:1.6; margin:8px 0 20px; color:#253c30; }
+.expanded-brand-registry .registry-set-lockup { gap:20px; }
+.expanded-brand-registry .registry-set-tcg-logo { mix-blend-mode:multiply; }
+.expanded-brand-registry .registry-set-wordmark { width:min(100%,480px); }
+.expanded-brand-registry .set-brand-label { margin:0; }
+@media(max-width:700px) {
+  :is(.set-logo-grid--grand-archive,.set-logo-grid--universus,.set-logo-grid--weiss-schwarz) { grid-template-columns:1fr; }
+  .expanded-brand-registry .registry-set-lockup { min-height:0; gap:20px; }
+}

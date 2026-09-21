@@ -1,6 +1,13 @@
 const WORDMARK_ROOT = "/graphics/mtg-set-wordmarks";
 
 export const SET_WORDMARKS = {
+  "dawn-of-ashes-first-edition": "/graphics/new-set-wordmarks/dawn-of-ashes-first-edition.webp",
+  "mercurial-heart-first-edition": "/graphics/new-set-wordmarks/mercurial-heart-first-edition.webp",
+  "heroes-clash-chrome-rares": "/graphics/new-set-wordmarks/heroes-clash-chrome-rares.webp",
+  "undaunted-raid-chrome-rares": "/graphics/new-set-wordmarks/undaunted-raid-chrome-rares.webp",
+  "saekano-serial-numbered": "/graphics/new-set-wordmarks/saekano-serial-numbered.webp",
+  "sao-alicization-vol-2-serial-numbered": "/graphics/new-set-wordmarks/sao-alicization-vol-2-serial-numbered.webp",
+
   "magnificent-monsters": "/magnificent-monsters-wordmark.webp",
   "magnificent-maestros": "/magnificent-maestros-wordmark-v4.png",
   "lotr-original": `${WORDMARK_ROOT}/lotr-original.webp`,
@@ -23,6 +30,10 @@ export const SET_WORDMARKS = {
 };
 
 export const TCG_HEADER_LOGOS = {
+  "grand-archive": "/graphics/grand-archive-logo.webp",
+  "universus": "/graphics/universus-logo.webp",
+  "weiss-schwarz": "/graphics/weiss-schwarz-logo.webp",
+
   gundam: "/graphics/gundam-official-logo.png",
   yugioh: "/graphics/yugioh-official-logo-hq.webp",
   "magic-the-gathering": "/graphics/magic-official-logo-hq.webp",
@@ -31,3 +42,5 @@ export const TCG_HEADER_LOGOS = {
 export function getSetWordmark(slug) {
   return SET_WORDMARKS[slug] || null;
 }
+
+export const SET_BRAND_LABELS = {"dawn-of-ashes-first-edition": "First Edition · Collector Ultra Rares", "mercurial-heart-first-edition": "First Edition · Collector Ultra Rare", "heroes-clash-chrome-rares": "My Hero Academia · Chrome Rares", "undaunted-raid-chrome-rares": "My Hero Academia · Chrome Rares", "saekano-serial-numbered": "English · Serialised SPs", "sao-alicization-vol-2-serial-numbered": "Vol. 2 · English Serialised SPs"};

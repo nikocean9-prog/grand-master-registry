@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import PublicHeader from "./PublicHeader";
-import { getSetWordmark, TCG_HEADER_LOGOS } from "../lib/setWordmarks";
+import { getSetWordmark, TCG_HEADER_LOGOS, SET_BRAND_LABELS } from "../lib/setWordmarks";
 
 export default async function SerializedSetPage({ slug, tcgName, eyebrow, title, description, backHref }) {
   const usesCompactCardTiles = tcgName === "Magic: The Gathering";
@@ -27,14 +27,14 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
   ) ?? 0;
   const percentage = total ? ((confirmed / total) * 100).toFixed(2) : "0.00";
   const setWordmark = getSetWordmark(slug);
-  const tcgSlug = tcgName === "Magic: The Gathering" ? "magic-the-gathering" : null;
+  const tcgSlug = { "Magic: The Gathering": "magic-the-gathering", "Grand Archive": "grand-archive", "UniVersus": "universus", "Weiß Schwarz": "weiss-schwarz" }[tcgName] || null;
   const tcgLogo = tcgSlug ? TCG_HEADER_LOGOS[tcgSlug] : null;
   const sharedSerialTotal = cards?.length && cards.every((card) => card.serial_total === cards[0].serial_total)
     ? cards[0].serial_total
     : null;
 
   return (
-    <main>
+    <main className={SET_BRAND_LABELS[slug] ? "expanded-brand-registry" : undefined}>
       <PublicHeader />
       <Link href={backHref} className="back-link">← {tcgName} sets</Link>
       <section className={setWordmark ? "registry-set-intro registry-set-intro--branded" : "registry-hero compact"}>
@@ -44,6 +44,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             <div className="registry-set-lockup">
               {tcgLogo && <img src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}
               <img src={setWordmark} alt={title} className="registry-set-wordmark" />
+              {SET_BRAND_LABELS[slug] && <p className="set-brand-label">{SET_BRAND_LABELS[slug]}</p>}
             </div>
           </>
         ) : (

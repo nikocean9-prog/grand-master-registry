@@ -1,3 +1,4 @@
+import "./registry-branding.css";
 import "./globals.css";
 import Link from "next/link";
 import AdminRegistryLink from "./components/AdminRegistryLink";
