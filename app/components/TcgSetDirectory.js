@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../lib/adminAuth";
-import { SET_WORDMARKS } from "../lib/setWordmarks";
+import { SET_WORDMARKS, MAGIC_STYLE_TCGS } from "../lib/setWordmarks";
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -74,7 +74,7 @@ export default function TcgSetDirectory({ sets, tcgSlug }) {
   }
 
   if (logoSets.length === visibleSets.length) {
-    return <div className={`set-logo-grid set-logo-grid--${["grand-archive", "universus", "weiss-schwarz"].includes(tcgSlug) ? "magic-the-gathering" : tcgSlug}`}>{logoSets.map((set) => (
+    return <div className={`set-logo-grid set-logo-grid--${MAGIC_STYLE_TCGS.includes(tcgSlug) ? "magic-the-gathering" : tcgSlug}`}>{logoSets.map((set) => (
       <SetLogoTile key={set.name} set={set} logo={SET_WORDMARKS[set.slug]} confirmed={confirmedBySet[set.slug] || 0} />
     ))}</div>;
   }

@@ -24,3 +24,10 @@ Production build passed. Browser-rendered side-by-side comparison inspected, inc
 Residual gap: comparison uses desktop Chrome frames at mobile CSS width, not physical Safari.
 
 final result: passed
+
+## Additional four games — September 21, 2026
+
+- Extended shared Magic directory composition to Flesh and Blood, Gundam, Digimon and Star Wars: Unlimited.
+- Added eight transparent set wordmarks and set-page game/set lockups; source provenance in logo-sources.md.
+- Mobile browser comparison at 393px: game headers, set logos and live-count progress rows render without rectangular asset backgrounds. Star Wars directory and Gundam/Digimon set headers inspected.
+- Production build passed. Existing local preview database timeouts remain; live deployment data verification required. No database or approval-state edits.

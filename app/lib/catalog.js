@@ -23,7 +23,7 @@ export const tcgs = [
     { slug: "lorwyn-eclipsed", name: "Lorwyn Eclipsed", status: "live", serials: 500, summary: "Bitterbloom Bearer · 500 serial numbers", description: "Track the 500 individually numbered Bitterbloom Bearer cards.", href: "/sets/lorwyn-eclipsed" },
     { slug: "secrets-of-strixhaven", name: "Secrets of Strixhaven", status: "live", serials: 500, summary: "Emeritus of Ideation · 500 serial numbers", description: "Track the 500 individually numbered Emeritus of Ideation cards.", href: "/sets/secrets-of-strixhaven" },
   ] },
-  { slug: "gundam", name: "Gundam Card Game", initials: "GCG", logo: "/graphics/gundam-official-logo.png", status: "live", description: "Track serial-numbered Gundam Card Game promos by release and language edition.", sets: [
+  { slug: "gundam", name: "Gundam Card Game", initials: "GCG", logo: "/graphics/gundam-logo-restored.webp", status: "live", description: "Track serial-numbered Gundam Card Game promos by release and language edition.", sets: [
     { slug: "gundam-1st-anniversary", name: "1st Anniversary Promos · English", status: "live", serials: 999, summary: "Strike Freedom Gundam EXBP-028 · English edition · 999 serial numbers", description: "Track the 999 serial-numbered English copies of Strike Freedom Gundam (EXBP-028), an EX Base token released through the 2026 1st Anniversary events. Other language editions are separate releases.", href: "/sets/gundam-1st-anniversary" },
   ] },
   { slug: "one-piece", name: "One Piece Card Game", initials: "OP", logo: "/graphics/one-piece-logo.webp", status: "planned", description: "A planned registry for numbered One Piece cards.", sets: [] },
@@ -33,7 +33,7 @@ export const tcgs = [
     { slug: "dusk-till-dawn", name: "Dusk Till Dawn", status: "live", serials: 20, summary: "Prism and Chane artist-sketch cards · 20 serial numbers", description: "Track the ten signed and serialized artist-sketch versions each of Prism and Chane.", href: "/sets/dusk-till-dawn" },
   ] },
   { slug: "digimon", name: "Digimon Card Game", initials: "DGM", logo: "/graphics/digimon-logo.webp", status: "live", description: "Track individually numbered Digimon cards.", sets: [
-    { slug: "world-convergence", name: "World Convergence", status: "live", serials: 350, summary: "Serialized Omnimon · 350 serial numbers", description: "Track all 350 individually numbered Omnimon cards from Special Booster Ver. 2.0.", href: "/sets/world-convergence" },
+    { slug: "world-convergence", name: "World Convergence", status: "live", serials: 350, summary: "Serialized Omnimon · 350 serial numbers", description: "Track all 350 individually numbered Omnimon cards from World Convergence (BT-21).", href: "/sets/world-convergence" },
   ] },
   { slug: "final-fantasy", name: "Final Fantasy TCG", initials: "FF", logo: "/graphics/final-fantasy-logo.webp", status: "planned", description: "A planned registry for special Final Fantasy TCG releases.", sets: [] },
   { slug: "star-wars-unlimited", name: "Star Wars: Unlimited", initials: "SWU", logo: "/graphics/star-wars-unlimited-logo.webp", status: "live", description: "Track serialized Prestige cards across Star Wars: Unlimited releases.", sets: [

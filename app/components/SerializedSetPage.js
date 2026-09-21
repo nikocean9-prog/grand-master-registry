@@ -27,7 +27,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
   ) ?? 0;
   const percentage = total ? ((confirmed / total) * 100).toFixed(2) : "0.00";
   const setWordmark = getSetWordmark(slug);
-  const tcgSlug = { "Magic: The Gathering": "magic-the-gathering", "Grand Archive": "grand-archive", "UniVersus": "universus", "Weiß Schwarz": "weiss-schwarz" }[tcgName] || null;
+  const tcgSlug = { "Flesh and Blood": "flesh-and-blood", "Gundam Card Game": "gundam", "Digimon Card Game": "digimon", "Star Wars: Unlimited": "star-wars-unlimited", "Magic: The Gathering": "magic-the-gathering", "Grand Archive": "grand-archive", "UniVersus": "universus", "Weiß Schwarz": "weiss-schwarz" }[tcgName] || null;
   const tcgLogo = tcgSlug ? TCG_HEADER_LOGOS[tcgSlug] : null;
   const sharedSerialTotal = cards?.length && cards.every((card) => card.serial_total === cards[0].serial_total)
     ? cards[0].serial_total
