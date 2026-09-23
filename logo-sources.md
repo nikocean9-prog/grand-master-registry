@@ -33,3 +33,5 @@ The Digimon catalogue description was corrected from Special Booster Ver. 2.0 to
 - Production build and diff whitespace checks passed. Catalogue image override is restricted to card 548.
 
 Omnimon BT13-112 catalogue edit (23 September 2026): AI-assisted SAMPLE removal and transparent card cutout derived from owner screenshot of official preview https://world.digimoncard.com/images/products/pack/ver21/card/BT13-112p.png?250404-2 . Catalogue illustration only; never submission evidence. Asset: public/graphics/digimon-omnimon-bt13-112-catalog.webp.
+
+Grand Archive serial card back: official homepage image https://www.gatcg.com/_nuxt/img/back.d4a22a4.jpg (23 September 2026).

@@ -202,7 +202,7 @@ export default async function CardPage({ params }) {
     enableCardTransition,
   };
   return (
-    <main className={`card-page${tcgSlug === "gundam" ? " card-page--gundam" : tcgSlug === "flesh-and-blood" ? " card-page--fab" : tcgSlug === "digimon" ? " card-page--digimon" : tcgSlug === "star-wars-unlimited" ? ` card-page--swu${[334,335].includes(Number(card.id)) ? " card-page--swu-landscape" : ""}` : ""}`}>
+    <main className={`card-page${tcgSlug === "gundam" ? " card-page--gundam" : tcgSlug === "flesh-and-blood" ? " card-page--fab" : tcgSlug === "digimon" ? " card-page--digimon" : tcgSlug === "grand-archive" ? " card-page--ga" : tcgSlug === "star-wars-unlimited" ? ` card-page--swu${[334,335].includes(Number(card.id)) ? " card-page--swu-landscape" : ""}` : ""}`}>
       <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
