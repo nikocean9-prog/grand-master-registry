@@ -1,4 +1,5 @@
 const TCG_CARD_BACKS = {
+  universus: "/graphics/card-backs/universus-legacy-card-back.webp",
   "grand-archive": "https://www.gatcg.com/_nuxt/img/back.d4a22a4.jpg",
   gundam: "/graphics/card-backs/gundam-card-back.webp",
   yugioh: "/graphics/card-backs/yugioh-card-back-v2.webp",

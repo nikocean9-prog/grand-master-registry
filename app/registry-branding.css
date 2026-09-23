@@ -171,3 +171,23 @@
 }
 .card-page--ga .serial-card-flight-face { border-radius: 5% / 3.6%; background-color: transparent; }
 .card-page--ga .serial-card-flight-front img { object-fit: contain; }
+
+/* UniVersus catalogue spacing and rounded card silhouettes. */
+.card-grid.card-grid--uv { align-items: start; row-gap: 40px; }
+.card-grid--uv .registry-card--uv {
+  display: flex; flex-direction: column; align-self: start; gap: 16px;
+}
+.registry-card--uv .registry-card-content { display: grid; gap: 10px; }
+.registry-card--uv .registry-card-content h3 { margin: 0; line-height: 1.35; overflow-wrap: anywhere; }
+.registry-card--uv .registry-card-content p { margin: 0; line-height: 1.5; }
+.registry-card--uv .registry-card-content .card-progress { margin: 0; }
+.registry-card--uv .registry-card-image,
+.card-page.card-page--uv .card-detail-image {
+  aspect-ratio: 63 / 88; border: 0; border-radius: 5% / 3.6%;
+  background: transparent; object-fit: cover;
+}
+.card-page--uv .tcg-card-grid.card-transition-grid .serial-box {
+  border: 0; border-radius: 5% / 3.6%; background: transparent; box-shadow: none;
+}
+.card-page--uv .serial-card-flight-face { border-radius: 5% / 3.6%; background-color: transparent; }
+.card-page--uv .serial-card-flight-front img { object-fit: contain; }

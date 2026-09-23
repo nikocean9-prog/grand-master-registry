@@ -71,7 +71,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
           <p>{sharedSerialTotal ? `Each card contains ${sharedSerialTotal.toLocaleString()} serial numbers.` : `${cards?.length ?? 0} serial-numbered ${cards?.length === 1 ? "card" : "cards"} · ${total.toLocaleString()} serials`}</p>
         </div>
         {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : (
-          <div className={`card-grid${tcgName === "Star Wars: Unlimited" ? " card-grid--swu" : tcgName === "Grand Archive" ? " card-grid--ga" : ""}`}>
+          <div className={`card-grid${tcgName === "Star Wars: Unlimited" ? " card-grid--swu" : tcgName === "Grand Archive" ? " card-grid--ga" : tcgName === "UniVersus" ? " card-grid--uv" : ""}`}>
             {cards?.map((card) => {
               const catalogImage = getGundamCatalogImage(card);
               const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
@@ -93,7 +93,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                 );
               }
               return (
-                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : tcgName === "Digimon Card Game" ? " registry-card--digimon" : tcgName === "Star Wars: Unlimited" ? " registry-card--swu" : tcgName === "Grand Archive" ? " registry-card--ga" : ""}`}>
+                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : tcgName === "Digimon Card Game" ? " registry-card--digimon" : tcgName === "Star Wars: Unlimited" ? " registry-card--swu" : tcgName === "Grand Archive" ? " registry-card--ga" : tcgName === "UniVersus" ? " registry-card--uv" : ""}`}>
                   {catalogImage ? (tcgName === "Star Wars: Unlimited" ? <div className={`swu-card-art${[334, 335].includes(Number(card.id)) ? " swu-card-art--landscape" : ""}`}><img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /></div> : <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />) : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
                   <div className="registry-card-content">
                     <h3>{card.name}</h3>
