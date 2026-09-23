@@ -130,3 +130,24 @@
   background-color: transparent;
 }
 .card-page--swu .serial-card-flight-back { background-size: 104% 104%; }
+
+/* Reserve natural space for full Star Wars names and registry statistics. */
+.card-grid.card-grid--swu {
+  align-items: start;
+  row-gap: 40px;
+}
+.card-grid--swu .registry-card--swu {
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  gap: 16px;
+}
+.registry-card--swu .swu-card-art { flex: none; width: 100%; }
+.registry-card--swu .registry-card-content { display: grid; gap: 10px; }
+.registry-card--swu .registry-card-content h3 {
+  margin: 0;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.registry-card--swu .registry-card-content p { margin: 0; line-height: 1.5; }
+.registry-card--swu .registry-card-content .card-progress { margin: 0; }

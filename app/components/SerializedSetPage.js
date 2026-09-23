@@ -71,7 +71,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
           <p>{sharedSerialTotal ? `Each card contains ${sharedSerialTotal.toLocaleString()} serial numbers.` : `${cards?.length ?? 0} serial-numbered ${cards?.length === 1 ? "card" : "cards"} · ${total.toLocaleString()} serials`}</p>
         </div>
         {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : (
-          <div className="card-grid">
+          <div className={`card-grid${tcgName === "Star Wars: Unlimited" ? " card-grid--swu" : ""}`}>
             {cards?.map((card) => {
               const catalogImage = getGundamCatalogImage(card);
               const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
