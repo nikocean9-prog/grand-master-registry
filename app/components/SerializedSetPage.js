@@ -93,7 +93,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                 );
               }
               return (
-                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : ""}`}>
+                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : tcgName === "Digimon Card Game" ? " registry-card--digimon" : ""}`}>
                   {catalogImage ? <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /> : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
                   <div className="registry-card-content">
                     <h3>{card.name}</h3>

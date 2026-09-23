@@ -31,3 +31,5 @@ The Digimon catalogue description was corrected from Special Booster Ver. 2.0 to
 - `card-backs/gundam-card-back.webp`: built-in image extraction/restoration of the publisher's frontmost card back from https://www.gundam-gcg.com/en/images/welcome/playguide/img_01.webp . Prompt preserves the pale-blue geometric design and lettering, removes the stack/background, and adds transparent physical corners.
 - Shared `SerialGrid` behavior is enabled by the Gundam card-back mapping, including reduced-motion handling. Local confirmed-tile fixture triggered the existing flight/spin element successfully; the real Gundam registry has no confirmed pulls yet. Fixture exists only in the separate preview checkout.
 - Production build and diff whitespace checks passed. Catalogue image override is restricted to card 548.
+
+Omnimon BT13-112 catalogue edit (23 September 2026): AI-assisted SAMPLE removal and transparent card cutout derived from owner screenshot of official preview https://world.digimoncard.com/images/products/pack/ver21/card/BT13-112p.png?250404-2 . Catalogue illustration only; never submission evidence. Asset: public/graphics/digimon-omnimon-bt13-112-catalog.webp.
