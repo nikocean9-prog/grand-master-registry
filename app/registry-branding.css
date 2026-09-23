@@ -41,3 +41,26 @@
 .card-page--gundam .serial-card-flight-back {
   background-size: 105% 105%;
 }
+
+/* Flesh and Blood catalogue fronts use their own rounded 63:88 silhouette. */
+.registry-card--fab .registry-card-image,
+.card-page.card-page--fab .card-detail-image {
+  aspect-ratio: 63 / 88;
+  border: 0;
+  border-radius: 5% / 3.6%;
+  background: transparent;
+  object-fit: cover;
+}
+.card-page--fab .tcg-card-grid.card-transition-grid .serial-box {
+  aspect-ratio: 63 / 88;
+  border: 0;
+  border-radius: 5% / 3.6%;
+  background: transparent;
+}
+.card-page--fab .serial-card-flight-face {
+  border-radius: 5% / 3.6%;
+  background-color: transparent;
+}
+.card-page--fab .serial-card-flight-front img {
+  object-fit: contain;
+}

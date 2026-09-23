@@ -202,7 +202,7 @@ export default async function CardPage({ params }) {
     enableCardTransition,
   };
   return (
-    <main className={`card-page${tcgSlug === "gundam" ? " card-page--gundam" : ""}`}>
+    <main className={`card-page${tcgSlug === "gundam" ? " card-page--gundam" : tcgSlug === "flesh-and-blood" ? " card-page--fab" : ""}`}>
       <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
