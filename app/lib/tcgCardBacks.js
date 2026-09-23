@@ -1,4 +1,5 @@
 const TCG_CARD_BACKS = {
+  gundam: "/graphics/card-backs/gundam-card-back.webp",
   yugioh: "/graphics/card-backs/yugioh-card-back-v2.webp",
   pokemon: "/graphics/card-backs/pokemon-card-back-hq.webp",
   "magic-the-gathering": "/graphics/card-backs/mtg-card-back-hq.webp",

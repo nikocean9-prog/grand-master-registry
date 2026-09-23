@@ -1,3 +1,4 @@
+import { getGundamCatalogImage } from "../../lib/gundamCatalog";
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@supabase/supabase-js";
@@ -192,7 +193,7 @@ export default async function CardPage({ params }) {
     ? getMagnificentMonstersCatalogImage(card)
     : card.card_sets?.slug === "magnificent-maestros"
       ? getMagnificentMaestrosCatalogImage(card)
-      : card.image_url;
+      : getGundamCatalogImage(card);
   const cardSummary = {
     name: card.name,
     image_url: catalogImage,
@@ -201,7 +202,7 @@ export default async function CardPage({ params }) {
     enableCardTransition,
   };
   return (
-    <main className="card-page">
+    <main className={`card-page${tcgSlug === "gundam" ? " card-page--gundam" : ""}`}>
       <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 

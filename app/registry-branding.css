@@ -6,3 +6,15 @@
 @media(max-width:700px) {
   .expanded-brand-registry .registry-set-lockup { min-height:0; gap:20px; }
 }
+
+/* Gundam artwork follows the physical card silhouette, without the YGO mat. */
+.registry-card--gundam .registry-card-image,
+.card-page--gundam .card-detail-image {
+  aspect-ratio: 63 / 88;
+  border: 0;
+  border-radius: 3%;
+  background: transparent;
+  object-fit: contain;
+  box-shadow: none;
+  filter: drop-shadow(0 10px 12px rgba(8,25,16,.28));
+}

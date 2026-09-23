@@ -1,3 +1,4 @@
+import { getGundamCatalogImage } from "../lib/gundamCatalog";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import PublicHeader from "./PublicHeader";
@@ -72,6 +73,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
         {cardsError ? <p>The card list is temporarily unavailable. Please refresh the page.</p> : (
           <div className="card-grid">
             {cards?.map((card) => {
+              const catalogImage = getGundamCatalogImage(card);
               const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
               const cardPercentage = card.serial_total ? ((cardConfirmed / card.serial_total) * 100).toFixed(1) : "0.0";
               if (usesCompactCardTiles) {
@@ -82,7 +84,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                     className="registry-card registry-card--mtg"
                     aria-label={`${card.name}: ${cardConfirmed} found out of ${card.serial_total.toLocaleString()} total cards, ${Math.round(Number(cardPercentage))} percent documented`}
                   >
-                    {card.image_url && <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" />}
+                    {catalogImage && <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />}
                     <div className="registry-card-count" style={{ "--card-found": `${cardPercentage}%` }}>
                       <span className="registry-card-count-value"><strong>{cardConfirmed}</strong> / {card.serial_total.toLocaleString()} found</span>
                       <span className="registry-card-percent">{Math.round(Number(cardPercentage))}%</span>
@@ -91,8 +93,8 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                 );
               }
               return (
-                <Link key={card.id} href={`/card/${card.id}`} className="registry-card">
-                  {card.image_url ? <img src={card.image_url} alt={card.name} className="registry-card-image" loading="lazy" /> : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
+                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Gundam Card Game" ? " registry-card--gundam" : ""}`}>
+                  {catalogImage ? <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /> : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
                   <div className="registry-card-content">
                     <h3>{card.name}</h3>
                     <p>{cardConfirmed} / {card.serial_total.toLocaleString()} confirmed · {cardPercentage}%</p>

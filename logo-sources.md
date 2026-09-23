@@ -24,3 +24,10 @@ These are AI-assisted cutouts/restorations, not untouched publisher logo files. 
 Set files: `public/graphics/new-set-wordmarks/*-transparent.webp`; restored game logo: `public/graphics/gundam-logo-restored.webp`.
 
 The Digimon catalogue description was corrected from Special Booster Ver. 2.0 to World Convergence (BT-21), consistent with https://world.digimoncard.com/products/pack/ver21/ . No database changes were made.
+
+## Gundam card presentation — September 23, 2026
+
+- `gundam-strike-freedom-exbp-028-catalog.webp`: built-in image edit of the existing official SAMPLE catalogue image, removing the diagonal SAMPLE overlay and isolating rounded card corners. Placeholder 000/000 preserved. Edited catalogue illustration only; submission/evidence files and approval records are unchanged.
+- `card-backs/gundam-card-back.webp`: built-in image extraction/restoration of the publisher's frontmost card back from https://www.gundam-gcg.com/en/images/welcome/playguide/img_01.webp . Prompt preserves the pale-blue geometric design and lettering, removes the stack/background, and adds transparent physical corners.
+- Shared `SerialGrid` behavior is enabled by the Gundam card-back mapping, including reduced-motion handling. Local confirmed-tile fixture triggered the existing flight/spin element successfully; the real Gundam registry has no confirmed pulls yet. Fixture exists only in the separate preview checkout.
+- Production build and diff whitespace checks passed. Catalogue image override is restricted to card 548.
