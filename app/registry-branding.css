@@ -191,3 +191,18 @@
 }
 .card-page--uv .serial-card-flight-face { border-radius: 5% / 3.6%; background-color: transparent; }
 .card-page--uv .serial-card-flight-front img { object-fit: contain; }
+
+/* Fixed-size UniVersus artwork windows trim the restored image's pale edge. */
+.registry-card--uv .uv-card-art {
+  width: 100%; aspect-ratio: 63 / 88; overflow: hidden;
+  border-radius: 5% / 3.6%; background: #190b06;
+  box-shadow: 0 12px 28px rgba(0,0,0,.34), 0 3px 8px rgba(0,0,0,.24);
+}
+.registry-card--uv .uv-card-art .registry-card-image {
+  width: 100%; height: 100%; border-radius: 0; box-shadow: none;
+}
+.registry-card--uv .uv-card-art--kirishima .registry-card-image,
+.card-page--uv .uv-card-art--kirishima .card-detail-image { transform: scale(1.012); }
+.card-page--uv .card-detail-image-frame.uv-card-art--kirishima {
+  overflow: hidden; border-radius: 5% / 3.6%; background: #190b06;
+}

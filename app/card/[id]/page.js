@@ -208,7 +208,7 @@ export default async function CardPage({ params }) {
 
       <div className="card-detail-header">
         {catalogImage && (
-          <div className="card-detail-image-frame">
+          <div className={`card-detail-image-frame${Number(card.id) === 561 ? " uv-card-art--kirishima" : ""}`}>
             <img src={catalogImage} alt={card.name} className="card-detail-image" />
           </div>
         )}
