@@ -76,3 +76,53 @@
   box-shadow: none;
   filter: drop-shadow(0 10px 12px rgba(8,25,16,.28));
 }
+
+/* Star Wars catalogue slots follow the physical card, including sideways ships. */
+.swu-card-art,
+.card-page--swu .card-detail-image-frame {
+  position: relative;
+  aspect-ratio: 63 / 88;
+  border-radius: 5% / 3.6%;
+  overflow: hidden;
+  background: transparent;
+  box-shadow: 0 10px 20px rgba(8,25,16,.24);
+}
+.registry-card--swu .registry-card-image,
+.card-page.card-page--swu .card-detail-image {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  aspect-ratio: 63 / 88;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  object-fit: contain;
+  box-shadow: none;
+}
+.registry-card--swu .swu-card-art--landscape .registry-card-image,
+.card-page.card-page--swu-landscape .card-detail-image,
+.card-page--swu-landscape .serial-card-flight-front img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 139.68254%;
+  height: 71.59091%;
+  aspect-ratio: 88 / 63;
+  border-radius: 3.6% / 5%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  object-fit: contain;
+}
+.card-page--swu .tcg-card-grid.card-transition-grid .serial-box {
+  border: 0;
+  border-radius: 5% / 3.6%;
+  background: transparent;
+  box-shadow: none;
+}
+.card-page--swu .tcg-card-grid .serial-box::before {
+  background-size: 104% 104%;
+}
+.card-page--swu .serial-card-flight-face {
+  border-radius: 5% / 3.6%;
+  background-color: transparent;
+}
+.card-page--swu .serial-card-flight-back { background-size: 104% 104%; }
