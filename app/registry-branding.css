@@ -206,3 +206,6 @@
 .card-page--uv .card-detail-image-frame.uv-card-art--kirishima {
   overflow: hidden; border-radius: 5% / 3.6%; background: #190b06;
 }
+
+/* Reserve two title lines so UniVersus counters and progress bars align. */
+.registry-card--uv .registry-card-content h3 { min-height: 2.7em; }
