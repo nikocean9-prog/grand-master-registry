@@ -209,3 +209,20 @@
 
 /* Reserve two title lines so UniVersus counters and progress bars align. */
 .registry-card--uv .registry-card-content h3 { min-height: 2.7em; }
+
+/* Shared caption layout for every TCG and set, including future entries.
+   Stretch each row and let titles grow without shifting its tracker baselines. */
+.card-grid:has(.registry-card-content) { align-items: stretch; row-gap: 40px; }
+.card-grid .registry-card:has(.registry-card-content) {
+  display: flex; flex-direction: column; align-self: stretch; gap: 16px;
+}
+.card-grid .registry-card .registry-card-content {
+  display: flex; flex-direction: column; flex: 1; gap: 10px;
+}
+.card-grid .registry-card .registry-card-content h3 {
+  flex: 1; min-height: 2.7em; margin: 0; line-height: 1.35; overflow-wrap: anywhere;
+}
+.card-grid .registry-card .registry-card-content p { margin: 0; line-height: 1.5; }
+.card-grid .registry-card .registry-card-content .card-progress {
+  flex-shrink: 0; height: 6px; margin: 0;
+}
