@@ -226,3 +226,15 @@
 .card-grid .registry-card .registry-card-content .card-progress {
   flex-shrink: 0; height: 6px; margin: 0;
 }
+
+/* Weiß Schwarz: both serialised sets share the physical card frame and spin. */
+.registry-card--ws .registry-card-image,
+.card-page.card-page--ws .card-detail-image {
+  aspect-ratio: 63 / 88; border: 0; border-radius: 5% / 3.6%;
+  background: transparent; object-fit: cover;
+}
+.card-page--ws .tcg-card-grid.card-transition-grid .serial-box {
+  border: 0; border-radius: 5% / 3.6%; background: transparent; box-shadow: none;
+}
+.card-page--ws .serial-card-flight-face { border-radius: 5% / 3.6%; background-color: transparent; }
+.card-page--ws .serial-card-flight-front img { object-fit: contain; }

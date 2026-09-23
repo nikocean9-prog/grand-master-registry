@@ -39,3 +39,6 @@ Grand Archive serial card back: official homepage image https://www.gatcg.com/_n
 UniVersus legacy blue-lightning card back (23 September 2026): AI-assisted perspective correction and transparent catalogue cutout from https://i.ebayimg.com/images/g/WegAAOSw0VZmoUzN/s-l1600.jpg . Legacy era cross-checked against https://cardgamer.com/games/tcgs/universus/universus-card-back-design/ . UI illustration only, never evidence.
 
 Kirishima Heroes Clash Chrome Rare catalogue illustration (23 September 2026): owner-approved AI restoration based on https://www.bigorbitcards.co.uk/510665-large_default/eijiro-kirishima-serial-numbered-1st-edition.jpg and adjacent Heroes Clash catalogue style references. Final haze-free revision; catalogue only, not serial evidence. Asset: public/graphics/universus-kirishima-chrome-catalog.webp.
+
+## Weiß Schwarz card back
+Shared by Saekano and Sword Art Online serialised registries. Source: https://en.wikipedia.org/wiki/File:Wei%C3%9F_Schwarz_cardback.png (Bushiroad card back). Original external PNG used for serial tiles and shared spin transition.

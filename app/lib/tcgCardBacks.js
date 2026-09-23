@@ -1,4 +1,5 @@
 const TCG_CARD_BACKS = {
+  "weiss-schwarz": "https://upload.wikimedia.org/wikipedia/en/c/c0/Wei%C3%9F_Schwarz_cardback.png",
   universus: "/graphics/card-backs/universus-legacy-card-back.webp",
   "grand-archive": "https://www.gatcg.com/_nuxt/img/back.d4a22a4.jpg",
   gundam: "/graphics/card-backs/gundam-card-back.webp",
