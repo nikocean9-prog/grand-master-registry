@@ -99,17 +99,21 @@
   object-fit: contain;
   box-shadow: none;
 }
-.registry-card--swu .swu-card-art--landscape .registry-card-image,
-.card-page.card-page--swu-landscape .card-detail-image,
-.card-page--swu-landscape .serial-card-flight-front img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 139.68254%;
-  height: 71.59091%;
+.swu-card-art.swu-card-art--landscape,
+.card-page--swu-landscape .card-detail-image-frame {
   aspect-ratio: 88 / 63;
   border-radius: 3.6% / 5%;
-  transform: translate(-50%, -50%) rotate(90deg);
+  align-self: start;
+}
+.registry-card--swu .swu-card-art--landscape .registry-card-image,
+.card-page.card-page--swu-landscape .card-detail-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 88 / 63;
+  border-radius: inherit;
+  object-fit: contain;
+}
+.card-page--swu-landscape .serial-card-flight-front img {
   object-fit: contain;
 }
 .card-page--swu .tcg-card-grid.card-transition-grid .serial-box {
