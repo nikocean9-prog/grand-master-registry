@@ -9,7 +9,7 @@
 
 /* Gundam artwork follows the physical card silhouette, without the YGO mat. */
 .registry-card--gundam .registry-card-image,
-.card-page--gundam .card-detail-image {
+.card-page.card-page--gundam .card-detail-image {
   aspect-ratio: 63 / 88;
   border: 0;
   border-radius: 3%;
