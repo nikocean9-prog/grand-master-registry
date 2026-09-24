@@ -16,7 +16,7 @@ function wrapTitle(title) {
   const lines = [];
   let line = "";
   for (const word of words) {
-    if (line && `${line} ${word}`.length > 23) {
+    if (line && `${line} ${word}`.length > 17) {
       lines.push(line);
       line = word;
     } else line = line ? `${line} ${word}` : word;
@@ -31,16 +31,16 @@ export default function SetTitleArtwork({ name, tcg }) {
   const title = fullTitle.includes(":") ? fullTitle.split(":").at(-1).trim() : fullTitle;
   const subtitle = fullTitle.includes(":") ? fullTitle.split(":")[0].trim() : secondary;
   const lines = wrapTitle(title);
-  const fontSize = lines.some((part) => part.length > 19) ? 46 : 60;
-  const lineHeight = fontSize * 1.08;
-  const start = 112 - (lines.length - 1) * lineHeight / 2;
+  const fontSize = lines.length > 1 ? 94 : lines[0].length > 15 ? 108 : 132;
+  const lineHeight = lines.length > 1 ? 86 : 110;
+  const start = 119 - (lines.length - 1) * lineHeight / 2;
   return (
     <svg className="set-wordmark-art set-title-artwork" viewBox="0 0 800 250" role="img" aria-label={`${name} set title`} preserveAspectRatio="xMidYMid meet">
       <title>{name}</title>
       <path d="M160 36h480M160 218h480" stroke={accent} strokeWidth="3" strokeLinecap="round" />
       <path d="M387 36l13-9 13 9M387 218l13 9 13-9" fill="none" stroke={accent} strokeWidth="3" />
-      {lines.map((text, i) => <text key={`${text}-${i}`} x="400" y={start + i * lineHeight} fill={ink} textAnchor="middle" dominantBaseline="middle" fontFamily="Georgia, serif" fontSize={fontSize} fontWeight="bold" textLength={text.length > 25 ? 690 : undefined} lengthAdjust="spacing">{text}</text>)}
-      {subtitle && <text x="400" y="194" fill={accent} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="17" fontWeight="700" letterSpacing="3">{subtitle.toUpperCase().slice(0, 55)}</text>}
+      {lines.map((text, i) => <text key={`${text}-${i}`} x="400" y={start + i * lineHeight} fill={ink} textAnchor="middle" dominantBaseline="middle" fontFamily="Georgia, serif" fontSize={fontSize} fontWeight="bold" textLength={text.length > 10 ? 680 : undefined} lengthAdjust="spacingAndGlyphs">{text}</text>)}
+      {subtitle && lines.length === 1 && <text x="400" y="206" fill={accent} textAnchor="middle" fontFamily="Arial, sans-serif" fontSize="21" fontWeight="700" letterSpacing="3">{subtitle.toUpperCase().slice(0, 55)}</text>}
     </svg>
   );
 }
