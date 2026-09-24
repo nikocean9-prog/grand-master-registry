@@ -1,3 +1,4 @@
+import SetWordmark from "./SetWordmark";
 import TcgLogo from "./TcgLogo";
 import CatalogCardArt from "./CatalogCardArt";
 import { getGundamCatalogImage } from "../lib/gundamCatalog";
@@ -50,7 +51,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             <h1 className="visually-hidden">{tcgName} {title}</h1>
             <div className="registry-set-lockup">
               {tcgLogo && <TcgLogo slug={tcgSlug} src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}
-              <img src={setWordmark} alt={title} className="registry-set-wordmark" />
+              <SetWordmark src={setWordmark} alt={title} className="registry-set-wordmark" />
               {SET_BRAND_LABELS[slug] && <p className="set-brand-label">{SET_BRAND_LABELS[slug]}</p>}
             </div>
           </>

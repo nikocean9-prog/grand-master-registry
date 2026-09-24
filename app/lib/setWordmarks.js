@@ -1,6 +1,11 @@
 const WORDMARK_ROOT = "/graphics/mtg-set-wordmarks";
 
 export const SET_WORDMARKS = {
+  "generation-dragenesis-serial-numbered": "https://www.pucapucagames.co.uk/cdn/shop/collections/Generation_Dragenesis.png?v=1756050269#crop=57,176,478,218,642,637",
+  "mortal-ambition-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-mortal-ambition/logo-mortal-ambition-v3.webp",
+  "abyssal-heaven-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-abyssal-heaven/logo-abyssal-heaven-v3.webp",
+  "distorted-reflections-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-distorted-reflections/logo-distorted-reflections-v3.webp",
+  "phantom-monarchs-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-phantom-monarchs/logo-phantom-monarchs-v3.webp",
   "dusk-till-dawn": "/graphics/new-set-wordmarks/dusk-till-dawn-transparent.webp",
   "gundam-1st-anniversary": "/graphics/new-set-wordmarks/gundam-1st-anniversary-transparent.webp",
   "world-convergence": "/graphics/new-set-wordmarks/world-convergence-transparent.webp",
