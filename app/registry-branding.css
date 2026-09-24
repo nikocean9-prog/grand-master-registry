@@ -273,3 +273,22 @@
 .card-progress-summary .yugioh-set-tracker-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px 24px; }
 .card-progress-summary .yugioh-set-progress { height: 6px; background: #d7ddda; border-radius: 999px; overflow: hidden; margin-top: 12px; }
 .card-progress-summary .yugioh-set-progress > span { display: block; height: 100%; background: #3b9d66; }
+
+/* Logos share the approved artwork window, after their empty canvas is cropped. */
+.live-registry-grid .live-registry-art .tcg-logo-normalised {
+  display: block; width: min(100%, 360px); height: 150px; max-height: 150px;
+  overflow: hidden; transition: transform 160ms ease;
+}
+.tcg-logo--dragon-ball-super { mix-blend-mode: multiply; filter: brightness(1.035); }
+.tcg-logo--one-piece { mix-blend-mode: multiply; }
+.catalog-heading .tcg-official-logo.tcg-logo-normalised {
+  display: block; width: min(100%, 500px); height: auto; max-height: 250px;
+  margin: 0 auto; overflow: hidden;
+}
+.registry-set-lockup .registry-set-tcg-logo.tcg-logo-normalised {
+  display: block; width: min(100%, 420px); height: auto; max-height: 210px;
+  margin: 0 auto; overflow: hidden;
+}
+@media (max-width: 700px) {
+  .live-registry-grid .live-registry-art .tcg-logo-normalised { height: 125px; max-height: 125px; }
+}

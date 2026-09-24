@@ -42,3 +42,6 @@ Kirishima Heroes Clash Chrome Rare catalogue illustration (23 September 2026): o
 
 ## Weiß Schwarz card back
 Shared by Saekano and Sword Art Online serialised registries. Source: https://en.wikipedia.org/wiki/File:Wei%C3%9F_Schwarz_cardback.png (Bushiroad card back). Original external PNG used for serial tiles and shared spin transition.
+
+## Expansion logo presentation — 24 September 2026
+Dragon Ball uses the higher-resolution original wordmark at https://www.pngkey.com/png/detail/42-428156_comments-dragon-ball-super-card-game-logo.png . Its neutral outer background is removed visually by CSS compositing; the source bitmap is unchanged. Altered and Vanguard padded transparent canvases are fitted with SVG viewports. Riftbound uses the transparent wordmark at https://spellboundgames.co.uk/cdn/shop/collections/riftlogo.png?v=1743736584&width=1500 . Shared `TcgLogo` presentation is used on the game list, game headers and set headers.

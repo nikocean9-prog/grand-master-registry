@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import TcgLogo from "./TcgLogo";
 import { createClient } from "@supabase/supabase-js";
 import { getCurrentAdmin } from "../lib/adminAuth";
 
@@ -58,7 +59,7 @@ export default function TcgCatalog({ tcgs }) {
           return (
             <Link href={`/tcg/${tcg.slug}`} className={`live-registry-card tcg-${tcg.slug}`} key={tcg.slug}>
               <span className="live-registry-name">{tcg.name}</span>
-              <span className="live-registry-art">{tcg.logo ? <img src={tcg.logo} alt={tcg.name} /> : <strong className="live-registry-text-mark">{tcg.name}</strong>}</span>
+              <span className="live-registry-art">{tcg.logo ? <TcgLogo slug={tcg.slug} src={tcg.logo} alt={tcg.name} /> : <strong className="live-registry-text-mark">{tcg.name}</strong>}</span>
               <span className="live-registry-tracker">
                 <span className="live-registry-tracker-heading">
                   <strong>{confirmed.toLocaleString()} / {total.toLocaleString()} confirmed</strong>
