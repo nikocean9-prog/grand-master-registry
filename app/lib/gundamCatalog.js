@@ -1,6 +1,6 @@
 // Edited catalogue illustration only. Never apply this to submission/evidence photos.
 const PHOTO_CATALOGUE = {
-  652: "goku-clean.webp",
+  652: "goku-clean.webp#crop=8,6,1045,1471,1061,1483",
   664: "chrono-original.webp#patch=/graphics/catalogue-photos/chrono-clean.webp,3,285,143,66,350,510",
   665: "messiah-original.webp#patch=/graphics/catalogue-photos/messiah-clean.webp,5,285,139,66,350,510",
   651: "bardock-photo.webp#quad=226,298,981,317,970,1373,206,1371,1200,1600",
