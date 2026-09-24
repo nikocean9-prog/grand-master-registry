@@ -1,8 +1,11 @@
+import CatalogCardArt from "./CatalogCardArt";
 import { getGundamCatalogImage } from "../lib/gundamCatalog";
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import PublicHeader from "./PublicHeader";
 import { getSetWordmark, TCG_HEADER_LOGOS, SET_BRAND_LABELS } from "../lib/setWordmarks";
+import { getSet } from "../lib/catalog";
+import { getTcgCardAspectRatio } from "../lib/tcgCardBacks";
 
 export default async function SerializedSetPage({ slug, tcgName, eyebrow, title, description, backHref }) {
   const usesCompactCardTiles = tcgName === "Magic: The Gathering";
@@ -16,20 +19,22 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
   const { data: cards, error: cardsError } = cardSet
     ? await supabase
         .from("cards")
-        .select("id, name, image_url, serial_total, serials(status)")
+        .select("id, name, image_url, serial_total, serials(count)")
         .eq("set_id", cardSet.id)
+        .eq("serials.status", "confirmed")
         .order("id")
     : { data: [], error: setError };
 
   const total = cards?.reduce((sum, card) => sum + card.serial_total, 0) ?? 0;
   const confirmed = cards?.reduce(
-    (sum, card) => sum + (card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0),
+    (sum, card) => sum + (card.serials?.[0]?.count ?? 0),
     0
   ) ?? 0;
   const percentage = total ? ((confirmed / total) * 100).toFixed(2) : "0.00";
   const setWordmark = getSetWordmark(slug);
-  const tcgSlug = { "Flesh and Blood": "flesh-and-blood", "Gundam Card Game": "gundam", "Digimon Card Game": "digimon", "Star Wars: Unlimited": "star-wars-unlimited", "Magic: The Gathering": "magic-the-gathering", "Grand Archive": "grand-archive", "UniVersus": "universus", "Weiß Schwarz": "weiss-schwarz" }[tcgName] || null;
-  const tcgLogo = tcgSlug ? TCG_HEADER_LOGOS[tcgSlug] : null;
+  const tcg = getSet(slug)?.tcg;
+  const tcgSlug = tcg?.slug;
+  const tcgLogo = TCG_HEADER_LOGOS[tcgSlug] || tcg?.logo;
   const sharedSerialTotal = cards?.length && cards.every((card) => card.serial_total === cards[0].serial_total)
     ? cards[0].serial_total
     : null;
@@ -74,7 +79,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
           <div className={`card-grid${tcgName === "Star Wars: Unlimited" ? " card-grid--swu" : tcgName === "Grand Archive" ? " card-grid--ga" : tcgName === "UniVersus" ? " card-grid--uv" : ""}`}>
             {cards?.map((card) => {
               const catalogImage = getGundamCatalogImage(card);
-              const cardConfirmed = card.serials?.filter((serial) => serial.status === "confirmed").length ?? 0;
+              const cardConfirmed = card.serials?.[0]?.count ?? 0;
               const cardPercentage = card.serial_total ? ((cardConfirmed / card.serial_total) * 100).toFixed(1) : "0.0";
               if (usesCompactCardTiles) {
                 return (
@@ -84,7 +89,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                     className="registry-card registry-card--mtg"
                     aria-label={`${card.name}: ${cardConfirmed} found out of ${card.serial_total.toLocaleString()} total cards, ${Math.round(Number(cardPercentage))} percent documented`}
                   >
-                    {catalogImage && <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />}
+                    {catalogImage && <CatalogCardArt src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />}
                     <div className="registry-card-count" style={{ "--card-found": `${cardPercentage}%` }}>
                       <span className="registry-card-count-value"><strong>{cardConfirmed}</strong> / {card.serial_total.toLocaleString()} found</span>
                       <span className="registry-card-percent">{Math.round(Number(cardPercentage))}%</span>
@@ -93,8 +98,8 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
                 );
               }
               return (
-                <Link key={card.id} href={`/card/${card.id}`} className={`registry-card${tcgName === "Weiß Schwarz" ? " registry-card--ws" : tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : tcgName === "Digimon Card Game" ? " registry-card--digimon" : tcgName === "Star Wars: Unlimited" ? " registry-card--swu" : tcgName === "Grand Archive" ? " registry-card--ga" : tcgName === "UniVersus" ? " registry-card--uv" : ""}`}>
-                  {catalogImage ? (tcgName === "Star Wars: Unlimited" ? <div className={`swu-card-art${[334, 335].includes(Number(card.id)) ? " swu-card-art--landscape" : ""}`}><img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /></div> : tcgName === "UniVersus" ? <div className={`uv-card-art${Number(card.id) === 561 ? " uv-card-art--kirishima" : ""}`}><img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /></div> : <img src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />) : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
+                <Link key={card.id} href={`/card/${card.id}`} style={{ "--physical-card-ratio": getTcgCardAspectRatio(tcgSlug) }} className={`registry-card registry-card--physical${tcgName === "Weiß Schwarz" ? " registry-card--ws" : tcgName === "Gundam Card Game" ? " registry-card--gundam" : tcgName === "Flesh and Blood" ? " registry-card--fab" : tcgName === "Digimon Card Game" ? " registry-card--digimon" : tcgName === "Star Wars: Unlimited" ? " registry-card--swu" : tcgName === "Grand Archive" ? " registry-card--ga" : tcgName === "UniVersus" ? " registry-card--uv" : ""}`}>
+                  {catalogImage ? (tcgName === "Star Wars: Unlimited" ? <div className={`swu-card-art${[334, 335].includes(Number(card.id)) ? " swu-card-art--landscape" : ""}`}><CatalogCardArt src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /></div> : tcgName === "UniVersus" ? <div className={`uv-card-art${Number(card.id) === 561 ? " uv-card-art--kirishima" : ""}`}><CatalogCardArt src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" /></div> : <CatalogCardArt src={catalogImage} alt={card.name} className="registry-card-image" loading="lazy" />) : <div className="registry-card-art-unavailable">Catalogue image unavailable</div>}
                   <div className="registry-card-content">
                     <h3>{card.name}</h3>
                     <p>{cardConfirmed} / {card.serial_total.toLocaleString()} confirmed · {cardPercentage}%</p>

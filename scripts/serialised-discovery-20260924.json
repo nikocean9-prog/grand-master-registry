@@ -1,0 +1,787 @@
+{
+  "checked": "2026-09-24",
+  "note": "Catalogue images are references, never evidence of an actual reported serial. Every newly seeded slot starts unreported.",
+  "sets": [
+    {
+      "tcg": "universus",
+      "slug": "jet-burn-chrome-rares",
+      "name": "My Hero Academia: Jet Burn · Chrome Rares",
+      "limit": 100,
+      "source": "https://www.universusacademy.org/support/chrome-rares",
+      "cards": [
+        {
+          "name": "Dabi (Serial Numbered)",
+          "number": "MHA6 #1/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/525033_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F525033%2Funiversus-universus-my-hero-academia-jet-burn-dabi-serial-numbered"
+        },
+        {
+          "name": "Endeavor (Serial Numbered)",
+          "number": "MHA6 #2/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/525035_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F525035%2Funiversus-universus-my-hero-academia-jet-burn-endeavor-serial-numbered"
+        },
+        {
+          "name": "Hawks (Serial Numbered)",
+          "number": "MHA6 #3/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/525034_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F525034%2Funiversus-universus-my-hero-academia-jet-burn-hawks-serial-numbered"
+        },
+        {
+          "name": "Izuku Midoriya (Serial Numbered)",
+          "number": "MHA6 #4/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/525032_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F525032%2Funiversus-universus-my-hero-academia-jet-burn-izuku-midoriya-serial-numbered"
+        },
+        {
+          "name": "Katsuki Bakugo (Serial Numbered)",
+          "number": "MHA6 #5/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/525036_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F525036%2Funiversus-universus-my-hero-academia-jet-burn-katsuki-bakugo-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "girl-power-chrome-rares",
+      "name": "My Hero Academia: Girl Power · Chrome Rares",
+      "limit": 100,
+      "source": "https://www.crunchyroll.com/news/latest/2024/4/24/my-hero-academia-girl-power-universus-cards-chrome-rares-may-2024",
+      "cards": [
+        {
+          "name": "Himiko Toga (Serial Numbered)",
+          "number": "MHA7 #1/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/545032_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F545032%2Funiversus-universus-my-hero-academia-girl-power-himiko-toga-serial-numbered"
+        },
+        {
+          "name": "Mirko (Serial Numbered)",
+          "number": "MHA7 #2/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/547803_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F547803%2Funiversus-universus-my-hero-academia-girl-power-mirko-serial-numbered"
+        },
+        {
+          "name": "Momo Yaoyorozu (Serial Numbered)",
+          "number": "MHA7 #3/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/547804_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F547804%2Funiversus-universus-my-hero-academia-girl-power-momo-yaoyorozu-serial-numbered"
+        },
+        {
+          "name": "Ochaco Uraraka (Serial Numbered)",
+          "number": "MHA7 #4/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/547805_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F547805%2Funiversus-universus-my-hero-academia-girl-power-ochaco-uraraka-serial-numbered"
+        },
+        {
+          "name": "Tsuyu Asui (Serial Numbered)",
+          "number": "MHA7 #5/5",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/547806_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F547806%2Funiversus-universus-my-hero-academia-girl-power-tsuyu-asui-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-battle-for-humanity",
+      "name": "Attack on Titan: Battle for Humanity · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/news/hajime-isayama-custom-art-in-attack-on-titan-apocalypse/",
+      "cards": [
+        {
+          "name": "Armin Arlert (Serial Numbered)",
+          "number": "AOT1 #1/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563361_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563361%2Funiversus-attack-on-titan-battle-for-humanity-armin-arlert-serial-numbered"
+        },
+        {
+          "name": "Beast Titan (Serial Numbered)",
+          "number": "AOT1 #2/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563362_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563362%2Funiversus-attack-on-titan-battle-for-humanity-beast-titan-serial-numbered"
+        },
+        {
+          "name": "Eren Yeager (Serial Numbered)",
+          "number": "AOT1 #3/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563363_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563363%2Funiversus-attack-on-titan-battle-for-humanity-eren-yeager-serial-numbered"
+        },
+        {
+          "name": "Levi Ackerman (Serial Numbered)",
+          "number": "AOT1 #4/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563364_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563364%2Funiversus-attack-on-titan-battle-for-humanity-levi-ackerman-serial-numbered"
+        },
+        {
+          "name": "Mikasa Ackerman (Serial Numbered)",
+          "number": "AOT1 #5/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563365_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563365%2Funiversus-attack-on-titan-battle-for-humanity-mikasa-ackerman-serial-numbered"
+        },
+        {
+          "name": "Reiner Braun (Serial Numbered)",
+          "number": "AOT1 #6/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/563366_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F563366%2Funiversus-attack-on-titan-battle-for-humanity-reiner-braun-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-origins-of-power",
+      "name": "Attack On Titan: Origins of Power · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/news/hajime-isayama-custom-art-in-attack-on-titan-apocalypse/",
+      "cards": [
+        {
+          "name": "Eren, Attack Titan Advancing  (Serial Numbered)",
+          "number": "AOT02 #1/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589078_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589078%2Funiversus-attack-on-titan-origins-of-power-eren-attack-titan-advancing-serial-numbered"
+        },
+        {
+          "name": "Bertolt, Colossus Titan Advancing (Serial Numbered)",
+          "number": "AOT02 #2/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589192_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589192%2Funiversus-attack-on-titan-origins-of-power-bertolt-colossus-titan-advancing-serial-numbered"
+        },
+        {
+          "name": "Reiner, Armored Titan Advancing (Serial Numbered)",
+          "number": "AOT02 #3/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589209_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589209%2Funiversus-attack-on-titan-origins-of-power-reiner-armored-titan-advancing-serial-numbered"
+        },
+        {
+          "name": "Cart Titan (Serial Numbered)",
+          "number": "AOT02 #4/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589222_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589222%2Funiversus-attack-on-titan-origins-of-power-cart-titan-serial-numbered"
+        },
+        {
+          "name": "Zeke, Beast Titan (Serial Numbered)",
+          "number": "AOT02 #5/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589237_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589237%2Funiversus-attack-on-titan-origins-of-power-zeke-beast-titan-serial-numbered"
+        },
+        {
+          "name": "Annie, Female Titan (Serial Numbered)",
+          "number": "AOT02 #6/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/589253_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F589253%2Funiversus-attack-on-titan-origins-of-power-annie-female-titan-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-apocalypse",
+      "name": "Attack on Titan: Apocalypse · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/news/hajime-isayama-custom-art-in-attack-on-titan-apocalypse/",
+      "cards": [
+        {
+          "name": "Armin Arlert, Power of the Colossus (Chrome Rare)",
+          "number": "AOT03 #1/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630449_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630449%2Funiversus-attack-on-titan-apocalypse-armin-arlert-power-of-the-colossus-chrome-rare"
+        },
+        {
+          "name": "Eren Yeager, Usurper (Chrome Rare)",
+          "number": "AOT03 #2/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630451_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630451%2Funiversus-attack-on-titan-apocalypse-eren-yeager-usurper-chrome-rare"
+        },
+        {
+          "name": "Levi Ackerman, Vengeance-Driven (Chrome Rare)",
+          "number": "AOT03 #3/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630454_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630454%2Funiversus-attack-on-titan-apocalypse-levi-ackerman-vengeance-driven-chrome-rare"
+        },
+        {
+          "name": "Mikasa Ackerman, Hizuru's Hope (Chrome Rare)",
+          "number": "AOT03 #4/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630455_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630455%2Funiversus-attack-on-titan-apocalypse-mikasa-ackerman-hizurus-hope-chrome-rare"
+        },
+        {
+          "name": "Reiner Braun, Marley's Shield (Chrome Rare)",
+          "number": "AOT03 #5/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630457_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630457%2Funiversus-attack-on-titan-apocalypse-reiner-braun-marleys-shield-chrome-rare"
+        },
+        {
+          "name": "Beast Titan, Finale (Chrome Rare)",
+          "number": "AOT03 #6/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630459_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F630459%2Funiversus-attack-on-titan-apocalypse-beast-titan-finale-chrome-rare"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "tmnt-chrome-rares",
+      "name": "Teenage Mutant Ninja Turtles · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/news/the-teenage-mutant-ninja-turtles-make-their-universus-debut/",
+      "cards": [
+        {
+          "name": "Leonardo, the Leader (Serial Numbered)",
+          "number": "TMNT #TMNT01 1/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647786_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647786%2Funiversus-teenage-mutant-ninja-turtles-leonardo-the-leader-serial-numbered"
+        },
+        {
+          "name": "Raphael, the Muscle (Serial Numbered)",
+          "number": "TMNT #TMNT01 2/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647787_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647787%2Funiversus-teenage-mutant-ninja-turtles-raphael-the-muscle-serial-numbered"
+        },
+        {
+          "name": "Michelangelo, the Wild Card (Serial Numbered)",
+          "number": "TMNT #TMNT01 3/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647788_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647788%2Funiversus-teenage-mutant-ninja-turtles-michelangelo-the-wild-card-serial-numbered"
+        },
+        {
+          "name": "Donatello, the Smart One (Serial Numbered)",
+          "number": "TMNT #TMNT01 4/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647789_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647789%2Funiversus-teenage-mutant-ninja-turtles-donatello-the-smart-one-serial-numbered"
+        },
+        {
+          "name": "Bebop, Burly Brawler (Serial Numbered)",
+          "number": "TMNT #TMNT01 5/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647790_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647790%2Funiversus-teenage-mutant-ninja-turtles-bebop-burly-brawler-serial-numbered"
+        },
+        {
+          "name": "Rocksteady, Easily Angered (Serial Numbered)",
+          "number": "TMNT #TMNT01 6/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647791_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647791%2Funiversus-teenage-mutant-ninja-turtles-rocksteady-easily-angered-serial-numbered"
+        },
+        {
+          "name": "Superfly, Malicious Mutant (Serial Numbered)",
+          "number": "TMNT #TMNT01 7/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647792_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647792%2Funiversus-teenage-mutant-ninja-turtles-superfly-malicious-mutant-serial-numbered"
+        },
+        {
+          "name": "Splinter, Caring Father (Serial Numbered)",
+          "number": "TMNT #TMNT01 8/8",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/647793_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F647793%2Funiversus-teenage-mutant-ninja-turtles-splinter-caring-father-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "guilty-gear-strive-chrome-rares",
+      "name": "GUILTY GEAR -STRIVE- · Chrome Rares",
+      "limit": 100,
+      "source": "https://cardgamer.com/best-lists/most-valuable-guilty-gear-strive-cards/",
+      "cards": [
+        {
+          "name": "BRIDGET (Serial Numbered)",
+          "number": "#GGS01 1/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666640_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666640%2Funiversus-guilty-gear-strive-bridget-serial-numbered"
+        },
+        {
+          "name": "I-NO (Serial Numbered)",
+          "number": "#GGS01 2/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666641_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666641%2Funiversus-guilty-gear-strive-i-no-serial-numbered"
+        },
+        {
+          "name": "KY KISKE (Serial Numbered)",
+          "number": "#GGS01 3/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666642_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666642%2Funiversus-guilty-gear-strive-ky-kiske-serial-numbered"
+        },
+        {
+          "name": "MAY (Serial Numbered)",
+          "number": "#GGS01 4/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666643_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666643%2Funiversus-guilty-gear-strive-may-serial-numbered"
+        },
+        {
+          "name": "NAGORIYUKI (Serial Numbered)",
+          "number": "#GGS01 5/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666644_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666644%2Funiversus-guilty-gear-strive-nagoriyuki-serial-numbered"
+        },
+        {
+          "name": "SOL BADGUY (Serial Numbered)",
+          "number": "#GGS01 6/6",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/666645_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F666645%2Funiversus-guilty-gear-strive-sol-badguy-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "heroes-of-exandria-chrome-rares",
+      "name": "Critical Role: Heroes of Exandria · Chrome Rares",
+      "limit": 100,
+      "source": "https://uvsgames.com/license/critical-role/",
+      "cards": [
+        {
+          "name": "Allura Vysoren, Arcanist of Tal'Dorei (Serial Numbered)",
+          "number": "CR02 #1/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620282_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620282%2Funiversus-critical-role-heroes-of-exandria-allura-vysoren-arcanist-of-taldorei-serial-numbered"
+        },
+        {
+          "name": "Beauregard Lionett, Expositor (Serial Numbered)",
+          "number": "CR02 #2/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620283_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620283%2Funiversus-critical-role-heroes-of-exandria-beauregard-lionett-expositor-serial-numbered"
+        },
+        {
+          "name": "Caleb Widogast, Fiery Transmuter (Serial Numbered)",
+          "number": "CR02 #4/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620284_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620284%2Funiversus-critical-role-heroes-of-exandria-caleb-widogast-fiery-transmuter-serial-numbered"
+        },
+        {
+          "name": "Grog Strongjaw, Mighty Half-Giant (Serial Numbered)",
+          "number": "CR02 #7/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620285_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620285%2Funiversus-critical-role-heroes-of-exandria-grog-strongjaw-mighty-half-giant-serial-numbered"
+        },
+        {
+          "name": "Jester Lavorre, Traveler's Faithful (Serial Numbered)",
+          "number": "CR02 #8/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620286_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620286%2Funiversus-critical-role-heroes-of-exandria-jester-lavorre-travelers-faithful-serial-numbered"
+        },
+        {
+          "name": "Percival de Rolo III, Vengeful Sharpshooter (Serial Numbered)",
+          "number": "CR02 #13/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620287_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620287%2Funiversus-critical-role-heroes-of-exandria-percival-de-rolo-iii-vengeful-sharpshooter-serial-numbered"
+        },
+        {
+          "name": "Scanlan Shorthalt, Devious Troubadour (Serial Numbered)",
+          "number": "CR02 #16/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620288_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620288%2Funiversus-critical-role-heroes-of-exandria-scanlan-shorthalt-devious-troubadour-serial-numbered"
+        },
+        {
+          "name": "Yasha Nydoorin, Orphanmaker (Serial Numbered)",
+          "number": "CR02 #20/211",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620289_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F620289%2Funiversus-critical-role-heroes-of-exandria-yasha-nydoorin-orphanmaker-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "yu-yu-hakusho-dark-tournament",
+      "name": "Yu Yu Hakusho: Dark Tournament · Chrome Rares",
+      "limit": 100,
+      "source": "https://db.yuyuhakushotcg.com/yu-yu-hakusho-universal-fighting-systemuniversus",
+      "cards": [
+        {
+          "name": "Hiei, Dragon Within (Serial Numbered)",
+          "number": "YDT #1/4",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/537650_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F537650%2Funiversus-yu-yu-hakusho-dark-tournament-hiei-dragon-within-serial-numbered"
+        },
+        {
+          "name": "Kurama, Youko Unleashed (Serial Numbered)",
+          "number": "YDT #2/4",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/537651_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F537651%2Funiversus-yu-yu-hakusho-dark-tournament-kurama-youko-unleashed-serial-numbered"
+        },
+        {
+          "name": "Kuwabara, Spirited Warrior (Serial Numbered)",
+          "number": "YDT #3/4",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/537652_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F537652%2Funiversus-yu-yu-hakusho-dark-tournament-kuwabara-spirited-warrior-serial-numbered"
+        },
+        {
+          "name": "Yusuke, Team Leader (Serial Numbered)",
+          "number": "YDT #4/4",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/537653_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F537653%2Funiversus-yu-yu-hakusho-dark-tournament-yusuke-team-leader-serial-numbered"
+        }
+      ]
+    },
+    {
+      "tcg": "universus",
+      "slug": "godzilla-reign-of-kaiju-chrome-rares",
+      "name": "Godzilla: Reign of Kaiju · Chrome Rares",
+      "limit": 100,
+      "source": "https://www.ebay.com/itm/127792752515",
+      "cards": [
+        {
+          "name": "Anguirus, Fierce Dragon (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 1/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681204_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681204%2Funiversus-godzilla-reign-of-kaiju-anguirus-fierce-dragon-chrome-rare"
+        },
+        {
+          "name": "Battra, Beast of Destruction (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 2/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681205_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681205%2Funiversus-godzilla-reign-of-kaiju-battra-beast-of-destruction-chrome-rare"
+        },
+        {
+          "name": "Gigan, Space Monster (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 3/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681206_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681206%2Funiversus-godzilla-reign-of-kaiju-gigan-space-monster-chrome-rare"
+        },
+        {
+          "name": "Godzilla, Shin Godzilla (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 4/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681207_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681207%2Funiversus-godzilla-reign-of-kaiju-godzilla-shin-godzilla-chrome-rare"
+        },
+        {
+          "name": "Godzilla, Titan of Terror (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 5/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681208_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681208%2Funiversus-godzilla-reign-of-kaiju-godzilla-titan-of-terror-chrome-rare"
+        },
+        {
+          "name": "Jet Jaguar, Warrior of Justice (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 6/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681209_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681209%2Funiversus-godzilla-reign-of-kaiju-jet-jaguar-warrior-of-justice-chrome-rare"
+        },
+        {
+          "name": "King Ghidorah, Three-Headed Monster (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 7/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681210_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681210%2Funiversus-godzilla-reign-of-kaiju-king-ghidorah-three-headed-monster-chrome-rare"
+        },
+        {
+          "name": "Mechagodzilla, Modified Type-3 Kiryu (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 8/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681211_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681211%2Funiversus-godzilla-reign-of-kaiju-mechagodzilla-modified-type-3-kiryu-chrome-rare"
+        },
+        {
+          "name": "Mothra, Divine Moth (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 9/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681212_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681212%2Funiversus-godzilla-reign-of-kaiju-mothra-divine-moth-chrome-rare"
+        },
+        {
+          "name": "SpaceGodzilla, Bio-Quartz Monster (Chrome Rare)",
+          "number": "GDZ01 #GDZ01 10/10",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/681213_in_1000x1000.jpg",
+          "source": "https://partner.tcgplayer.com/c/3982491/1780961/21018?u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F681213%2Funiversus-godzilla-reign-of-kaiju-spacegodzilla-bio-quartz-monster-chrome-rare"
+        }
+      ]
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "mortal-ambition-first-edition",
+      "name": "Mortal Ambition · First Edition CUR",
+      "limit": 72,
+      "source": "https://index.gatcg.com/edition/kongming-fel-eidolon-amb-cur",
+      "cards": [
+        {
+          "name": "Kongming, Fel Eidolon",
+          "number": "AMB 1st EN-009 CUR",
+          "image": "https://api.gatcg.com/cards/images/l4zh11099v.jpg"
+        }
+      ],
+      "note": "One physical card per serial. Official Collector tab population; printed serial denominator /72."
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "abyssal-heaven-first-edition",
+      "name": "Abyssal Heaven · First Edition CUR",
+      "limit": 72,
+      "source": "https://index.gatcg.com/edition/lu-bu-indomitable-titan-hvn1e-cur",
+      "cards": [
+        {
+          "name": "Lu Bu, Indomitable Titan // Lu Bu, Wrath Incarnate",
+          "number": "HVN 1st EN-208 CUR",
+          "image": "https://api.gatcg.com/cards/images/rjkfm3rjgb.jpg"
+        }
+      ],
+      "note": "One physical card per serial. Official Collector tab population; printed serial denominator /72."
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "distorted-reflections-first-edition",
+      "name": "Distorted Reflections · First Edition CUR",
+      "limit": 72,
+      "source": "https://index.gatcg.com/edition/alice-golden-queen-dtr1e-cur",
+      "cards": [
+        {
+          "name": "Alice, Golden Queen",
+          "number": "DTR 1st EN-004 CUR",
+          "image": "https://api.gatcg.com/cards/images/zRYKP4YYfx.jpg"
+        }
+      ],
+      "note": "One physical card per serial. Official Collector tab population; printed serial denominator /72."
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "phantom-monarchs-first-edition",
+      "name": "Phantom Monarchs · First Edition CUR",
+      "limit": 72,
+      "source": "https://index.gatcg.com/edition/alice-phantom-monarch-ptm1e-cur",
+      "cards": [
+        {
+          "name": "Alice, Phantom Monarch",
+          "number": "PTM 1st EN-004 CUR",
+          "image": "https://api.gatcg.com/cards/images/F9L8odk8kt.jpg"
+        }
+      ],
+      "note": "One physical card per serial. Official Collector tab population; printed serial denominator /72."
+    },
+    {
+      "tcg": "dragon-ball-super",
+      "slug": "history-of-z-serial-numbered",
+      "name": "History of Z · Serial Number Cards",
+      "limit": 100,
+      "source": "https://www.dbs-cardgame.com/us-en/product/dbs-b27.php",
+      "cards": [
+        {
+          "name": "Bardock, Destiny-Changing Willpower (Serial Numbered)",
+          "number": "BT27 #BT27-095",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620241_in_1000x1000.jpg"
+        },
+        {
+          "name": "Son Goku, Unlimited Potential (Serial Numbered)",
+          "number": "BT27 #BT27-019",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620236_in_1000x1000.jpg"
+        },
+        {
+          "name": "SS Broly, Vigor (Serial Numbered)",
+          "number": "BT27 #BT27-084",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620240_in_1000x1000.jpg"
+        },
+        {
+          "name": "SS2 Son Gohan, Sadness and Rage (Serial Numbered)",
+          "number": "BT27 #BT27-059",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620238_in_1000x1000.jpg"
+        },
+        {
+          "name": "SSB Vegeta, Power of Conviction (Serial Numbered)",
+          "number": "BT27 #BT27-039",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/620237_in_1000x1000.jpg"
+        }
+      ],
+      "release_date": "2025-03-07"
+    },
+    {
+      "tcg": "one-piece",
+      "slug": "one-piece-championship-2025-ace",
+      "name": "Championship 2025–26 · Portgas.D.Ace",
+      "limit": 2500,
+      "source": "https://en.onepiece-cardgame.com/events/2025/championship/online_regional_season1.php",
+      "cards": [
+        {
+          "name": "Portgas.D.Ace (Serial Numbered)",
+          "number": "OP07-119",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/630009_in_1000x1000.jpg"
+        }
+      ],
+      "note": "English numbered /2500 tournament prize; excludes AZAZ sample/unawarded variants."
+    },
+    {
+      "tcg": "neopets-battledome",
+      "slug": "curse-of-maraqua-serial-numbered",
+      "name": "Curse of Maraqua · The Two Ring",
+      "limit": 2,
+      "source": "https://upperdeck.com/the-hunt-begins-be-a-part-of-history-as-neopets-battledome-tcg-announces-its-first-numbered-card/",
+      "cards": [
+        {
+          "name": "The Two Ring (Serial Numbered)",
+          "number": "CMA 239",
+          "image": "https://upperdeck.com/wp-content/uploads/2026/04/2026_Neopets_CurseofMaraqua_F17_pg1_crd_cma239_TheTwoRing.png"
+        }
+      ]
+    },
+    {
+      "tcg": "altered",
+      "slug": "seeds-of-unity-serialised-heroes",
+      "name": "Seeds of Unity · Serialised Emissary Heroes",
+      "limit": 30,
+      "source": "https://www.altered.gg/en-us/news/collecting-the-best-and-the-brightest-introducing-collector-boosters/",
+      "cards": [
+        {
+          "name": "Della & Bolt (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_AX_85_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_AX_85_C_XXX.jpg"
+        },
+        {
+          "name": "Sol & Halua (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_BR_65_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_BR_65_C_XXX.jpg"
+        },
+        {
+          "name": "Nadir & Bubbles (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_LY_65_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_LY_65_C_XXX.jpg"
+        },
+        {
+          "name": "Turuun & Benih (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_MU_85_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_MU_85_C_XXX.jpg"
+        },
+        {
+          "name": "Matz & Hive (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_OR_85_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_OR_85_C_XXX.jpg"
+        },
+        {
+          "name": "Moyo & Silk (Serialised Emissary)",
+          "number": "ALT_DUSTERCB_P_YZ_65_C_XXX",
+          "image": "https://www.altered.gg/cards/DUSTERCB/en-us/ALT_DUSTERCB_P_YZ_65_C_XXX.jpg"
+        }
+      ]
+    },
+    {
+      "tcg": "cardfight-vanguard",
+      "slug": "generation-dragenesis-serial-numbered",
+      "name": "Generation Dragenesis · English SNRs",
+      "limit": 10,
+      "source": "https://en.cf-vanguard.com/products/dzbt06/",
+      "cards": [
+        {
+          "name": "Chronojet Dragon (SNR)",
+          "number": "DZ-BT06/SNR01EN",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/619977_in_1000x1000.jpg"
+        },
+        {
+          "name": "Alter Ego Messiah (SNR)",
+          "number": "DZ-BT06/SNR02EN",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/619978_in_1000x1000.jpg"
+        }
+      ]
+    },
+    {
+      "tcg": "digimon",
+      "slug": "digimon-special-booster-2-5",
+      "name": "Special Booster Ver. 2.5 · English Serial Cards",
+      "limit": 300,
+      "source": "https://world.digimoncard.com/products/pack/ver19-20/",
+      "cards": [
+        {
+          "name": "WarGreymon (Serial Numbered)",
+          "number": "BT14-101",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/615765_in_1000x1000.jpg"
+        },
+        {
+          "name": "MetalGarurumon (Serial Numbered)",
+          "number": "BT15-101",
+          "image": "https://tcgplayer-cdn.tcgplayer.com/product/615763_in_1000x1000.jpg"
+        }
+      ],
+      "note": "Western English /300 edition, separate from Asian-English campaign cards. Printed serial ranges corroborated by actual pull photos."
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-en",
+      "name": "T1 2025 Worlds Champion Signature Edition · English",
+      "limit": 2025,
+      "source": "https://playriftbound.com/en-us/news/announcements/the-riftbound-x-t1-2025-worlds-champion-collection/",
+      "cards": [
+        {
+          "name": "Ambessa, The Wolf",
+          "number": "T1S 001*/005 EN",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=17,20,418,583,1327,1220"
+        },
+        {
+          "name": "Xin Zhao, Vigilant",
+          "number": "T1S 002*/005 EN",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=453,20,418,583,1327,1220"
+        },
+        {
+          "name": "Galio, Indefatigable",
+          "number": "T1S 003*/005 EN",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/7bf0e7c80972da18f3e282e8841631447abe036b-1600x960.jpg#crop=819,91,604,844,1600,960"
+        },
+        {
+          "name": "Miss Fortune, Buccaneer",
+          "number": "T1S 004*/005 EN",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=243,621,418,583,1327,1220"
+        },
+        {
+          "name": "Seraphine, Not Alone",
+          "number": "T1S 005*/005 EN",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=670,621,418,583,1327,1220"
+        }
+      ],
+      "note": "Separate 10,125-card numbered run per language. Official English artwork renders are catalogue references; player signatures and language differ on the physical serialized cards. Player Bundle excluded."
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-zh",
+      "name": "T1 2025 Worlds Champion Signature Edition · Chinese",
+      "limit": 2025,
+      "source": "https://playriftbound.com/en-us/news/announcements/the-riftbound-x-t1-2025-worlds-champion-collection/",
+      "cards": [
+        {
+          "name": "Ambessa, The Wolf",
+          "number": "T1S 001*/005 ZH",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=17,20,418,583,1327,1220"
+        },
+        {
+          "name": "Xin Zhao, Vigilant",
+          "number": "T1S 002*/005 ZH",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=453,20,418,583,1327,1220"
+        },
+        {
+          "name": "Galio, Indefatigable",
+          "number": "T1S 003*/005 ZH",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/7bf0e7c80972da18f3e282e8841631447abe036b-1600x960.jpg#crop=819,91,604,844,1600,960"
+        },
+        {
+          "name": "Miss Fortune, Buccaneer",
+          "number": "T1S 004*/005 ZH",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=243,621,418,583,1327,1220"
+        },
+        {
+          "name": "Seraphine, Not Alone",
+          "number": "T1S 005*/005 ZH",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=670,621,418,583,1327,1220"
+        }
+      ],
+      "note": "Separate 10,125-card numbered run per language. Official English artwork renders are catalogue references; player signatures and language differ on the physical serialized cards. Player Bundle excluded."
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-ko",
+      "name": "T1 2025 Worlds Champion Signature Edition · Korean",
+      "limit": 2025,
+      "source": "https://playriftbound.com/en-us/news/announcements/the-riftbound-x-t1-2025-worlds-champion-collection/",
+      "cards": [
+        {
+          "name": "Ambessa, The Wolf",
+          "number": "T1S 001*/005 KO",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=17,20,418,583,1327,1220"
+        },
+        {
+          "name": "Xin Zhao, Vigilant",
+          "number": "T1S 002*/005 KO",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=453,20,418,583,1327,1220"
+        },
+        {
+          "name": "Galio, Indefatigable",
+          "number": "T1S 003*/005 KO",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/7bf0e7c80972da18f3e282e8841631447abe036b-1600x960.jpg#crop=819,91,604,844,1600,960"
+        },
+        {
+          "name": "Miss Fortune, Buccaneer",
+          "number": "T1S 004*/005 KO",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=243,621,418,583,1327,1220"
+        },
+        {
+          "name": "Seraphine, Not Alone",
+          "number": "T1S 005*/005 KO",
+          "image": "https://cmsassets.rgpub.io/sanity/images/dsfx7636/news_live/3eb6c2b57002f85ce99e3125c56e7ef997086ebe-1327x1220.jpg#crop=670,621,418,583,1327,1220"
+        }
+      ],
+      "note": "Separate 10,125-card numbered run per language. Official English artwork renders are catalogue references; player signatures and language differ on the physical serialized cards. Player Bundle excluded."
+    }
+  ]
+}

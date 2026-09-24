@@ -2,10 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import CatalogCardArt from "./CatalogCardArt";
 import SerialDetailModal, { preloadSerialDetails } from "./SerialDetailModal";
 
 const formatSerial = (serial, total) => {
-  const formatted = String(serial.serial_number).padStart(total < 100 ? 2 : 3, "0");
+  const formatted = String(serial.serial_number).padStart(Math.max(2, String(total).length), "0");
   return serial.region === "E" ? `${formatted}E` : formatted;
 };
 
@@ -171,6 +172,8 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
       style={cardSummary?.card_back_url ? {
         "--tcg-card-back-image": `url("${cardSummary.card_back_url}")`,
         "--tcg-card-aspect-ratio": cardSummary.card_aspect_ratio,
+        "--card-back-size": cardSummary.card_back_presentation?.size || "cover",
+        "--card-back-position": cardSummary.card_back_presentation?.position || "center",
       } : undefined}
     >
       {serials.map((serial) => {
@@ -224,7 +227,7 @@ export default function SerialGrid({ serials, total = 100, cardSummary, isYugioh
           <div className="serial-card-flight-rotor">
             <div className="serial-card-flight-face serial-card-flight-back"><span>{cardTransition.label}</span></div>
             <div className="serial-card-flight-face serial-card-flight-front">
-              {cardTransition.imageUrl && <img src={cardTransition.imageUrl} alt="" />}
+              {cardTransition.imageUrl && <CatalogCardArt src={cardTransition.imageUrl} alt="" />}
             </div>
           </div>
         </div>

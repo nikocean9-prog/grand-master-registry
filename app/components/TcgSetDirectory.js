@@ -25,7 +25,7 @@ function SetLogoTile({ set, logo, confirmed = 0 }) {
   return (
     <Link href={set.href} className={`set-logo-tile set-logo-tile--${set.slug}`} aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
       <span className={`set-logo-art${releaseLabel ? " set-logo-art--holiday" : ""}`}>
-        <img src={logo} alt={set.name} />
+        {logo ? <img src={logo} alt={set.name} /> : <span className="set-title-lockup">{set.name}</span>}
         {releaseLabel ? <img className="set-release-ribbon" src={releaseLabel.image} alt={releaseLabel.text} /> : null}
       </span>
       <span className="set-logo-tracker">
@@ -45,7 +45,7 @@ export default function TcgSetDirectory({ sets, tcgSlug }) {
   }, []);
 
   useEffect(() => {
-    const trackedSlugs = sets.filter((set) => SET_WORDMARKS[set.slug]).map((set) => set.slug);
+    const trackedSlugs = sets.filter((set) => set.slug).map((set) => set.slug);
     if (!trackedSlugs.length) return;
 
     async function loadConfirmedTotals() {
@@ -67,14 +67,13 @@ export default function TcgSetDirectory({ sets, tcgSlug }) {
   }, [sets]);
 
   const visibleSets = sets.filter((set) => ["live", "preview"].includes(set.status) || isAdmin);
-  const logoSets = visibleSets.filter((set) => SET_WORDMARKS[set.slug]);
 
   if (!visibleSets.length) {
     return <div className="empty-state"><h3>No sets are live yet</h3><p>This TCG is in the future expansion plan.</p><Link href="/help#contact" className="hero-button hero-button-primary">Suggest a set</Link></div>;
   }
 
-  if (logoSets.length === visibleSets.length) {
-    return <div className={`set-logo-grid set-logo-grid--${MAGIC_STYLE_TCGS.includes(tcgSlug) ? "magic-the-gathering" : tcgSlug}`}>{logoSets.map((set) => (
+  if (visibleSets.length) {
+    return <div className={`set-logo-grid set-logo-grid--${MAGIC_STYLE_TCGS.includes(tcgSlug) ? "magic-the-gathering" : tcgSlug}`}>{visibleSets.map((set) => (
       <SetLogoTile key={set.name} set={set} logo={SET_WORDMARKS[set.slug]} confirmed={confirmedBySet[set.slug] || 0} />
     ))}</div>;
   }

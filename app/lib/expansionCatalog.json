@@ -1,0 +1,260 @@
+{
+  "games": [
+    {
+      "slug": "neopets-battledome",
+      "name": "Neopets Battledome TCG",
+      "initials": "NPT",
+      "logo": "https://upperdeckstore.com/media/wysiwyg/2024-Neopets-Landing-Page-Graphics-Top-Logo-Only.png"
+    },
+    {
+      "slug": "altered",
+      "name": "Altered",
+      "initials": "ALT",
+      "logo": "https://www.asmodee.co.uk/cdn/shop/files/altered_logo-COLOR-HD.png?v=1723544666"
+    },
+    {
+      "slug": "cardfight-vanguard",
+      "name": "Cardfight!! Vanguard",
+      "initials": "CFV",
+      "logo": "https://jetcards.uk/cdn/shop/collections/Cardfight_Vanguard_Logo.png?crop=center&height=1200&v=1714492288&width=1200"
+    },
+    {
+      "slug": "riftbound",
+      "name": "Riftbound",
+      "initials": "RFT",
+      "logo": "https://events.fantasysphere.net/wp-content/uploads/2025/10/Carre-Retouche.png"
+    }
+  ],
+  "sets": [
+    {
+      "tcg": "universus",
+      "slug": "jet-burn-chrome-rares",
+      "name": "My Hero Academia: Jet Burn · Chrome Rares",
+      "status": "live",
+      "serials": 500,
+      "summary": "5 serialised cards · 500 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/jet-burn-chrome-rares"
+    },
+    {
+      "tcg": "universus",
+      "slug": "girl-power-chrome-rares",
+      "name": "My Hero Academia: Girl Power · Chrome Rares",
+      "status": "live",
+      "serials": 500,
+      "summary": "5 serialised cards · 500 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/girl-power-chrome-rares"
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-battle-for-humanity",
+      "name": "Attack on Titan: Battle for Humanity · Chrome Rares",
+      "status": "live",
+      "serials": 600,
+      "summary": "6 serialised cards · 600 serial numbers",
+      "description": "Track 6 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/attack-on-titan-battle-for-humanity"
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-origins-of-power",
+      "name": "Attack On Titan: Origins of Power · Chrome Rares",
+      "status": "live",
+      "serials": 600,
+      "summary": "6 serialised cards · 600 serial numbers",
+      "description": "Track 6 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/attack-on-titan-origins-of-power"
+    },
+    {
+      "tcg": "universus",
+      "slug": "attack-on-titan-apocalypse",
+      "name": "Attack on Titan: Apocalypse · Chrome Rares",
+      "status": "live",
+      "serials": 600,
+      "summary": "6 serialised cards · 600 serial numbers",
+      "description": "Track 6 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/attack-on-titan-apocalypse"
+    },
+    {
+      "tcg": "universus",
+      "slug": "tmnt-chrome-rares",
+      "name": "Teenage Mutant Ninja Turtles · Chrome Rares",
+      "status": "live",
+      "serials": 800,
+      "summary": "8 serialised cards · 800 serial numbers",
+      "description": "Track 8 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/tmnt-chrome-rares"
+    },
+    {
+      "tcg": "universus",
+      "slug": "guilty-gear-strive-chrome-rares",
+      "name": "GUILTY GEAR -STRIVE- · Chrome Rares",
+      "status": "live",
+      "serials": 600,
+      "summary": "6 serialised cards · 600 serial numbers",
+      "description": "Track 6 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/guilty-gear-strive-chrome-rares"
+    },
+    {
+      "tcg": "universus",
+      "slug": "heroes-of-exandria-chrome-rares",
+      "name": "Critical Role: Heroes of Exandria · Chrome Rares",
+      "status": "live",
+      "serials": 800,
+      "summary": "8 serialised cards · 800 serial numbers",
+      "description": "Track 8 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/heroes-of-exandria-chrome-rares"
+    },
+    {
+      "tcg": "universus",
+      "slug": "yu-yu-hakusho-dark-tournament",
+      "name": "Yu Yu Hakusho: Dark Tournament · Chrome Rares",
+      "status": "live",
+      "serials": 400,
+      "summary": "4 serialised cards · 400 serial numbers",
+      "description": "Track 4 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/yu-yu-hakusho-dark-tournament"
+    },
+    {
+      "tcg": "universus",
+      "slug": "godzilla-reign-of-kaiju-chrome-rares",
+      "name": "Godzilla: Reign of Kaiju · Chrome Rares",
+      "status": "live",
+      "serials": 1000,
+      "summary": "10 serialised cards · 1,000 serial numbers",
+      "description": "Track 10 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/godzilla-reign-of-kaiju-chrome-rares"
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "mortal-ambition-first-edition",
+      "name": "Mortal Ambition · First Edition CUR",
+      "status": "live",
+      "serials": 72,
+      "summary": "1 serialised cards · 72 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 72 copies.",
+      "href": "/sets/mortal-ambition-first-edition"
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "abyssal-heaven-first-edition",
+      "name": "Abyssal Heaven · First Edition CUR",
+      "status": "live",
+      "serials": 72,
+      "summary": "1 serialised cards · 72 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 72 copies.",
+      "href": "/sets/abyssal-heaven-first-edition"
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "distorted-reflections-first-edition",
+      "name": "Distorted Reflections · First Edition CUR",
+      "status": "live",
+      "serials": 72,
+      "summary": "1 serialised cards · 72 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 72 copies.",
+      "href": "/sets/distorted-reflections-first-edition"
+    },
+    {
+      "tcg": "grand-archive",
+      "slug": "phantom-monarchs-first-edition",
+      "name": "Phantom Monarchs · First Edition CUR",
+      "status": "live",
+      "serials": 72,
+      "summary": "1 serialised cards · 72 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 72 copies.",
+      "href": "/sets/phantom-monarchs-first-edition"
+    },
+    {
+      "tcg": "dragon-ball-super",
+      "slug": "history-of-z-serial-numbered",
+      "name": "History of Z · Serial Number Cards",
+      "status": "live",
+      "serials": 500,
+      "summary": "5 serialised cards · 500 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 100 copies.",
+      "href": "/sets/history-of-z-serial-numbered"
+    },
+    {
+      "tcg": "one-piece",
+      "slug": "one-piece-championship-2025-ace",
+      "name": "Championship 2025–26 · Portgas.D.Ace",
+      "status": "live",
+      "serials": 2500,
+      "summary": "1 serialised cards · 2,500 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 2,500 copies.",
+      "href": "/sets/one-piece-championship-2025-ace"
+    },
+    {
+      "tcg": "neopets-battledome",
+      "slug": "curse-of-maraqua-serial-numbered",
+      "name": "Curse of Maraqua · The Two Ring",
+      "status": "live",
+      "serials": 2,
+      "summary": "1 serialised cards · 2 serial numbers",
+      "description": "Track 1 individually numbered card, each limited to 2 copies.",
+      "href": "/sets/curse-of-maraqua-serial-numbered"
+    },
+    {
+      "tcg": "altered",
+      "slug": "seeds-of-unity-serialised-heroes",
+      "name": "Seeds of Unity · Serialised Emissary Heroes",
+      "status": "live",
+      "serials": 180,
+      "summary": "6 serialised cards · 180 serial numbers",
+      "description": "Track 6 individually numbered cards, each limited to 30 copies.",
+      "href": "/sets/seeds-of-unity-serialised-heroes"
+    },
+    {
+      "tcg": "cardfight-vanguard",
+      "slug": "generation-dragenesis-serial-numbered",
+      "name": "Generation Dragenesis · English SNRs",
+      "status": "live",
+      "serials": 20,
+      "summary": "2 serialised cards · 20 serial numbers",
+      "description": "Track 2 individually numbered cards, each limited to 10 copies.",
+      "href": "/sets/generation-dragenesis-serial-numbered"
+    },
+    {
+      "tcg": "digimon",
+      "slug": "digimon-special-booster-2-5",
+      "name": "Special Booster Ver. 2.5 · English Serial Cards",
+      "status": "live",
+      "serials": 600,
+      "summary": "2 serialised cards · 600 serial numbers",
+      "description": "Track 2 individually numbered cards, each limited to 300 copies.",
+      "href": "/sets/digimon-special-booster-2-5"
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-en",
+      "name": "T1 2025 Worlds Champion Signature Edition · English",
+      "status": "live",
+      "serials": 10125,
+      "summary": "5 serialised cards · 10,125 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 2,025 copies. Signature Edition only; the unnumbered Player Bundle is excluded. English publisher artwork is shown as a catalogue reference.",
+      "href": "/sets/riftbound-t1-2025-en"
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-zh",
+      "name": "T1 2025 Worlds Champion Signature Edition · Chinese",
+      "status": "live",
+      "serials": 10125,
+      "summary": "5 serialised cards · 10,125 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 2,025 copies. Signature Edition only; the unnumbered Player Bundle is excluded. English publisher artwork is shown as a catalogue reference.",
+      "href": "/sets/riftbound-t1-2025-zh"
+    },
+    {
+      "tcg": "riftbound",
+      "slug": "riftbound-t1-2025-ko",
+      "name": "T1 2025 Worlds Champion Signature Edition · Korean",
+      "status": "live",
+      "serials": 10125,
+      "summary": "5 serialised cards · 10,125 serial numbers",
+      "description": "Track 5 individually numbered cards, each limited to 2,025 copies. Signature Edition only; the unnumbered Player Bundle is excluded. English publisher artwork is shown as a catalogue reference.",
+      "href": "/sets/riftbound-t1-2025-ko"
+    }
+  ]
+}

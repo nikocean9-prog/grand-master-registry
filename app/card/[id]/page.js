@@ -1,3 +1,4 @@
+import CatalogCardArt from "../../components/CatalogCardArt";
 import { getGundamCatalogImage } from "../../lib/gundamCatalog";
 export const dynamic = "force-dynamic";
 
@@ -8,7 +9,8 @@ import PublicHeader from "../../components/PublicHeader";
 import { getEvidencePath } from "../../lib/evidenceUrl";
 import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonstersCatalog";
 import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestrosCatalog";
-import { getTcgCardAspectRatio, getTcgCardBack } from "../../lib/tcgCardBacks";
+import { getTcgCardAspectRatio, getTcgCardBack, getTcgCardBackPresentation } from "../../lib/tcgCardBacks";
+import { loadCardSerials } from "../../lib/loadCardSerials";
 
 function GradingMarketPanel() {
   return (
@@ -87,11 +89,7 @@ export default async function CardPage({ params }) {
     .eq("id", id)
     .single();
 
-  const { data: serials, error: serialsError } = await supabase
-    .from("serials")
-    .select("id, serial_number, region, status")
-    .eq("card_id", id)
-    .order("serial_number");
+  const { data: serials, error: serialsError } = await loadCardSerials(supabase, id);
 
   if (cardError && cardError.code !== "PGRST116") {
     return (
@@ -126,7 +124,7 @@ export default async function CardPage({ params }) {
   }
 
   const tcgSlug = card.card_sets?.tcg_slug;
-  const cardBackUrl = getTcgCardBack(tcgSlug);
+  const cardBackUrl = getTcgCardBack(tcgSlug, card.card_sets?.slug);
   const cardAspectRatio = getTcgCardAspectRatio(tcgSlug);
   const enableCardTransition = Boolean(cardBackUrl);
   let serialsWithEvidence = serials;
@@ -198,18 +196,19 @@ export default async function CardPage({ params }) {
     name: card.name,
     image_url: catalogImage,
     card_back_url: cardBackUrl,
+    card_back_presentation: getTcgCardBackPresentation(tcgSlug),
     card_aspect_ratio: cardAspectRatio,
     enableCardTransition,
   };
   return (
-    <main className={`card-page${tcgSlug === "weiss-schwarz" ? " card-page--ws" : tcgSlug === "gundam" ? " card-page--gundam" : tcgSlug === "flesh-and-blood" ? " card-page--fab" : tcgSlug === "digimon" ? " card-page--digimon" : tcgSlug === "grand-archive" ? " card-page--ga" : tcgSlug === "universus" ? " card-page--uv" : tcgSlug === "star-wars-unlimited" ? ` card-page--swu${[334,335].includes(Number(card.id)) ? " card-page--swu-landscape" : ""}` : ""}`}>
+    <main style={{ "--physical-card-ratio": cardAspectRatio }} className={`card-page card-page--physical${tcgSlug === "weiss-schwarz" ? " card-page--ws" : tcgSlug === "gundam" ? " card-page--gundam" : tcgSlug === "flesh-and-blood" ? " card-page--fab" : tcgSlug === "digimon" ? " card-page--digimon" : tcgSlug === "grand-archive" ? " card-page--ga" : tcgSlug === "universus" ? " card-page--uv" : tcgSlug === "star-wars-unlimited" ? ` card-page--swu${[334,335].includes(Number(card.id)) ? " card-page--swu-landscape" : ""}` : ""}`}>
       <PublicHeader />
       <Link href={`/sets/${card.card_sets?.slug || "magnificent-monsters"}`} className="back-link">← Back to Registry</Link>
 
       <div className="card-detail-header">
         {catalogImage && (
           <div className={`card-detail-image-frame${Number(card.id) === 561 ? " uv-card-art--kirishima" : ""}`}>
-            <img src={catalogImage} alt={card.name} className="card-detail-image" />
+            <CatalogCardArt src={catalogImage} alt={card.name} className="card-detail-image" />
           </div>
         )}
 

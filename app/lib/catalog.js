@@ -1,3 +1,5 @@
+import expansion from "./expansionCatalog.json";
+
 export const tcgs = [
   { slug: "yugioh", name: "Yu-Gi-Oh!", initials: "YGO", logo: "/graphics/yugioh-official-logo-hq.webp", status: "live", description: "Track serial-numbered Yu-Gi-Oh! cards by release and region.", sets: [
     { slug: "magnificent-monsters", name: "Magnificent Monsters", status: "live", serials: 3600, summary: "18 Grand Master Rares · 3,600 serial numbers", href: "/sets/magnificent-monsters" },
@@ -47,6 +49,21 @@ export const tcgs = [
   {"slug": "universus", "name": "UniVersus", "initials": "UVS", "status": "live", "description": "Track individually numbered UniVersus cards by release.", "sets": [{"slug": "heroes-clash-chrome-rares", "name": "My Hero Academia: Heroes Clash · Chrome Rares", "status": "live", "serials": 500, "summary": "5 serialised cards · 500 serial numbers", "description": "Track 5 serialised cards, each numbered to 100. Catalogue images are references; confirmed copies require photographic evidence.", "href": "/sets/heroes-clash-chrome-rares"}, {"slug": "undaunted-raid-chrome-rares", "name": "My Hero Academia: Undaunted Raid · Chrome Rares", "status": "live", "serials": 500, "summary": "5 serialised cards · 500 serial numbers", "description": "Track 5 serialised card(s), each numbered to 100. Catalogue images are references; confirmed copies require photographic evidence.", "href": "/sets/undaunted-raid-chrome-rares"}], "logo": "/graphics/universus-logo-transparent-v2.webp"},
   {"slug": "weiss-schwarz", "name": "Weiß Schwarz", "initials": "WS", "status": "live", "description": "Track individually numbered Weiß Schwarz cards by release.", "sets": [{"slug": "saekano-serial-numbered", "name": "Saekano: How to Raise a Boring Girlfriend · English Serialised SPs", "status": "live", "serials": 50, "summary": "5 serialised cards · 50 serial numbers", "description": "Track 5 serialised cards, each numbered to 10. Catalogue images are references; confirmed copies require photographic evidence.", "href": "/sets/saekano-serial-numbered"}, {"slug": "sao-alicization-vol-2-serial-numbered", "name": "Sword Art Online Alicization Vol. 2 · English Serialised SPs", "status": "live", "serials": 60, "summary": "6 serialised cards · 60 serial numbers", "description": "Track 6 serialised card(s), each numbered to 10. Catalogue images are references; confirmed copies require photographic evidence.", "href": "/sets/sao-alicization-vol-2-serial-numbered"}], "logo": "/graphics/weiss-schwarz-logo-transparent-v2.webp"},
 ];
+
+// Append verified releases without changing the established registry ordering.
+for (const game of expansion.games) {
+  if (!tcgs.some((tcg) => tcg.slug === game.slug)) {
+    tcgs.push({ ...game, status: "live", description: `Track individually numbered ${game.name} cards by release.`, sets: [] });
+  }
+}
+for (const { tcg: slug, ...set } of expansion.sets) {
+  const game = tcgs.find((tcg) => tcg.slug === slug);
+  if (game && !game.sets.some((existing) => existing.slug === set.slug)) {
+    game.sets.push(set);
+    game.status = "live";
+    if (["one-piece", "dragon-ball-super"].includes(slug)) game.description = `Track individually numbered ${game.name} cards by release.`;
+  }
+}
 
 export function getTcg(slug) {
   return tcgs.find((tcg) => tcg.slug === slug);
