@@ -43,7 +43,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
     <main className={SET_BRAND_LABELS[slug] ? "expanded-brand-registry" : undefined}>
       <PublicHeader />
       <Link href={backHref} className="back-link">← {tcgName} sets</Link>
-      <section className={setWordmark ? "registry-set-intro registry-set-intro--branded" : "registry-hero compact"}>
+      <section className={setWordmark ? "registry-set-intro registry-set-intro--branded" : "registry-set-intro registry-set-intro--text"}>
         {setWordmark ? (
           <>
             <h1 className="visually-hidden">{tcgName} {title}</h1>
@@ -54,7 +54,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             </div>
           </>
         ) : (
-          <><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p className="hero-copy">{description}</p></>
+          <div className="registry-set-lockup">{tcgLogo && <img src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}<h1 className="registry-set-text-title">{title}</h1><p className="hero-copy">{description}</p></div>
         )}
         {setError || cardsError ? (
           <p>Registry totals are temporarily unavailable.</p>

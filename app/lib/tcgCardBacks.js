@@ -25,6 +25,7 @@ const TCG_CARD_ASPECT_RATIOS = {
 };
 
 export function getTcgCardBack(tcgSlug, setSlug) {
+  if (setSlug === "abyssal-heaven-first-edition") return "https://api.gatcg.com/cards/images/l5izukgdmh.jpg";
   if (tcgSlug === "universus" && setSlug && !["heroes-clash-chrome-rares", "undaunted-raid-chrome-rares"].includes(setSlug)) {
     return "https://www.tabletopgamingnews.com/wp-content/uploads/2023/07/UniVersus_NEW_CardBack-731x1024.png";
   }
