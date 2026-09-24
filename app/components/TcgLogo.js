@@ -3,6 +3,7 @@ import CatalogCardArt from "./CatalogCardArt";
 // Fit the visible mark, not the padded canvas supplied by the publisher/store.
 // These viewports leave the original logo pixels and proportions unchanged.
 const LOGO_PRESENTATION = {
+  "neopets-battledome": { crop: "150,20,1300,524,1600,564" },
   "one-piece": { crop: "0,0,600,160,600,160" },
   "dragon-ball-super": {
     src: "https://www.pngkey.com/png/detail/42-428156_comments-dragon-ball-super-card-game-logo.png",
