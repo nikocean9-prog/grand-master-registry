@@ -575,7 +575,7 @@
       "tcg": "one-piece",
       "slug": "one-piece-championship-2025-ace",
       "name": "Championship 2025–26 · Portgas.D.Ace",
-      "limit": 2500,
+      "limit": 1000,
       "source": "https://en.onepiece-cardgame.com/events/2025/championship/online_regional_season1.php",
       "cards": [
         {
@@ -584,7 +584,7 @@
           "image": "https://tcgplayer-cdn.tcgplayer.com/product/630009_in_1000x1000.jpg"
         }
       ],
-      "note": "English numbered /2500 tournament prize; excludes AZAZ sample/unawarded variants."
+      "note": "English numbered /1000 tournament prize; the separate Japanese Flagship prize is /2500. Publisher catalogue preview is marked SAMPLE and is not evidence of a numbered copy."
     },
     {
       "tcg": "neopets-battledome",

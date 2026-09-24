@@ -1,7 +1,7 @@
 const WORDMARK_ROOT = "/graphics/mtg-set-wordmarks";
 
 export const SET_WORDMARKS = {
-  "generation-dragenesis-serial-numbered": "https://www.pucapucagames.co.uk/cdn/shop/collections/Generation_Dragenesis.png?v=1756050269#crop=57,176,478,218,642,637",
+  "generation-dragenesis-serial-numbered": "/graphics/new-set-wordmarks/generation-dragenesis-transparent.webp",
   "mortal-ambition-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-mortal-ambition/logo-mortal-ambition-v3.webp",
   "abyssal-heaven-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-abyssal-heaven/logo-abyssal-heaven-v3.webp",
   "distorted-reflections-first-edition": "https://bxjujshczxkhxpqpujuo.supabase.co/storage/v1/object/public/release-art/backfill/grand-archive-distorted-reflections/logo-distorted-reflections-v3.webp",

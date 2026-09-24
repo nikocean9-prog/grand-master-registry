@@ -1,4 +1,5 @@
 import SetWordmark from "./SetWordmark";
+import SetTitleArtwork from "./SetTitleArtwork";
 import TcgLogo from "./TcgLogo";
 import CatalogCardArt from "./CatalogCardArt";
 import { getGundamCatalogImage } from "../lib/gundamCatalog";
@@ -8,6 +9,7 @@ import PublicHeader from "./PublicHeader";
 import { getSetWordmark, TCG_HEADER_LOGOS, SET_BRAND_LABELS } from "../lib/setWordmarks";
 import { getSet } from "../lib/catalog";
 import { getTcgCardAspectRatio } from "../lib/tcgCardBacks";
+import { getVerifiedSerialLimit } from "../lib/verifiedSerialLimits";
 
 export default async function SerializedSetPage({ slug, tcgName, eyebrow, title, description, backHref }) {
   const usesCompactCardTiles = tcgName === "Magic: The Gathering";
@@ -27,7 +29,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
         .order("id")
     : { data: [], error: setError };
 
-  const total = cards?.reduce((sum, card) => sum + card.serial_total, 0) ?? 0;
+  const total = cards?.reduce((sum, card) => sum + getVerifiedSerialLimit(slug, card.serial_total), 0) ?? 0;
   const confirmed = cards?.reduce(
     (sum, card) => sum + (card.serials?.[0]?.count ?? 0),
     0
@@ -38,7 +40,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
   const tcgSlug = tcg?.slug;
   const tcgLogo = TCG_HEADER_LOGOS[tcgSlug] || tcg?.logo;
   const sharedSerialTotal = cards?.length && cards.every((card) => card.serial_total === cards[0].serial_total)
-    ? cards[0].serial_total
+    ? getVerifiedSerialLimit(slug, cards[0].serial_total)
     : null;
 
   return (
@@ -56,7 +58,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             </div>
           </>
         ) : (
-          <div className="registry-set-lockup">{tcgLogo && <TcgLogo slug={tcgSlug} src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}<h1 className="registry-set-text-title">{title}</h1><p className="hero-copy">{description}</p></div>
+          <div className="registry-set-lockup">{tcgLogo && <TcgLogo slug={tcgSlug} src={tcgLogo} alt={tcgName} className="registry-set-tcg-logo" />}<h1 className="visually-hidden">{title}</h1><SetTitleArtwork name={title} tcg={tcgSlug} /><p className="hero-copy">{description}</p></div>
         )}
         {setError || cardsError ? (
           <p>Registry totals are temporarily unavailable.</p>
@@ -82,6 +84,7 @@ export default async function SerializedSetPage({ slug, tcgName, eyebrow, title,
             {cards?.map((card) => {
               const catalogImage = getGundamCatalogImage(card);
               const cardConfirmed = card.serials?.[0]?.count ?? 0;
+              card.serial_total = getVerifiedSerialLimit(slug, card.serial_total);
               const cardPercentage = card.serial_total ? ((cardConfirmed / card.serial_total) * 100).toFixed(1) : "0.0";
               if (usesCompactCardTiles) {
                 return (

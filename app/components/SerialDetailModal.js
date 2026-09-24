@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import CatalogCardArt from "./CatalogCardArt";
+import { getGundamCatalogImage } from "../lib/gundamCatalog";
 
 const serialDetailRequests = new Map();
 const serialEvidenceImages = new Map();
@@ -111,7 +113,7 @@ export default function SerialDetailModal({ serial, card, onClose, isOpening = f
         <button ref={closeButtonRef} type="button" className="serial-modal-close" onClick={onClose} aria-label="Close serial details">×</button>
 
         <header className="serial-modal-heading">
-          {displayedCard?.image_url && <img src={displayedCard.image_url} alt="" />}
+          {displayedCard?.image_url && <CatalogCardArt src={card?.image_url || getGundamCatalogImage(displayedCard)} className="serial-modal-catalogue-art" alt="" />}
           <div>
             <span className="confirmed-badge">Confirmed</span>
             <h2 id="serial-modal-title">{displayedCard?.name || "Confirmed serial"}</h2>

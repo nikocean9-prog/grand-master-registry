@@ -4,10 +4,10 @@ import CatalogCardArt from "./CatalogCardArt";
 // These viewports leave the original logo pixels and proportions unchanged.
 const LOGO_PRESENTATION = {
   "neopets-battledome": { crop: "150,20,1300,524,1600,564" },
-  "one-piece": { crop: "0,0,600,160,600,160" },
+  "one-piece": { src: "/graphics/one-piece-logo-transparent.webp", crop: "0,0,2170,725,2170,725" },
   "dragon-ball-super": {
-    src: "https://www.pngkey.com/png/detail/42-428156_comments-dragon-ball-super-card-game-logo.png",
-    crop: "178,37,468,232,820,306",
+    src: "/graphics/dragon-ball-super-logo-transparent.webp",
+    crop: "57,428,1402,611,1472,1069",
   },
   altered: { crop: "50,596,3458,1202,3508,2480" },
   "cardfight-vanguard": { crop: "0,332,1200,536,1200,1200" },

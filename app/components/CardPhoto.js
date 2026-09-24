@@ -55,13 +55,13 @@ function drawTriangle(context, image, source, destination) {
   context.restore();
 }
 
-export function renderCorrectedCard(canvas, image, crop) {
+export function renderCorrectedCard(canvas, image, crop, catalogue = false) {
   const context = canvas.getContext("2d");
   if (!context || !crop?.corners?.length) return;
   const width = canvas.width;
   const height = canvas.height;
-  const safety = Math.min(0.03, Math.max(0.02, Number(crop.safety) || 0.025));
-  const cardRatio = 59 / 86;
+  const safety = catalogue ? 0 : Math.min(0.03, Math.max(0.02, Number(crop.safety) || 0.025));
+  const cardRatio = catalogue ? 63 / 88 : 59 / 86;
   const availableWidth = width * (1 - safety * 2);
   const availableHeight = height * (1 - safety * 2);
   let targetWidth = availableWidth;
@@ -99,7 +99,7 @@ export function renderCorrectedCard(canvas, image, crop) {
   }
 }
 
-export default function CardPhoto({ src, alt, crop, className = "", loading = "lazy" }) {
+export default function CardPhoto({ src, alt, crop, className = "", loading = "lazy", catalogue = false }) {
   const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
 
@@ -116,14 +116,14 @@ export default function CardPhoto({ src, alt, crop, className = "", loading = "l
       const ratio = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.max(1, Math.round(wrapper.clientWidth * ratio));
       canvas.height = Math.max(1, Math.round(wrapper.clientHeight * ratio));
-      renderCorrectedCard(canvas, image, crop);
+      if (image.complete && image.naturalWidth) renderCorrectedCard(canvas, image, crop, catalogue);
     };
     image.onload = render;
     image.src = src;
     const observer = new ResizeObserver(render);
     observer.observe(wrapperRef.current);
     return () => { cancelled = true; observer.disconnect(); };
-  }, [src, crop]);
+  }, [src, crop, catalogue]);
 
   if (!crop?.corners) return <img className={className} src={src} alt={alt} loading={loading} />;
 
