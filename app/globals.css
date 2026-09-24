@@ -2198,10 +2198,12 @@ button {
   padding: 0 56px 22px 0;
 }
 
-.serial-modal-heading img {
-  width: 88px;
+.serial-modal-heading > .serial-modal-catalogue-art {
+  width: 63px;
   height: 88px;
-  border-radius: 10px;
+  flex: none;
+  border-radius: 5% / 3.6%;
+  overflow: hidden;
   object-fit: cover;
 }
 
@@ -2325,8 +2327,8 @@ button {
 
   .serial-modal-heading { padding-right: 48px; }
 
-  .serial-modal-heading img {
-    width: 72px;
+  .serial-modal-heading > .serial-modal-catalogue-art {
+    width: 52px;
     height: 72px;
   }
 
