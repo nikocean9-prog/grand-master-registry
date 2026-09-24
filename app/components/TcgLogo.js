@@ -19,5 +19,5 @@ const LOGO_PRESENTATION = {
 export default function TcgLogo({ slug, src, alt, className = "" }) {
   const presentation = LOGO_PRESENTATION[slug];
   if (!presentation) return <img src={src} alt={alt} className={className || undefined} />;
-  return <CatalogCardArt src={`${presentation.src || src}#crop=${presentation.crop}`} alt={alt} className={`tcg-logo-normalised tcg-logo--${slug} ${className}`} />;
+  return <CatalogCardArt preserveAspectRatio="xMidYMid meet" src={`${presentation.src || src}#crop=${presentation.crop}`} alt={alt} className={`tcg-logo-normalised tcg-logo--${slug} ${className}`} />;
 }
