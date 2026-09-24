@@ -1,6 +1,7 @@
 "use client";
 
 import SetWordmark from "./SetWordmark";
+import SetTitleArtwork from "./SetTitleArtwork";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
@@ -26,7 +27,7 @@ function SetLogoTile({ set, logo, confirmed = 0 }) {
   return (
     <Link href={set.href} className={`set-logo-tile set-logo-tile--${set.slug}`} aria-label={`Open ${set.name}: ${confirmed} of ${total} confirmed`}>
       <span className={`set-logo-art${releaseLabel ? " set-logo-art--holiday" : ""}`}>
-        {logo ? <SetWordmark src={logo} alt={set.name} /> : <span className="set-title-lockup">{set.name}</span>}
+        {logo ? <SetWordmark src={logo} alt={set.name} /> : <SetTitleArtwork name={set.name} tcg={set.tcg} />}
         {releaseLabel ? <img className="set-release-ribbon" src={releaseLabel.image} alt={releaseLabel.text} /> : null}
       </span>
       <span className="set-logo-tracker">

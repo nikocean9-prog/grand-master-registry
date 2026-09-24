@@ -266,7 +266,8 @@
 }
 .registry-card--physical > .registry-card-image { flex: none; width: 100%; height: auto; overflow: hidden; }
 .serial-card-flight-front > svg { display: block; width: 100%; height: 100%; }
-.set-title-lockup { color: #203d2d; font-family: Georgia, serif; font-size: clamp(26px, 4vw, 44px); line-height: 1.15; text-align: center; text-wrap: balance; }
+.set-logo-art:has(.set-title-lockup) { overflow: hidden; margin-bottom: 32px; }
+.set-title-lockup { display: grid; align-content: center; width: 100%; height: 100%; max-height: 100%; overflow: hidden; color: #203d2d; font-family: Georgia, serif; font-size: clamp(19px, 2.2vw, 31px); line-height: 1.1; text-align: center; text-wrap: balance; transition: filter 160ms ease, transform 160ms ease; }
 
 .registry-set-text-title { font-size: clamp(28px, 4vw, 48px); line-height: 1.15; text-align: center; text-wrap: balance; margin: 24px 0 12px; }
 .registry-set-intro--text .hero-copy { text-align: center; margin: 0 auto 28px; }
@@ -277,10 +278,8 @@
 /* Logos share the approved artwork window, after their empty canvas is cropped. */
 .live-registry-grid .live-registry-art .tcg-logo-normalised {
   display: block; width: min(100%, 360px); height: 150px; max-height: 150px;
-  overflow: hidden; transition: transform 160ms ease;
+  overflow: hidden; transition: transform 160ms ease, filter 160ms ease;
 }
-.tcg-logo--dragon-ball-super { mix-blend-mode: multiply; filter: brightness(1.035); }
-.tcg-logo--one-piece { mix-blend-mode: multiply; }
 .catalog-heading .tcg-official-logo.tcg-logo-normalised {
   display: block; width: min(100%, 500px); height: auto; max-height: 250px;
   margin: 0 auto; overflow: hidden;
@@ -295,9 +294,12 @@
 
 /* The same release artwork is used in directories and set headers. */
 .set-logo-art > svg.set-wordmark-art { display:block; width:100%; height:144px; overflow:hidden; }
+.registry-set-lockup > svg.set-title-artwork { display:block; width:min(100%,640px); height:auto; max-height:230px; margin:24px auto 12px; overflow:visible; filter:drop-shadow(0 5px 5px rgba(23,28,25,.17)); }
 .set-wordmark-neutral { mix-blend-mode:multiply; }
 svg.registry-set-wordmark { height:220px; overflow:hidden; }
 @media (max-width:480px) {
-  .set-logo-art > svg.set-wordmark-art { height:auto; max-height:240px; }
+  .set-logo-art > svg.set-wordmark-art { height:144px; max-height:240px; }
+  .set-logo-grid--magic-the-gathering .set-logo-art:has(.set-title-lockup) { height:166px; }
+  .set-logo-art .set-title-lockup { font-size:clamp(22px, 6vw, 34px); }
   svg.registry-set-wordmark { height:auto; max-height:176px; }
 }

@@ -11,6 +11,7 @@ import { getMagnificentMonstersCatalogImage } from "../../lib/magnificentMonster
 import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestrosCatalog";
 import { getTcgCardAspectRatio, getTcgCardBack, getTcgCardBackPresentation } from "../../lib/tcgCardBacks";
 import { loadCardSerials } from "../../lib/loadCardSerials";
+import { getVerifiedSerialLimit } from "../../lib/verifiedSerialLimits";
 
 function GradingMarketPanel() {
   return (
@@ -66,7 +67,7 @@ export async function generateMetadata({ params }) {
   const card = await getCard(id);
   if (!card) return { title: "Card Not Found", robots: { index: false, follow: false } };
   const title = `${card.name} Serialized Card Registry`;
-  const description = `Track all ${Number(card.serial_total || 0).toLocaleString()} serial numbers for ${card.name} from ${card.card_sets?.name || "this serialized card release"}, including confirmed pulls and regional variants.`;
+  const description = `Track all ${getVerifiedSerialLimit(card.card_sets?.slug, card.serial_total).toLocaleString()} serial numbers for ${card.name} from ${card.card_sets?.name || "this serialized card release"}, including confirmed pulls and regional variants.`;
   return {
     title,
     description,
@@ -175,7 +176,7 @@ export default async function CardPage({ params }) {
 
   const standard = serialsWithEvidence.filter((serial) => serial.region === "AMERICAS");
   const eRegion = serialsWithEvidence.filter((serial) => serial.region === "E");
-  const worldwide = serialsWithEvidence.filter((serial) => serial.region === "GLOBAL");
+  const worldwide = serialsWithEvidence.filter((serial) => serial.region === "GLOBAL" && Number(serial.serial_number) <= getVerifiedSerialLimit(card.card_sets?.slug, card.serial_total));
   const standardConfirmed = standard.filter(
     (serial) => serial.status === "confirmed"
   ).length;
@@ -184,7 +185,7 @@ export default async function CardPage({ params }) {
   ).length;
   const worldwideConfirmed = worldwide.filter((serial) => serial.status === "confirmed").length;
   const totalConfirmed = standardConfirmed + eConfirmed + worldwideConfirmed;
-  const total = card.serial_total || serials.length;
+  const total = getVerifiedSerialLimit(card.card_sets?.slug, card.serial_total || serials.length);
   const percentage = total ? ((totalConfirmed / total) * 100).toFixed(1) : "0.0";
   const isGlobal = card.card_sets?.serial_scheme === "global";
   const catalogImage = card.card_sets?.slug === "magnificent-monsters"
