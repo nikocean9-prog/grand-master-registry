@@ -4221,7 +4221,9 @@ button {
   transition: transform 180ms ease, filter 180ms ease;
 }
 .live-registry-grid .live-registry-card .live-registry-art :is(img, svg),
-.set-logo-grid .set-logo-tile .set-logo-art > :is(img, svg, span) {
+.set-logo-grid .set-logo-tile .set-logo-art > :is(img, svg, span):first-child,
+.live-registry-grid .live-registry-card:is(:hover, :focus-visible) .live-registry-art :is(img, svg),
+.set-logo-grid .set-logo-tile:is(:hover, :focus-visible) .set-logo-art > :is(img, svg, span):first-child {
   transform: none;
   filter: none;
 }
