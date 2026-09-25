@@ -4211,3 +4211,32 @@ button {
 .live-registry-text-mark { color: #183d2b; font-family: Georgia, serif; font-size: clamp(30px, 4vw, 46px); line-height: 1.15; text-align: center; letter-spacing: -.025em; }
 
 .registry-card-art-unavailable { display: grid; place-items: center; min-height: 260px; padding: 24px; background: #e8eee9; color: #52665a; text-align: center; }
+
+/* Keep directory motion outside cropped artwork so SVG and image logos behave alike. */
+.live-registry-grid .live-registry-card .live-registry-art,
+.set-logo-grid .set-logo-tile .set-logo-art {
+  overflow: visible;
+  transform-origin: center;
+  filter: drop-shadow(0 4px 4px rgba(20, 28, 23, .16));
+  transition: transform 180ms ease, filter 180ms ease;
+}
+.live-registry-grid .live-registry-card .live-registry-art :is(img, svg),
+.set-logo-grid .set-logo-tile .set-logo-art > :is(img, svg, span) {
+  transform: none;
+  filter: none;
+}
+.live-registry-grid .live-registry-card:is(:hover, :focus-visible) .live-registry-art,
+.set-logo-grid .set-logo-tile:is(:hover, :focus-visible) .set-logo-art {
+  transform: translateY(-5px) scale(1.035);
+  filter: drop-shadow(0 12px 9px rgba(20, 28, 23, .32));
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-registry-grid .live-registry-card .live-registry-art,
+  .set-logo-grid .set-logo-tile .set-logo-art {
+    transition: none;
+  }
+  .live-registry-grid .live-registry-card:is(:hover, :focus-visible) .live-registry-art,
+  .set-logo-grid .set-logo-tile:is(:hover, :focus-visible) .set-logo-art {
+    transform: none;
+  }
+}
