@@ -12,8 +12,10 @@ import { getMagnificentMaestrosCatalogImage } from "../../lib/magnificentMaestro
 import { getTcgCardAspectRatio, getTcgCardBack, getTcgCardBackPresentation } from "../../lib/tcgCardBacks";
 import { loadCardSerials } from "../../lib/loadCardSerials";
 import { getVerifiedSerialLimit } from "../../lib/verifiedSerialLimits";
+import { getPsaPopulation, PSA_SOURCE, PSA_OBSERVED_DATE } from "../../lib/psaPopulations";
 
-function GradingMarketPanel() {
+function GradingMarketPanel({ card }) {
+  const population = getPsaPopulation(card);
   return (
     <aside className="grading-market-panel" aria-labelledby="grading-market-heading">
       <h2 id="grading-market-heading">Grading &amp; market</h2>
@@ -21,8 +23,11 @@ function GradingMarketPanel() {
         <section>
           <h4>PSA</h4>
           <dl>
-            <div><dt>10</dt><dd>-</dd></div>
-            <div><dt>9</dt><dd>-</dd></div>
+            <div><dt>10</dt><dd>{population?.psa10 ?? "—"}</dd></div>
+            <div><dt>9</dt><dd>{population?.psa9 ?? "—"}</dd></div>
+            <div><dt>8 and below</dt><dd>{population?.psa8AndBelow ?? "—"}</dd></div>
+            {population?.unconfirmed > 0 && <div><dt>Grade unconfirmed</dt><dd>{population.unconfirmed}</dd></div>}
+            <div><dt>Total PSA</dt><dd>{population?.total ?? "—"}</dd></div>
           </dl>
         </section>
         <section>
@@ -33,6 +38,12 @@ function GradingMarketPanel() {
           </dl>
         </section>
       </div>
+      {card.card_sets?.slug === "magnificent-monsters" && (
+        <p style={{ fontSize: "0.78rem", color: "#52615a", marginTop: "0.65rem", lineHeight: 1.5 }}>
+          {population ? "English Grand Master Rare · regions combined" : "PSA population not reported"}
+          <br />Observed {PSA_OBSERVED_DATE} · <a href={PSA_SOURCE} target="_blank" rel="noopener noreferrer">Source: GemRate</a>
+        </p>
+      )}
       <dl className="grading-other">
         <div><dt>Other graded</dt><dd>-</dd></div>
       </dl>
@@ -227,7 +238,7 @@ export default async function CardPage({ params }) {
           </div>
         </div>
 
-        <GradingMarketPanel />
+        <GradingMarketPanel card={card} />
       </div>
 
       <div className="serial-registry-heading">
