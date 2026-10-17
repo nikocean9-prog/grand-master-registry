@@ -13,9 +13,11 @@ import { getTcgCardAspectRatio, getTcgCardBack, getTcgCardBackPresentation } fro
 import { loadCardSerials } from "../../lib/loadCardSerials";
 import { getVerifiedSerialLimit } from "../../lib/verifiedSerialLimits";
 import { getPsaPopulation, PSA_SOURCE, PSA_OBSERVED_DATE } from "../../lib/psaPopulations";
+import { getOfficialBgsPopulation } from "../../lib/officialGradingPopulations";
 
 function GradingMarketPanel({ card }) {
   const population = getPsaPopulation(card);
+  const bgs = getOfficialBgsPopulation(card);
   return (
     <aside className="grading-market-panel" aria-labelledby="grading-market-heading">
       <h2 id="grading-market-heading">Grading &amp; market</h2>
@@ -33,9 +35,19 @@ function GradingMarketPanel({ card }) {
         <section>
           <h4>Beckett</h4>
           <dl>
-            <div><dt>Black Label 10</dt><dd>-</dd></div>
-            <div><dt>Pristine 10</dt><dd>-</dd></div>
+            <div><dt>Black Label 10</dt><dd>{bgs?.blackLabel10 ?? "—"}</dd></div>
+            <div><dt>Pristine 10</dt><dd>{bgs?.pristine10 ?? "—"}</dd></div>
+            {bgs && <>
+              <div><dt>Gem Mint 9.5</dt><dd>{bgs.gemMint95}</dd></div>
+              <div><dt>Other BGS grades</dt><dd>{bgs.otherBgs}</dd></div>
+              <div><dt>Total BGS</dt><dd>{bgs.total}</dd></div>
+            </>}
           </dl>
+          {bgs && <p style={{ fontSize: "0.78rem", color: "#52615a", marginTop: "0.65rem", lineHeight: 1.5 }}>
+            {bgs.language} GMR · {bgs.region}<br />
+            Other regions not reported here.<br />
+            Observed {bgs.observedDate} · <a href={bgs.source} target="_blank" rel="noopener noreferrer">Official Beckett source</a>
+          </p>}
         </section>
       </div>
       {card.card_sets?.slug === "magnificent-monsters" && (
