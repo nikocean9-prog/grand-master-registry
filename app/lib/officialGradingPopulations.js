@@ -1,5 +1,7 @@
 // Official-source observations only. Missing records are never treated as zero.
-// These are Europe-distributed /100E English GMR records, NOT all-region totals.
+// Europe-distributed /100E English GMR records are NOT all-region totals.
+import { brothersWarBgs, BRO_BGS_SOURCE } from "./brothersWarBgs";
+
 const officialBgs = {
   2: {
     tcg: "yugioh", set: "magnificent-monsters", serialTotal: 200,
@@ -31,20 +33,29 @@ const officialBgs = {
 };
 
 export function getOfficialBgsPopulation(card) {
-  const entry = officialBgs[Number(card.id)];
+  const bro = brothersWarBgs.find(row => row.id === Number(card.id));
+  const entry = officialBgs[Number(card.id)] || (bro && {
+    ...bro, tcg: "magic-the-gathering", set: "the-brothers-war", serialTotal: 500,
+    region: "Global /500", summary: "English · serialized schematic rainbow foil",
+    printing: "2022 The Brothers' War Retro Artifacts · serialized schematic rainbow foil /500",
+    source: BRO_BGS_SOURCE,
+    identitySource: "https://magic.wizards.com/en/news/feature/whats-inside-the-brothers-war-boosters",
+  });
   if (!entry || card.name !== entry.name || card.card_sets?.tcg_slug !== entry.tcg || card.card_sets?.slug !== entry.set || Number(card.serial_total) !== entry.serialTotal) return null;
-  const mint9 = entry.mint9 ?? 0;
-  const nearMintMint85 = entry.nearMintMint85 ?? 0;
+  const counts = entry.gradeCounts || [0, 0, entry.gemMint95, entry.mint9 ?? 0, entry.nearMintMint85 ?? 0, ...Array(15).fill(0)];
+  const labels = ["9.5", "9", "8.5", "8", "7.5", "7", "6.5", "6", "5.5", "5", "4.5", "4", "3.5", "3", "2.5", "2", "1.5", "1"];
+  const grades = Object.fromEntries(labels.map((grade, i) => [grade, counts[i + 2]]));
   return {
     ...entry,
     observedDate: "17 October 2026",
     language: "English",
-    blackLabel10: 0,
-    pristine10: 0,
-    mint9, nearMintMint85,
-    grades: { "9.5": entry.gemMint95, "9": mint9, "8.5": nearMintMint85, "8": 0, "7.5": 0, "7": 0, "6.5": 0, "6": 0, "5.5": 0, "5": 0, "4.5": 0, "4": 0, "3.5": 0, "3": 0, "2.5": 0, "2": 0, "1.5": 0, "1": 0 },
+    blackLabel10: counts[0],
+    pristine10: counts[1],
+    gemMint95: counts[2],
+    grades,
+    extraGrades: labels.filter(grade => grade !== "9.5" && grades[grade] > 0).map(grade => ({ grade, count: grades[grade] })),
     otherBgs: 0,
-    total: entry.gemMint95 + mint9 + nearMintMint85,
+    total: counts.reduce((sum, count) => sum + count, 0),
     previous: null,
   };
 }

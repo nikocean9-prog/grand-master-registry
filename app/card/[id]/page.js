@@ -39,9 +39,8 @@ function GradingMarketPanel({ card }) {
             <div><dt>Pristine 10</dt><dd>{bgs?.pristine10 ?? "—"}</dd></div>
             {bgs && <>
               <div><dt>Gem Mint 9.5</dt><dd>{bgs.gemMint95}</dd></div>
-              {bgs.mint9 > 0 && <div><dt>Mint 9</dt><dd>{bgs.mint9}</dd></div>}
-              {bgs.nearMintMint85 > 0 && <div><dt>NM-MT+ 8.5</dt><dd>{bgs.nearMintMint85}</dd></div>}
-              <div><dt>Other BGS grades</dt><dd>{bgs.otherBgs}</dd></div>
+              {bgs.extraGrades.map(({ grade, count }) => <div key={grade}><dt>Grade {grade}</dt><dd>{count}</dd></div>)}
+              <div><dt>Remaining grades</dt><dd>{bgs.otherBgs}</dd></div>
               <div><dt>Total BGS</dt><dd>{bgs.total}</dd></div>
             </>}
           </dl>
