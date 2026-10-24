@@ -10,6 +10,7 @@ const officialBgs = {
     name: "Kuriboh - Multiply!",
     cardNumber: "MAMO-EN002",
     source: "https://beckett.com/grading/pop-report/list-of-cards?type=card&page=1&limit=100&query=2026+Yu-Gi-Oh%21+TCG+Magnificent+Monsters+1st+Edition+%23MAMOEN002+Kuriboh+-+Multiply%21+EXT+ART+SERIAL+GMR%2F100E&sports=YuGiOh",
+    observedDate: "24 October 2026",
     gemMint95: 1,
   },
   3: {
@@ -19,7 +20,9 @@ const officialBgs = {
     name: "Dark Magical Curtain",
     cardNumber: "MAMO-EN003",
     source: "https://beckett.com/grading/pop-report/list-of-cards?type=card&page=1&limit=100&query=2026+Yu-Gi-Oh%21+TCG+Magnificent+Monsters+1st+Edition+%23MAMOEN003+Dark+Magical+Curtain+EXT+ART+SERIAL+GMR%2F100E&sports=YuGiOh",
-    gemMint95: 3,
+    observedDate: "24 October 2026",
+    gemMint95: 4,
+    previous: { total: 3, gemMint95: 3, observedDate: "17 October 2026" },
   },
   91: {
     tcg: "magic-the-gathering", set: "mtg-final-fantasy", serialTotal: 77,
@@ -28,6 +31,7 @@ const officialBgs = {
     printing: "2025 FINAL FANTASY · 0551f · serialized gold foil /77",
     source: "https://beckett.com/grading/pop-report/list-of-cards?type=card&page=1&limit=100&query=2025+Magic+The+Gathering+Final+Fantasy+%230551f+Traveling+Chocobo+GOLD+FOIL+M&sports=Magic+The+Gathering",
     identitySource: "https://magic.wizards.com/en/news/feature/collecting-final-fantasy",
+    observedDate: "24 October 2026",
     gemMint95: 8, mint9: 9, nearMintMint85: 1,
   },
 };
@@ -47,7 +51,7 @@ export function getOfficialBgsPopulation(card) {
   const grades = Object.fromEntries(labels.map((grade, i) => [grade, counts[i + 2]]));
   return {
     ...entry,
-    observedDate: "17 October 2026",
+    observedDate: entry.observedDate || "24 October 2026",
     language: "English",
     blackLabel10: counts[0],
     pristine10: counts[1],
@@ -56,6 +60,6 @@ export function getOfficialBgsPopulation(card) {
     extraGrades: labels.filter(grade => grade !== "9.5" && grades[grade] > 0).map(grade => ({ grade, count: grades[grade] })),
     otherBgs: 0,
     total: counts.reduce((sum, count) => sum + count, 0),
-    previous: null,
+    previous: entry.previous || null,
   };
 }
