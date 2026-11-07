@@ -1,4 +1,4 @@
-// Official Beckett observation, 17 October 2026. English serialized schematic /500 only.
+// Official Beckett observations, checked 7 November 2026. English serialized schematic /500 only.
 // Grade order: Black Label 10, Pristine 10, 9.5, 9, 8.5, 8, 7.5, 7, 6.5, 6, 5.5, 5, 4.5, 4, 3.5, 3, 2.5, 2, 1.5, 1.
 export const BRO_BGS_SOURCE = "https://beckett.com/grading/pop-report/list-of-cards?type=set&page=1&limit=100&query=2022+Magic+The+Gathering+The+Brothers%27+War+Retro+Artifacts+Serialized+Rainbow+Foil&sports=Magic+The+Gathering";
 export const brothersWarBgs = [
@@ -441,7 +441,7 @@ export const brothersWarBgs = [
     "gradeCounts": [
       0,
       0,
-      1,
+      2,
       3,
       5,
       4,
@@ -459,7 +459,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 14,
+      "gemMint95": 1,
+      "mint9": 3,
+      "nearMintMint85": 5,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 109,
@@ -712,7 +720,7 @@ export const brothersWarBgs = [
       0,
       0,
       1,
-      1,
+      2,
       1,
       1,
       0,
@@ -729,7 +737,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 4,
+      "gemMint95": 1,
+      "mint9": 1,
+      "nearMintMint85": 1,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 119,
@@ -738,7 +754,7 @@ export const brothersWarBgs = [
     "gradeCounts": [
       0,
       0,
-      1,
+      2,
       1,
       4,
       0,
@@ -756,7 +772,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 6,
+      "gemMint95": 1,
+      "mint9": 1,
+      "nearMintMint85": 4,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 120,
@@ -793,7 +817,7 @@ export const brothersWarBgs = [
       0,
       0,
       0,
-      1,
+      2,
       1,
       1,
       0,
@@ -810,7 +834,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 3,
+      "gemMint95": 0,
+      "mint9": 1,
+      "nearMintMint85": 1,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 122,
@@ -1144,7 +1176,7 @@ export const brothersWarBgs = [
       0,
       0,
       0,
-      0,
+      1,
       1,
       1,
       0,
@@ -1161,7 +1193,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 2,
+      "gemMint95": 0,
+      "mint9": 0,
+      "nearMintMint85": 1,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 135,
@@ -1171,7 +1211,7 @@ export const brothersWarBgs = [
       0,
       0,
       1,
-      0,
+      1,
       0,
       0,
       0,
@@ -1188,7 +1228,15 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 2,
+      "gemMint95": 1,
+      "mint9": 0,
+      "nearMintMint85": 0,
+      "observedDate": "17 October 2026"
+    }
   },
   {
     "id": 136,
@@ -1685,7 +1733,7 @@ export const brothersWarBgs = [
       0,
       1,
       2,
-      2,
+      3,
       0,
       0,
       0,
@@ -1701,7 +1749,14 @@ export const brothersWarBgs = [
       0,
       0,
       0
-    ]
+    ],
+    "observedDate": "7 November 2026",
+    "previous": {
+      "total": 5,
+      "gemMint95": 1,
+      "mint9": 2,
+      "nearMintMint85": 2,
+      "observedDate": "17 October 2026"
+    }
   }
 ];
-
