@@ -20,9 +20,9 @@ const officialBgs = {
     name: "Dark Magical Curtain",
     cardNumber: "MAMO-EN003",
     source: "https://beckett.com/grading/pop-report/list-of-cards?type=card&page=1&limit=100&query=2026+Yu-Gi-Oh%21+TCG+Magnificent+Monsters+1st+Edition+%23MAMOEN003+Dark+Magical+Curtain+EXT+ART+SERIAL+GMR%2F100E&sports=YuGiOh",
-    observedDate: "24 October 2026",
-    gemMint95: 4,
-    previous: { total: 3, gemMint95: 3, observedDate: "17 October 2026" },
+    observedDate: "7 November 2026",
+    gemMint95: 5,
+    previous: { total: 4, gemMint95: 4, observedDate: "24 October 2026" },
   },
   91: {
     tcg: "magic-the-gathering", set: "mtg-final-fantasy", serialTotal: 77,
